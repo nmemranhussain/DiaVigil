@@ -146,11 +146,13 @@ Patients are segmented into three risk tiers based on predicted patient's readmi
 
 ## Cost-Benefit Analysis & ROI Optimization
 
+### Moderate Scenario
+
 ![Sensitivity Analysis in Moderate Scenario](sensitivity_analysis_moderate_scenario.png)
 
 **Description**: This sensitivity analysis illustrates that Year 1 net financial benefit scales linearly with the readmission prevention rate, reaching up to $8.8M at full intervention efficacy. The system crosses the breakeven threshold (red dashed line) at a prevention rate under 5%, confirming strong financial viability even with modest readmission reductions.
 
-![Cost-Benefit Analysis in Moderate Scenario](cost_benefit.png)
+![Cost-Benefit Analysis in Moderate Scenario](cost_benefit_moderate.png)
 
 **Description**: This waterfall chart illustrates the Year 1 net financial return (ROI) of implementing the Diabetic Readmission Copilot, showing how cost investments compare against clinical savings and regulatory penalty reductions.  
 
@@ -177,6 +179,14 @@ Patients are segmented into three risk tiers based on predicted patient's readmi
 **Net Year 1 Value (Final Blue Bar)**
 
 **Net Benefit (~$8.8M):** Demonstrates that the copilot yields an overwhelming positive ROI within its first year, proving to hospital leadership that the multi-agent system provides substantial economic value alongside clinical utility.
+
+### Conservative Scenario
+
+![Sensitivity Analysis in Conservative Scenario](sensitivity_analysis_conservative_scenario.png)
+**Description**:
+
+![Cost-Benefit Analysis in Conservative Scenario](cost_benefit_conservative.png)
+**Description**:
 
 ## System Architecture & Data Pipeline 
 
