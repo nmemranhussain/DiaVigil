@@ -208,7 +208,6 @@ flowchart TD
 ### Execution Trace: Patient 55667788
 
 ```mermaid
-
 flowchart TD
     %% Input Layer
     Start([Clinician Query: Patient 55667788]) --> Agent1
@@ -216,27 +215,27 @@ flowchart TD
     %% Agent 1: Data Extraction
     subgraph Step1 [Agent 1: SQL & Data Extractor]
         Agent1[Natural Language Parsing] --> DB[(DuckDB Warehouse)]
-        DB -->|Returns JSON Vitals:<br>stay: 7 days | labs: 62<br>meds: 18 | ED visits: 3| Agent2
+        DB -->|"JSON Vitals:<br>stay: 7 days, labs: 62<br>meds: 18, ED visits: 3"| Agent2
     end
 
     %% Agent 2: Machine Learning Inference
     subgraph Step2 [Agent 2: Clinical ML Predictor]
-        Agent2[XGBoost Optimized Model] --> Pred[Prediction: 68.48%<br>Risk Tier: High]
+        Agent2[XGBoost Optimized Model] --> Pred["Prediction: 68.48%<br>Risk Tier: High"]
         Agent2 --> SHAP[SHAP TreeExplainer]
-        SHAP --> Drivers[Top Drivers:<br>1. ED Visits +0.584<br>2. Hospital Stay +0.083<br>3. Medications +0.066]
+        SHAP --> Drivers["Top Drivers:<br>1. ED Visits +0.584<br>2. Hospital Stay +0.083<br>3. Medications +0.066"]
     end
 
     %% Agent 3: LLM Synthesis
     Pred --> Agent3
     Drivers --> Agent3
-    Protocols[[Hospital Protocols:<br>• SW Consult<br>• 72h Telehealth<br>• Pharmacist Med Rec]] --> Agent3
+    Protocols["Hospital Protocols:<br>• SW Consult<br>• 72h Telehealth<br>• Pharmacist Med Rec"] --> Agent3
 
     subgraph Step3 [Agent 3: BI & Executive Synthesizer]
         Agent3[Groq Compound LLM] --> Synthesis[Contextualize & Format]
     end
 
     %% Output Layer
-    Synthesis --> Output([Final Markdown Output:<br>Targeted Transition-of-Care Brief])
+    Synthesis --> Output(["Final Markdown Output:<br>Targeted Transition-of-Care Brief"])
 
     %% Styling
     classDef agent fill:#0f4c75,stroke:#3282b8,stroke-width:2px,color:#fff,border-radius:5px;
