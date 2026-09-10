@@ -205,62 +205,47 @@ flowchart TD
 - **Agent 2 (Clinical ML Predictor):** Trains an XGBoost classifier to predict the 30-day readmission probability and applies a SHAP TreeExplainer to identify the top feature attributions driving the risk.
 - **Agent 3 (BI & Executive Synthesizer):** Translates the raw data and machine learning predictions into a structured transition-of-care report containing an executive risk summary, BI reporting metrics, and prescribed clinical interventions. 
 
-### End-to-End Execution Trace: High-Risk Encounter
+**Example Output: High-Risk Patient Encounter**
 
-The 3-agent orchestration pipeline processes patient data in real-time, executing SQL extractions, generating XGBoost/SHAP predictions, and synthesizing the final report.
+`[Agent 1] Extracted Vitals for 55667788: {'time_in_hospital': 7, 'num_lab_procedures': 62, 'num_medications': 18, 'number_emergency': 3}`
+`[Agent 2] ML Results: {'readmission_probability': 0.6848, 'risk_tier': 'High', 'top_drivers': ['number_emergency (impact: +0.584)', 'time_in_hospital (impact: +0.083)', 'num_medications (impact: +0.066)']}`
 
-**System Telemetry (Agents 1 & 2)**
-```text
-[Agent 1: SQL Extractor] 
-Extracted Vitals: {"patient_id": 55667788, "time_in_hospital": 7, "num_lab_procedures": 62, "num_medications": 18, "number_emergency": 3}
+`[Agent 3] Executive Clinical Brief:`
+**Executive Clinical Brief – Patient 55667788**
 
-[Agent 2: ML Predictor] 
-Prediction: {"readmission_probability": 0.6848, "risk_tier": "High"}
-Top SHAP Drivers: 
-  1. number_emergency (impact: +0.584)
-  2. time_in_hospital (impact: +0.083)
-  3. num_medications (impact: +0.066)
+---
 
-```mermaid
-flowchart TD
-    %% Input Layer
-    Start([Clinician Query: Patient 55667788]) --> Agent1
+### 1. Executive Risk Summary  
+- **Risk Tier:** **High**  
+- **Readmission Probability:** **68.5 %**  
 
-    %% Agent 1: Data Extraction
-    subgraph Step1 [Agent 1: SQL & Data Extractor]
-        Agent1[Natural Language Parsing] --> DB[(DuckDB Warehouse)]
-        DB -->|"JSON Vitals:<br>stay: 7 days, labs: 62<br>meds: 18, ED visits: 3"| Agent2
-    end
+---
 
-    %% Agent 2: Machine Learning Inference
-    subgraph Step2 [Agent 2: Clinical ML Predictor]
-        Agent2[XGBoost Optimized Model] --> Pred["Prediction: 68.48%<br>Risk Tier: High"]
-        Agent2 --> SHAP[SHAP TreeExplainer]
-        SHAP --> Drivers["Top Drivers:<br>1. ED Visits +0.584<br>2. Hospital Stay +0.083<br>3. Medications +0.066"]
-    end
+### 2. Primary Contributing Drivers  
+| SHAP Driver | Clinical Impact | Why it raises readmission risk |
+|-------------|----------------|--------------------------------|
+| **Number of emergency visits (+0.584)** | 3 ED visits in the past period | Indicates unstable disease control, frequent acute decompensation, and possible gaps in outpatient management. |
+| **Time in hospital (+0.083)** | 7 days stay | Reflects a complex or severe index admission; longer stays are linked to complications (e.g., infections, deconditioning) that predispose to early return. |
+| **Number of medications (+0.066)** | 18 active meds | Polypharmacy raises the chance of medication errors, adverse drug events, and non-adherence, all well-known readmission drivers. |
 
-    %% Agent 3: LLM Synthesis
-    Pred --> Agent3
-    Drivers --> Agent3
-    Protocols["Hospital Protocols:<br>• SW Consult<br>• 72h Telehealth<br>• Pharmacist Med Rec"] --> Agent3
+---
 
-    subgraph Step3 [Agent 3: BI & Executive Synthesizer]
-        Agent3[Groq Compound LLM] --> Synthesis[Contextualize & Format]
-    end
+### 3. Targeted Transition-of-Care Interventions  
 
-    %% Output Layer
-    Synthesis --> Output(["Final Markdown Output:<br>Targeted Transition-of-Care Brief"])
+| Domain | Actionable Recommendation (patient-specific) |
+|--------|----------------------------------------------|
+| **Medication Management** | • **Pharmacist-led medication reconciliation** before discharge to verify doses, eliminate duplications, and provide a clear, patient-friendly medication list.<br>• Create a **medication calendar** and arrange a 48-hour post-discharge phone check by the pharmacy team. |
+| **Follow-up** | • **Telehealth visit within 72 hours** of discharge (per hospital protocol) to review symptoms, vitals, and medication adherence.<br>• Schedule an **in-person primary-care or specialty follow-up** within 7 days for continuity of care. |
+| **Social Support** | • **Social-worker consultation** before discharge to assess home environment, caregiver capacity, transportation, and financial barriers; arrange needed services (e.g., home health, meal delivery). |
+| **Patient & Caregiver Education** | • Provide a **tailored education session** (in-person or via video) covering: red-flag symptoms, when to call the clinic vs. go to the ED, and proper inhaler/insulin technique if applicable.<br>• Supply written “What to do if you feel worse” handouts in the patient’s primary language. |
+| **Safety Net & Monitoring** | • Enroll the patient in a **post-discharge monitoring program** (e.g., daily symptom questionnaire via patient portal or automated calls).<br>• Ensure **rapid access to a nurse line** for questions about side effects or worsening condition. |
 
-    %% Styling
-    classDef agent fill:#0f4c75,stroke:#3282b8,stroke-width:2px,color:#fff,border-radius:5px;
-    classDef database fill:#3282b8,stroke:#bbe1fa,stroke-width:1px,color:#fff;
-    classDef result fill:#1b262c,stroke:#bbe1fa,stroke-width:1px,color:#fff;
-    
-    class Agent1,Agent2,Agent3 agent;
-    class DB database;
-    class Pred,Drivers,Protocols,Synthesis result;
-```
-**Description**: Patient 55667788 represents a complex, high-risk encounter with a 68.5% probability of a 30-day hospital readmission. The 3-agent DiaVigil pipeline autonomously extracted the patient's clinical history—highlighting a 7-day hospitalization, 18 active medications, and 3 recent emergency visits—and evaluated the risk using the optimized XGBoost model. By translating the raw SHAP feature penalties into clinical context, the Groq LLM successfully synthesized a protocol-aligned discharge plan that mandated critical interventions, including pharmacist-led medication reconciliation and a 72-hour telehealth follow-up, demonstrating the system's end-to-end clinical utility.
+*(All interventions satisfy the hospital mandate for high-risk patients: social-worker consult, telehealth follow-up ≤72 h, and pharmacist medication reconciliation.)*
+
+---
+
+### 4. Bottom Line  
+Patient 55667788 is a **high-risk** readmission case (68.5 % probability) driven by frequent emergency visits, a prolonged index stay, and polypharmacy. Immediate, coordinated actions—pharmacist medication reconciliation, a telehealth follow-up within 72 hours, a social-worker consult, and focused education/monitoring—are essential to curb the readmission risk and support a safe transition home.
 
 ### Version of the Modeling Software:
 |Package / Environment | Version |
