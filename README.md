@@ -205,7 +205,7 @@ flowchart TD
 - **Agent 2 (Clinical ML Predictor):** Trains an XGBoost classifier to predict the 30-day readmission probability and applies a SHAP TreeExplainer to identify the top feature attributions driving the risk.
 - **Agent 3 (BI & Executive Synthesizer):** Translates the raw data and machine learning predictions into a structured transition-of-care report containing an executive risk summary, BI reporting metrics, and prescribed clinical interventions. 
 
-**Example Output: High-Risk Patient Encounter**
+## **Example Output: High-Risk Patient Encounter**
 
 `[Agent 1] Extracted Vitals for 55667788: {'time_in_hospital': 7, 'num_lab_procedures': 62, 'num_medications': 18, 'number_emergency': 3}`
 `[Agent 2] ML Results: {'readmission_probability': 0.6848, 'risk_tier': 'High', 'top_drivers': ['number_emergency (impact: +0.584)', 'time_in_hospital (impact: +0.083)', 'num_medications (impact: +0.066)']}`
