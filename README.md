@@ -36,7 +36,7 @@ DiaVigil is an agentic clinical decision-support copilot designed to reduce 30-d
 - **All-Cause Readmission Predictions:** The database and engineered feature tables are loaded exclusively with diabetic records to calculate 30-day readmission risk specifically for diabetic patients, rather than the general hospital population.
 - **Real-Time Emergency Intake Triage:** The workflow evaluates baseline flags like emergency visit frequency to generate clinical transition-of-care reports for discharge planning, rather than managing active acute care during initial emergency room triage. 
 
-## Understanding Dataset
+## Data Dictionary
 **Dataset Name & Source:** [Diabetes Hospital Readmission Dataset](https://www.kaggle.com/datasets/razanihababdellatif/diabetes-hospital-readmission-dataset)  
 
 **Number of Samples:** The dataset contains 101,766 rows (patient encounters) and 50 columns. It is a tabular dataset comprising integers and string object data types.  
@@ -204,6 +204,49 @@ flowchart TD
 - **Agent 1 (Natural-Language SQL Extractor):** Uses Gemini and an in-memory DuckDB database to parse natural language requests and extract structured patient features (e.g., time in hospital, emergency visits) via SQL.
 - **Agent 2 (Clinical ML Predictor):** Trains an XGBoost classifier to predict the 30-day readmission probability and applies a SHAP TreeExplainer to identify the top feature attributions driving the risk.
 - **Agent 3 (BI & Executive Synthesizer):** Translates the raw data and machine learning predictions into a structured transition-of-care report containing an executive risk summary, BI reporting metrics, and prescribed clinical interventions. 
+
+### Execution Trace: Patient 55667788
+
+```mermaid
+flowchart TD
+    %% Input Layer
+    Start([Clinician Query: Patient 55667788]) --> Agent1
+
+    %% Agent 1: Data Extraction
+    subgraph Step1 [Agent 1: SQL & Data Extractor]
+        Agent1[Natural Language Parsing] --> DB[(DuckDB Warehouse)]
+        DB -->|Returns JSON Vitals:<br>stay: 7 days | labs: 62<br>meds: 18 | ED visits: 3| Agent2
+    end
+
+    %% Agent 2: Machine Learning Inference
+    subgraph Step2 [Agent 2: Clinical ML Predictor]
+        Agent2[XGBoost Optimized Model] --> Pred[Prediction: 68.48%<br>Risk Tier: High]
+        Agent2 --> SHAP[SHAP TreeExplainer]
+        SHAP --> Drivers[Top Drivers:<br>1. ED Visits +0.584<br>2. Hospital Stay +0.083<br>3. Medications +0.066]
+    end
+
+    %% Agent 3: LLM Synthesis
+    Pred --> Agent3
+    Drivers --> Agent3
+    Protocols[[Hospital Protocols:<br>• SW Consult<br>• 72h Telehealth<br>• Pharmacist Med Rec]] --> Agent3
+
+    subgraph Step3 [Agent 3: BI & Executive Synthesizer]
+        Agent3[Groq Compound LLM] --> Synthesis[Contextualize & Format]
+    end
+
+    %% Output Layer
+    Synthesis --> Output([Final Markdown Output:<br>Targeted Transition-of-Care Brief])
+
+    %% Styling
+    classDef agent fill:#0f4c75,stroke:#3282b8,stroke-width:2px,color:#fff,border-radius:5px;
+    classDef database fill:#3282b8,stroke:#bbe1fa,stroke-width:1px,color:#fff;
+    classDef result fill:#1b262c,stroke:#bbe1fa,stroke-width:1px,color:#fff;
+    
+    class Agent1,Agent2,Agent3 agent;
+    class DB database;
+    class Pred,Drivers,Protocols,Synthesis result;
+```
+**Description**: Patient 55667788 represents a complex, high-risk encounter with a 68.5% probability of a 30-day hospital readmission. The 3-agent DiaVigil pipeline autonomously extracted the patient's clinical history—highlighting a 7-day hospitalization, 18 active medications, and 3 recent emergency visits—and evaluated the risk using the optimized XGBoost model. By translating the raw SHAP feature penalties into clinical context, the Groq LLM successfully synthesized a protocol-aligned discharge plan that mandated critical interventions, including pharmacist-led medication reconciliation and a 72-hour telehealth follow-up, demonstrating the system's end-to-end clinical utility.
 
 ### Version of the Modeling Software:
 |Package / Environment | Version |
