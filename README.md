@@ -208,6 +208,7 @@ flowchart TD
 ### Execution Trace: Patient 55667788
 
 ```mermaid
+
 flowchart TD
     %% Input Layer
     Start([Clinician Query: Patient 55667788]) --> Agent1
