@@ -207,45 +207,66 @@ flowchart TD
 
 ## **Example Output: High-Risk Patient Encounter**
 
-`[Agent 1] Extracted Vitals for 55667788: {'time_in_hospital': 7, 'num_lab_procedures': 62, 'num_medications': 18, 'number_emergency': 3}`
-`[Agent 2] ML Results: {'readmission_probability': 0.6848, 'risk_tier': 'High', 'top_drivers': ['number_emergency (impact: +0.584)', 'time_in_hospital (impact: +0.083)', 'num_medications (impact: +0.066)']}`
-
-`[Agent 3] Executive Clinical Brief:`
-**Executive Clinical Brief – Patient 55667788**
+Executive Clinical Brief:
+ **Patient 74528739 – Executive‑Ready Readmission Risk Report**
 
 ---
 
-### 1. Executive Risk Summary  
-- **Risk Tier:** **High**  
-- **Readmission Probability:** **68.5 %**  
+### 1. Patient Summary (raw metrics)
+
+| Metric                     | Value |
+|----------------------------|-------|
+| **Time in hospital**       | 4 days |
+| **Number of lab procedures** | 34 |
+| **Number of medications**  | 7 |
+| **Number of emergency visits** | 0 |
 
 ---
 
-### 2. Primary Contributing Drivers  
-| SHAP Driver | Clinical Impact | Why it raises readmission risk |
-|-------------|----------------|--------------------------------|
-| **Number of emergency visits (+0.584)** | 3 ED visits in the past period | Indicates unstable disease control, frequent acute decompensation, and possible gaps in outpatient management. |
-| **Time in hospital (+0.083)** | 7 days stay | Reflects a complex or severe index admission; longer stays are linked to complications (e.g., infections, deconditioning) that predispose to early return. |
-| **Number of medications (+0.066)** | 18 active meds | Polypharmacy raises the chance of medication errors, adverse drug events, and non-adherence, all well-known readmission drivers. |
+### 2. Machine‑Learning Output
+
+| Item                         | Value |
+|------------------------------|-------|
+| **Readmission probability**  | **0.4512**  (45.12 %) |
+| **Risk tier**                | **High** |
+| **Top drivers of risk**      | 1. **num_medications** (impact = ‑0.193)  <br>2. **number_emergency** (impact = ‑0.072)  <br>3. **time_in_hospital** (impact = +0.047) |
+
+*Interpretation of driver signs:*  
+- A **negative impact** means that **lower values** of the variable are associated with **higher readmission risk** (e.g., fewer medications → higher risk).  
+- A **positive impact** means that **higher values** increase risk (e.g., longer stay → higher risk).
 
 ---
 
-### 3. Targeted Transition-of-Care Interventions  
+### 3. Reasoning & Insight
 
-| Domain | Actionable Recommendation (patient-specific) |
-|--------|----------------------------------------------|
-| **Medication Management** | • **Pharmacist-led medication reconciliation** before discharge to verify doses, eliminate duplications, and provide a clear, patient-friendly medication list.<br>• Create a **medication calendar** and arrange a 48-hour post-discharge phone check by the pharmacy team. |
-| **Follow-up** | • **Telehealth visit within 72 hours** of discharge (per hospital protocol) to review symptoms, vitals, and medication adherence.<br>• Schedule an **in-person primary-care or specialty follow-up** within 7 days for continuity of care. |
-| **Social Support** | • **Social-worker consultation** before discharge to assess home environment, caregiver capacity, transportation, and financial barriers; arrange needed services (e.g., home health, meal delivery). |
-| **Patient & Caregiver Education** | • Provide a **tailored education session** (in-person or via video) covering: red-flag symptoms, when to call the clinic vs. go to the ED, and proper inhaler/insulin technique if applicable.<br>• Supply written “What to do if you feel worse” handouts in the patient’s primary language. |
-| **Safety Net & Monitoring** | • Enroll the patient in a **post-discharge monitoring program** (e.g., daily symptom questionnaire via patient portal or automated calls).<br>• Ensure **rapid access to a nurse line** for questions about side effects or worsening condition. |
+1. **Readmission probability of 45 %** places the patient well above typical thresholds (often 20‑30 %) used to flag high‑risk individuals.  
+2. **Risk tier “High”** aligns with the probability and signals the need for immediate intervention.  
+3. **Driver analysis**  
+   - **Number of medications (‑0.193):** The model learned that patients on **fewer medications** tend to be readmitted more often, possibly reflecting under‑treatment or gaps in chronic disease management.  
+   - **Number of emergency visits (‑0.072):** Zero emergency visits also contributes to higher risk, perhaps because the patient has not been engaged with acute care pathways that could trigger earlier follow‑up.  
+   - **Time in hospital (+0.047):** A longer stay modestly raises risk, likely reflecting greater illness severity.
 
-*(All interventions satisfy the hospital mandate for high-risk patients: social-worker consult, telehealth follow-up ≤72 h, and pharmacist medication reconciliation.)*
+Overall, the combination of **short medication regimen**, **no recent emergency contact**, and a **moderate length of stay** drives the high readmission risk.
 
 ---
 
-### 4. Bottom Line  
-Patient 55667788 is a **high-risk** readmission case (68.5 % probability) driven by frequent emergency visits, a prolonged index stay, and polypharmacy. Immediate, coordinated actions—pharmacist medication reconciliation, a telehealth follow-up within 72 hours, a social-worker consult, and focused education/monitoring—are essential to curb the readmission risk and support a safe transition home.
+### 4. Actionable Recommendations
+
+| Domain | Recommendation | Rationale |
+|--------|----------------|-----------|
+| **Medication Management** | Conduct a comprehensive medication reconciliation; consider adding evidence‑based therapies for any chronic conditions that may be undertreated. | The model flags low medication count as a risk factor. |
+| **Post‑Discharge Planning** | Arrange a structured discharge bundle: scheduled follow‑up within 7 days, home health or tele‑monitoring, and clear patient education on warning signs. | Early, proactive follow‑up can offset the risk associated with the current “high” tier. |
+| **Emergency‑Care Engagement** | Provide the patient with a low‑threshold pathway (e.g., nurse‑line, urgent‑care clinic) to encourage timely use of acute services if needed. | Absence of emergency visits is linked to higher readmission; facilitating appropriate acute care use may reduce risk. |
+| **Length‑of‑Stay Review** | Review the discharge criteria to ensure the patient is clinically ready; avoid unnecessary extensions but also avoid premature discharge. | Slight positive impact of longer stay suggests that each additional day adds modest risk; optimal LOS is key. |
+| **Lab Procedure Follow‑Up** | Verify that all 34 lab results have been reviewed, abnormal values addressed, and appropriate action plans documented. | High number of labs indicates extensive testing; missed abnormal results could precipitate readmission. |
+
+---
+
+### 5. Summary Statement (for executive dashboards)
+
+> **Patient 74528739** exhibits a **45 % probability of 30‑day readmission**, classified as **High risk**. The primary drivers are a **low medication count**, **no recent emergency encounters**, and a **moderate hospital stay**. Immediate interventions should focus on **optimizing pharmacotherapy**, **strengthening post‑discharge support**, and **ensuring rapid access to acute care** to mitigate the readmission risk.
+
+---
 
 ### Version of the Modeling Software:
 |Package / Environment | Version |
