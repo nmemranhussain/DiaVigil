@@ -207,66 +207,66 @@ flowchart TD
 
 ## **Example Output: High-Risk Patient Encounter**
 
-Executive Clinical Brief:
- **Patient 74528739 – Executive‑Ready Readmission Risk Report**
+**Executive Clinical Brief: Patient 74528739**
 
 ---
 
-### 1. Patient Summary (raw metrics)
+### 1. Patient Summary (Raw Metrics)
 
-| Metric                     | Value |
-|----------------------------|-------|
-| **Time in hospital**       | 4 days |
+| Metric | Value |
+| :--- | :--- |
+| **Time in hospital** | 4 days |
 | **Number of lab procedures** | 34 |
-| **Number of medications**  | 7 |
+| **Number of medications** | 7 |
 | **Number of emergency visits** | 0 |
 
 ---
 
-### 2. Machine‑Learning Output
+### 2. Machine-Learning Output
 
-| Item                         | Value |
-|------------------------------|-------|
-| **Readmission probability**  | **0.4512**  (45.12 %) |
-| **Risk tier**                | **High** |
-| **Top drivers of risk**      | 1. **num_medications** (impact = ‑0.193)  <br>2. **number_emergency** (impact = ‑0.072)  <br>3. **time_in_hospital** (impact = +0.047) |
+| Item | Value |
+| :--- | :--- |
+| **Readmission probability** | **0.4512** (45.12%) |
+| **Risk tier** | **High** |
+| **Top drivers of risk** | 1. `num_medications` (impact = -0.193)<br>2. `number_emergency` (impact = -0.072)<br>3. `time_in_hospital` (impact = +0.047) |
 
-*Interpretation of driver signs:*  
-- A **negative impact** means that **lower values** of the variable are associated with **higher readmission risk** (e.g., fewer medications → higher risk).  
-- A **positive impact** means that **higher values** increase risk (e.g., longer stay → higher risk).
+> **Interpretation of driver signs:**  
+> *   **Negative impact:** Lower values of the variable are associated with *higher* readmission risk (e.g., fewer medications → higher risk).  
+> *   **Positive impact:** Higher values *increase* risk (e.g., longer stay → higher risk).
 
 ---
 
 ### 3. Reasoning & Insight
 
-1. **Readmission probability of 45 %** places the patient well above typical thresholds (often 20‑30 %) used to flag high‑risk individuals.  
-2. **Risk tier “High”** aligns with the probability and signals the need for immediate intervention.  
-3. **Driver analysis**  
-   - **Number of medications (‑0.193):** The model learned that patients on **fewer medications** tend to be readmitted more often, possibly reflecting under‑treatment or gaps in chronic disease management.  
-   - **Number of emergency visits (‑0.072):** Zero emergency visits also contributes to higher risk, perhaps because the patient has not been engaged with acute care pathways that could trigger earlier follow‑up.  
-   - **Time in hospital (+0.047):** A longer stay modestly raises risk, likely reflecting greater illness severity.
+*   **Readmission probability of 45%** places the patient well above typical thresholds (often 20-30%) used to flag high-risk individuals.  
+*   **Risk tier “High”** aligns with the probability and signals the need for immediate intervention.  
+*   **Driver analysis:**  
+    *   **Number of medications (-0.193):** The model learned that patients on *fewer medications* tend to be readmitted more often, possibly reflecting under-treatment or gaps in chronic disease management.  
+    *   **Number of emergency visits (-0.072):** Zero emergency visits also contributes to higher risk, perhaps because the patient has not been engaged with acute care pathways that could trigger earlier follow-up.  
+    *   **Time in hospital (+0.047):** A longer stay modestly raises risk, likely reflecting greater illness severity.
 
-Overall, the combination of **short medication regimen**, **no recent emergency contact**, and a **moderate length of stay** drives the high readmission risk.
+**Conclusion:** The combination of a *short medication regimen*, *no recent emergency contact*, and a *moderate length of stay* drives the high readmission risk.
 
 ---
 
 ### 4. Actionable Recommendations
 
 | Domain | Recommendation | Rationale |
-|--------|----------------|-----------|
-| **Medication Management** | Conduct a comprehensive medication reconciliation; consider adding evidence‑based therapies for any chronic conditions that may be undertreated. | The model flags low medication count as a risk factor. |
-| **Post‑Discharge Planning** | Arrange a structured discharge bundle: scheduled follow‑up within 7 days, home health or tele‑monitoring, and clear patient education on warning signs. | Early, proactive follow‑up can offset the risk associated with the current “high” tier. |
-| **Emergency‑Care Engagement** | Provide the patient with a low‑threshold pathway (e.g., nurse‑line, urgent‑care clinic) to encourage timely use of acute services if needed. | Absence of emergency visits is linked to higher readmission; facilitating appropriate acute care use may reduce risk. |
-| **Length‑of‑Stay Review** | Review the discharge criteria to ensure the patient is clinically ready; avoid unnecessary extensions but also avoid premature discharge. | Slight positive impact of longer stay suggests that each additional day adds modest risk; optimal LOS is key. |
-| **Lab Procedure Follow‑Up** | Verify that all 34 lab results have been reviewed, abnormal values addressed, and appropriate action plans documented. | High number of labs indicates extensive testing; missed abnormal results could precipitate readmission. |
+| :--- | :--- | :--- |
+| **Medication Management** | Conduct a comprehensive medication reconciliation; consider adding evidence-based therapies for any chronic conditions that may be undertreated. | The model flags low medication count as a risk factor. |
+| **Post-Discharge Planning** | Arrange a structured discharge bundle: scheduled follow-up within 7 days, home health or tele-monitoring, and clear patient education on warning signs. | Early, proactive follow-up can offset the risk associated with the current “high” tier. |
+| **Emergency-Care Engagement** | Provide the patient with a low-threshold pathway (e.g., nurse-line, urgent-care clinic) to encourage timely use of acute services if needed. | Absence of emergency visits is linked to higher readmission; facilitating appropriate acute care use may reduce risk. |
+| **Length-of-Stay Review** | Review the discharge criteria to ensure the patient is clinically ready; avoid unnecessary extensions but also avoid premature discharge. | Slight positive impact of longer stay suggests that each additional day adds modest risk; optimal LOS is key. |
+| **Lab Procedure Follow-Up** | Verify that all 34 lab results have been reviewed, abnormal values addressed, and appropriate action plans documented. | High number of labs indicates extensive testing; missed abnormal results could precipitate readmission. |
 
 ---
 
-### 5. Summary Statement (for executive dashboards)
+### 5. Summary Statement (Executive Dashboard)
 
-> **Patient 74528739** exhibits a **45 % probability of 30‑day readmission**, classified as **High risk**. The primary drivers are a **low medication count**, **no recent emergency encounters**, and a **moderate hospital stay**. Immediate interventions should focus on **optimizing pharmacotherapy**, **strengthening post‑discharge support**, and **ensuring rapid access to acute care** to mitigate the readmission risk.
+> **Patient 74528739** exhibits a **45% probability of 30-day readmission**, classified as **High risk**. The primary drivers are a **low medication count**, **no recent emergency encounters**, and a **moderate hospital stay**. Immediate interventions should focus on **optimizing pharmacotherapy**, **strengthening post-discharge support**, and **ensuring rapid access to acute care** to mitigate the readmission risk.
 
----
+
+
 
 ### Version of the Modeling Software:
 |Package / Environment | Version |
