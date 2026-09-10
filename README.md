@@ -207,6 +207,49 @@ flowchart TD
 
 ### Execution Trace: Patient 55667788
 
+**Example Output: High-Risk Patient Encounter**
+
+`[Agent 1] Extracted Vitals for 55667788: {'time_in_hospital': 7, 'num_lab_procedures': 62, 'num_medications': 18, 'number_emergency': 3}`
+`[Agent 2] ML Results: {'readmission_probability': 0.6848, 'risk_tier': 'High', 'top_drivers': ['number_emergency (impact: +0.584)', 'time_in_hospital (impact: +0.083)', 'num_medications (impact: +0.066)']}`
+
+`[Agent 3] Executive Clinical Brief:`
+**Executive Clinical Brief – Patient 55667788**
+
+---
+
+### 1. Executive Risk Summary  
+- **Risk Tier:** **High**  
+- **Readmission Probability:** **68.5 %**  
+
+---
+
+### 2. Primary Contributing Drivers  
+| SHAP Driver | Clinical Impact | Why it raises readmission risk |
+|-------------|----------------|--------------------------------|
+| **Number of emergency visits (+0.584)** | 3 ED visits in the past period | Indicates unstable disease control, frequent acute decompensation, and possible gaps in outpatient management. |
+| **Time in hospital (+0.083)** | 7 days stay | Reflects a complex or severe index admission; longer stays are linked to complications (e.g., infections, deconditioning) that predispose to early return. |
+| **Number of medications (+0.066)** | 18 active meds | Polypharmacy raises the chance of medication errors, adverse drug events, and non-adherence, all well-known readmission drivers. |
+
+---
+
+### 3. Targeted Transition-of-Care Interventions  
+
+| Domain | Actionable Recommendation (patient-specific) |
+|--------|----------------------------------------------|
+| **Medication Management** | • **Pharmacist-led medication reconciliation** before discharge to verify doses, eliminate duplications, and provide a clear, patient-friendly medication list.<br>• Create a **medication calendar** and arrange a 48-hour post-discharge phone check by the pharmacy team. |
+| **Follow-up** | • **Telehealth visit within 72 hours** of discharge (per hospital protocol) to review symptoms, vitals, and medication adherence.<br>• Schedule an **in-person primary-care or specialty follow-up** within 7 days for continuity of care. |
+| **Social Support** | • **Social-worker consultation** before discharge to assess home environment, caregiver capacity, transportation, and financial barriers; arrange needed services (e.g., home health, meal delivery). |
+| **Patient & Caregiver Education** | • Provide a **tailored education session** (in-person or via video) covering: red-flag symptoms, when to call the clinic vs. go to the ED, and proper inhaler/insulin technique if applicable.<br>• Supply written “What to do if you feel worse” handouts in the patient’s primary language. |
+| **Safety Net & Monitoring** | • Enroll the patient in a **post-discharge monitoring program** (e.g., daily symptom questionnaire via patient portal or automated calls).<br>• Ensure **rapid access to a nurse line** for questions about side effects or worsening condition. |
+
+*(All interventions satisfy the hospital mandate for high-risk patients: social-worker consult, telehealth follow-up ≤72 h, and pharmacist medication reconciliation.)*
+
+---
+
+### 4. Bottom Line  
+Patient 55667788 is a **high-risk** readmission case (68.5 % probability) driven by frequent emergency visits, a prolonged index stay, and polypharmacy. Immediate, coordinated actions—pharmacist medication reconciliation, a telehealth follow-up within 72 hours, a social-worker consult, and focused education/monitoring—are essential to curb the readmission risk and support a safe transition home.
+
+
 ```mermaid
 flowchart TD
     %% Input Layer
