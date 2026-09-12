@@ -343,26 +343,43 @@ Acute Care Savings |Each successfully prevented readmission saves the hospital a
 
 ### Technical & Data Limitations
 
-- **Severe Class Imbalance:** The positive target class (readmitted_30d = 1) represents only ~11.16% (11,357 encounters) of the 101,766 total records, while 88.84% are non-readmitted. This severe negative-to-positive ratio (7.97:1) significantly skews model learning toward the majority class.  
-- **Constrained Feature Utilization:** Out of 50 available columns in the dataset (including clinical diagnoses diag_1, diag_2, diag_3, HbA1c tests, and 23 specific diabetes medications), the model extracts and trains on only four numerical features (time_in_hospital, num_lab_procedures, num_medications, and number_emergency).  
+- **Severe Class Imbalance:** The positive target class (readmitted_30d = 1) represents only ~11.16% (11,357 encounters) of the 101,766 total records, while 88.84% are non-readmitted. This severe negative-to-positive ratio (7.97:1) significantly skews model learning toward the majority class.
+
+- **Constrained Feature Utilization:** Out of 50 available columns in the dataset (including clinical diagnoses diag_1, diag_2, diag_3, HbA1c tests, and 23 specific diabetes medications), the model extracts and trains on only four numerical features (time_in_hospital, num_lab_procedures, num_medications, and number_emergency).
+
 - **High Sparsity in Clinical Lab Results:** Critical glycemic indicators in the raw dataset suffer from heavy missingness—max_glu_serum contains only 5,346 non-null values and A1Cresult contains only 17,018 non-null records out of 101,766 entries. Because no imputation pipeline was implemented, these primary diabetic markers were excluded from the model.
+
 - **Lack of Longitudinal Patient History:** The dataset treats encounters largely in isolation rather than modeling time-series trends or chronic condition trajectories across multiple historical hospital stays per patient.
+
 - **Low Discriminative Power (AUC):** The baseline XGBoost model achieved an Area Under the Curve (AUC) of only 0.5666. Even after applying scale_pos_weight (7.97) and exhaustive 3-fold GridSearchCV hyperparameter tuning, the test set AUC reached only 0.5748—marginally better than random chance (0.50).
+
 - **High False-Positive Drag:** To improve recall from a baseline of 0.26% to 54.18%, the model trades off precision, which drops to 13.39%. This creates 8,007 false positives against only 1,238 true positives, incurring an estimated $120,000 in annual operational drag due to care coordinators reviewing non-readmission cases.
+
 - **Arbitrary Risk Tier Thresholds:** Risk tier assignments (High if probability > 0.4, Moderate if > 0.2, else Low) are hard-coded heuristics rather than clinically validated decision boundaries optimized for specific hospital cost-versus-recall requirements.
+
 - **In-Memory Non-Persistent Storage:** The data warehouse layer runs in an ephemeral in-memory DuckDB instance (:memory:) inside Google Colab rather than interfacing with an enterprise, distributed data warehouse or live FHIR/HL7 feeds.
+
 - **Static SQL Extraction:** While designed as a natural-language SQL extractor, the implemented agent_sql_extractor executes a static parameterized SQL template with a fixed LIMIT 1 clause rather than dynamically generating complex, multi-table queries from unconstrained clinical dialogue.
+
 - **External LLM Dependency & Latency:** Agent 3 relies on external API calls to Groq (groq/compound) for generative synthesis. In production, this introduces network latency, rate-limiting risks, and compliance considerations regarding transmitting Protected Health Information (PHI) to third-party endpoints.
+
 - **Absence of External Multi-Center Validation:** The model was trained and evaluated strictly on an 80/20 train/test split of a single retrospective US hospital dataset from 1999–2008 without external validation across contemporary health systems or diverse geographic populations.  
 
 ### AI Disclosure & Collaboration
-- **Large Language Models (Agent 3 - BI & Executive Synthesizer):** The synthesis layer uses the Groq Compound system (groq/compound via the groq 1.7.0 Python SDK) to translate raw tabular data and statistical outputs into structured clinical transition-of-care briefs. Architectural specifications also design for Google Gemini to parse natural language clinical requests into parameterized SQL queries (Agent 1).  
-- **Predictive Machine Learning (Agent 2 - Clinical ML Predictor):** Binary risk classification is executed via XGBoost (xgb.XGBClassifier), optimized with scale_pos_weight and GridSearchCV to generate a calibrated 30-day readmission probability.  
+- **Large Language Models (Agent 3 - BI & Executive Synthesizer):** The synthesis layer uses the Groq Compound system (groq/compound via the groq 1.7.0 Python SDK) to translate raw tabular data and statistical outputs into structured clinical transition-of-care briefs. Architectural specifications also design for Google Gemini to parse natural language clinical requests into parameterized SQL queries (Agent 1).
+
+- **Predictive Machine Learning (Agent 2 - Clinical ML Predictor):** Binary risk classification is executed via XGBoost (xgb.XGBClassifier), optimized with scale_pos_weight and GridSearchCV to generate a calibrated 30-day readmission probability.
+
 - **Explainable AI (XAI):** Model interpretability is handled by SHAP (shap.TreeExplainer), which decomposes tree outputs into local Shapley feature contributions to isolate individual patient risk drivers before passing them to the generative agent.
+
 - **Data & Orchestration Infrastructure:** The project utilizes DuckDB for in-memory SQL extraction, KaggleHub for programmatic dataset ingestion, and Plotly and Seaborn for cohort visualization and financial modeling.
+
 - **Copilot Paradigm (Assistive, Not Autonomous):** The framework is explicitly designated as a Clinical BI Copilot. It does not make autonomous diagnoses or independently discharge patients; instead, it synthesizes electronic health records into executive summaries to assist clinical decision-making.
+
 - **Human-in-the-Loop Clinical Workflows:** Every generated brief prescribes required human actions across specific clinical roles:  Pharmacists are required to conduct medication reconciliations, assess drug-drug interactions, and simplify complex regimens. Social Workers are assigned to evaluate transportation, caregiver support, and socioeconomic factors prior to discharge. Care Coordinators & Physicians are mandated to schedule follow-ups and 72-hour post-discharge telehealth check-ins.
-- **Institutional Policy & Protocol Enforcement:** The LLM prompt architecture supports dynamic injection of hospital-specific care guidelines (e.g., mandatory social worker consults and 72-hour telehealth follow-ups for moderate-to-high risk tiers), ensuring the AI's recommendations conform to institutional operating standards. 
+
+- **Institutional Policy & Protocol Enforcement:** The LLM prompt architecture supports dynamic injection of hospital-specific care guidelines (e.g., mandatory social worker consults and 72-hour telehealth follow-ups for moderate-to-high risk tiers), ensuring the AI's recommendations conform to institutional operating standards.
+
 
 ### Future Work & Scalability
 - **Feature Expansion & Engineering:** We can ingest and engineer features from the remaining raw variables in the dataset—such as primary, secondary, and tertiary diagnosis codes (diag_1, diag_2, diag_3), specific diabetes medications, procedural counts, and demographic indicators—to expand our feature space and boost model discrimination beyond our four baseline metrics.
