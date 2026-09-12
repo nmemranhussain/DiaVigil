@@ -146,7 +146,7 @@ Patients are segmented into three risk tiers based on predicted patient's readmi
 
 ## Cost-Benefit Analysis & ROI Optimization
 
-**Key assumptions for to model the ROI for a mid-sized US hospital's readmission intervention program are given below:**
+**Key assumptions to model the ROI for a mid-sized US hospital's readmission intervention program are given below:**
 
 |Criteria |Description of Criteria |Numeric Numbers |  
 |:--------|:-----------------------|:---------------|
