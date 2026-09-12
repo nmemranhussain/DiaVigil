@@ -146,6 +146,22 @@ Patients are segmented into three risk tiers based on predicted patient's readmi
 
 ## Cost-Benefit Analysis & ROI Optimization
 
+**Key assumptions for to model the ROI for a mid-sized US hospital's readmission intervention program are given below:**
+
+|Criteria |Description of Criteria |Numeric Numbers |  
+|:--------|:-----------------------|:---------------|
+|Facility Revenue |Annual Medicare DRG revenue |$40,000,000 |  
+|Penalty Rate |The HRRP (Hospital Readmissions Reduction Program) Payment Adjustment Factor |1.5%. |
+|Model Performance |The predictive model has a Recall rate |54.18%, identifying 1,238 True Positives and 8,007 False Positives |
+|Intervention Effectiveness |The percentage of clinical intervention successfully prevents readmissions among correctly identified high-risk patients |60% |  
+|Intervention Cost |The maximum operational cost to administer the intervention per flagged patient |$150 |  
+Acute Care Savings |Each successfully prevented readmission saves the hospital an estimated acute inpatient costs |$2,400|  
+
+*Source: 
+- [Centers for Medicare & Medicaid Services. (n.d.). Hospital Readmissions Reduction Program (HRRP).](https://www.cms.gov/medicare/payment/prospective-payment-systems/acute-inpatient-pps/hospital-readmissions-reduction-program-hrrp)
+- [Definitive Healthcare. (n.d.). Revenue trends at U.S. hospitals](https://www.definitivehc.com/blog/revenue-trends-at-u.s.-hospitals)
+- [Healthcare Cost and Utilization Project (HCUP) Statistical Brief by AHRQ](https://hcup-us.ahrq.gov/reports/statbriefs/sb278-Conditions-Frequent-Readmissions-By-Payer-2018.jsp)
+- [National Institutes of Health (NIH) / PMC Peer-Reviewed Studies](https://pmc.ncbi.nlm.nih.gov/articles/PMC6559370/)
 
 ![Sensitivity Analysis in Moderate Scenario](sensitivity_analysis_moderate_scenario.png)
 
