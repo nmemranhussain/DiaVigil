@@ -254,7 +254,9 @@ flowchart TD
 |:--------|:-----------------------|:---------------|
 |Facility Revenue |Annual Medicare DRG revenue |$40,000,000 |  
 |Penalty Rate |The HRRP (Hospital Readmissions Reduction Program) Payment Adjustment Factor |1.5%. |
-|Model Performance |The predictive model has a Recall rate |54.18%, identifying 1,238 True Positives and 8,007 False Positives |
+|Model's Recall |Our predictive model's Recall rate |54.18% |
+|Model's Precision |Our predictive model's Precision rate |13.39% |
+|Total patients flagged |True Positives + False Positives | 1,238 + 8,007 = 9,245 patients |
 |Intervention Effectiveness |The percentage of clinical intervention successfully prevents readmissions among correctly identified high-risk patients |60% |  
 |Intervention Cost |The maximum operational cost to administer the intervention per flagged patient |$150 |  
 Acute Care Savings |Each successfully prevented readmission saves the hospital an estimated acute inpatient costs |$2,400|  
