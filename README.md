@@ -146,7 +146,6 @@ Patients are segmented into three risk tiers based on predicted patient's readmi
 
 ## Cost-Benefit Analysis & ROI Optimization
 
-### Moderate Scenario
 
 ![Sensitivity Analysis in Moderate Scenario](sensitivity_analysis_moderate_scenario.png)
 
