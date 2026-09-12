@@ -307,7 +307,7 @@ Acute Care Savings |Each successfully prevented readmission saves the hospital a
 
 **Total Intervention Cost (-$1.38M):** The cumulative cost required to administer the preventative intervention to all patients initially flagged by the model.
 
-Final Outcome
+*Final Outcome: Net benefite = Gross Saving - Program Expense*
 
 **Net Benefit (+$591K):** The bottom-line financial value of the program, demonstrating that the combined savings significantly outweigh the operational intervention costs.
 
