@@ -302,7 +302,7 @@ Acute Care Savings |Each successfully prevented readmission saves the hospital a
 * **Acute Inpatient Savings (+$1.78M):** The bulk of the financial benefit, stemming from the direct cost savings of avoiding inpatient care for prevented readmissions.
 
 **Program Expenses**
-* **Total Intervention Cost (-$1.38M):** The cumulative cost required to administer the preventative intervention to all patients initially flagged by the BigQuery and Vertex AI model.
+* **Total Intervention Cost (-$1.38M):** The cumulative cost required to administer the preventative intervention to all patients initially flagged.
 
 **Final Outcome**
 > **Net Benefit = Gross Savings - Program Expenses**
