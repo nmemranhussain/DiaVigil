@@ -297,17 +297,16 @@ Acute Care Savings |Each successfully prevented readmission saves the hospital a
 
 **Description**: The waterfall chart visualizes the step-by-step financial impact of the readmission intervention, showing how operational costs offset projected savings to produce a positive return on investment.
 
-*Gross Savings*
+**Gross Savings**
+* **HRRP Savings (+$195K):** Represents the avoided Medicare penalty fines due to a reduced readmission rate.
+* **Acute Inpatient Savings (+$1.78M):** The bulk of the financial benefit, stemming from the direct cost savings of avoiding inpatient care for prevented readmissions.
 
-- **HRRP Savings (+$195K):** Represents the avoided Medicare penalty fines due to a reduced readmission rate.
+**Program Expenses**
+* **Total Intervention Cost (-$1.38M):** The cumulative cost required to administer the preventative intervention to all patients initially flagged by the BigQuery and Vertex AI model.
 
-- **Acute Inpatient Savings (+$1.78M):** The bulk of the financial benefit, stemming from the direct cost savings of avoiding inpatient care for prevented readmissions.
-
-*Program Expenses*
-
-**Total Intervention Cost (-$1.38M):** The cumulative cost required to administer the preventative intervention to all patients initially flagged by the model.
-
-*Final Outcome: Net benefite = Gross Saving - Program Expense*
+**Final Outcome**
+> **Net Benefit = Gross Savings - Program Expenses**
+> Net Benefit = ($195,048 + $1,782,720) - $1,386,750 = **+$591,018**
 
 **Net Benefit (+$591K):** The bottom-line financial value of the program, demonstrating that the combined savings significantly outweigh the operational intervention costs.
 
