@@ -246,7 +246,7 @@ If you utilize the DiaVigil architecture or build upon these findings, please ci
   year = {2026},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {[https://github.com/nmemranhussain/DiaVigil](https://github.com/nmemranhussain/DiaVigil)}
+  howpublished = {https://github.com/nmemranhussain/DiaVigil}
 }
 
 @article{strack2014diabetes,
