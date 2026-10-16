@@ -28,26 +28,88 @@ Hospital readmissions within 30 days of discharge among diabetes patients repres
 
 ## Architectural Workflow
 
-```text
-Raw Clinical Cohort (101,766 Encounters)
-│
-├── [CMS HRRP Filtering: Discharge Dispositions 11, 19, 20, 21 (2,423 Hospice/Expired Removed)]
-│
-Sanitized Cohort (99,343 Encounters | 70,442 Unique Patients | 11.27% Prevalence)
-│
-├── StratifiedGroupKFold(patient_nbr) ──> Zero Patient Identity Contamination
-│     ├── Development Cohort:  80,239 Encounters (Folds, Tuning, Calibration)
-│     └── Audit Test Cohort:    19,875 Encounters (Frozen Out-of-Sample Evaluation)
-│
-├── Module 1: Clinical Domain Transformer (Elixhauser Ontologies & Titrations)
-│
-├── Module 2: CatBoost + Isotonic Probability Calibration (tau* = 0.1620)
-│
-├── Module 3: Out-of-Sample Benchmark & Algorithmic Fairness Audit
-│
-├── Module 4: Multi-Agent Triage Engine & Local TreeSHAP Faithfulness Critic
-│
-└── Module 5: Stochastic Monte Carlo Simulation & Knapsack Staffing Frontiers
+```mermaid
+flowchart TD
+    %% Styling
+    classDef raw fill:#f8f9fa,stroke:#6c757d,stroke-width:1px,color:#212529;
+    classDef process fill:#e7f5ff,stroke:#1971c2,stroke-width:1.5px,color:#0c8599;
+    classDef model fill:#e6fcf5,stroke:#0ca678,stroke-width:1.5px,color:#099268;
+    classDef audit fill:#fff3bf,stroke:#f08c00,stroke-width:1.5px,color:#d9480f;
+    classDef agent fill:#f3f0ff,stroke:#7048e8,stroke-width:1.5px,color:#5f3dc4;
+    classDef ops fill:#ebfbee,stroke:#2b8a3e,stroke-width:1.5px,color:#2b8a3e;
+    classDef gate fill:#ffe3e3,stroke:#e03131,stroke-width:2px,color:#c92a2a;
+
+    subgraph CohortPrep ["1. Cohort Ingestion & Leak-Free Partitioning"]
+        direction TB
+        RawData["Raw Clinical Cohort<br/>(101,766 Encounters)"]:::raw
+        HRRPFilter["CMS HRRP Exclusion Filter<br/>(Codes 11, 19, 20, 21 Removed: n=2,423)"]:::process
+        Sanitized["Sanitized Base Cohort<br/>(99,343 Encounters | 70,442 Unique Patients)"]:::process
+        GroupKFold["StratifiedGroupKFold(patient_nbr)<br/>Enforces Zero Longitudinal Overlap"]:::process
+        DevSet["Development Cohort<br/>(80,239 Encounters)"]:::process
+        AuditSet["Frozen Holdout Audit Partition<br/>(19,875 Encounters)"]:::process
+
+        RawData --> HRRPFilter --> Sanitized --> GroupKFold
+        GroupKFold --> DevSet
+        GroupKFold --> AuditSet
+    end
+
+    subgraph FeaturePipeline ["2. Clinical Feature Pipeline"]
+        direction TB
+        Elixhauser["Vectorized Quan's Elixhauser Comorbidities<br/>(12 ICD-9 Regex Binary Indicators)"]:::process
+        Pharmaco["Pharmacotherapy Complexity Metrics<br/>(Insulin Titrations & Regimen Shifts)"]:::process
+        Util["Healthcare Utilization Metrics<br/>(Inpatient/Emergency Prior Encounters)"]:::process
+        Transform["Serialized ColumnTransformer<br/>(feature_engineering_pipeline.joblib)"]:::process
+
+        DevSet --> Elixhauser & Pharmaco & Util --> Transform
+    end
+
+    subgraph MLCore ["3. Calibrated ML Engine & Operating Cutoff"]
+        direction TB
+        CatBoostFit["CatBoost Classifier<br/>(Inner Group Cross-Validation)"]:::model
+        Isotonic["Post-Hoc Isotonic Probability Calibration<br/>(ECE: 0.3289 ➔ 0.0000 | Brier: -54.7%)"]:::model
+        CostLoss["Asymmetric Cost-Utility Function<br/>(C_FN = 5 × C_FP)"]:::model
+        ThresholdOpt["Optimal Cutoff Tau* = 0.1620<br/>(Holdout PR-AUC: 0.2036)"]:::model
+
+        Transform --> CatBoostFit --> Isotonic --> CostLoss --> ThresholdOpt
+    end
+
+    subgraph SubgroupAudit ["4. Algorithmic Fairness & Disparity Audit"]
+        direction TB
+        HoldoutEval["Frozen Threshold Evaluation<br/>(19,875 Held-out Encounters)"]:::audit
+        AgeDisparity["Age Band Vulnerability Discovery<br/>(0.5056 FNR Gap: 49.4% Young vs 86.2% Geriatric)"]:::audit
+        SexParity["Biological Sex Fairness Benchmark<br/>(0.0084 Cross-Sex FNR Difference)"]:::audit
+
+        ThresholdOpt -.-> HoldoutEval
+        AuditSet --> HoldoutEval
+        HoldoutEval --> AgeDisparity & SexParity
+    end
+
+    subgraph MultiAgentEngine ["5. Agentic Clinical Synthesis & TreeSHAP Critic"]
+        direction TB
+        Agent1["Agent 1: SQL Retriever<br/>(Structured Encounter Fetch)"]:::agent
+        Agent2["Agent 2: ML Inference & Local TreeSHAP<br/>(Calibrated Risk + Signed Attribution)"]:::agent
+        Agent3["Agent 3: Synthesis Engine<br/>(Draft Care Plan via Pydantic Contract)"]:::agent
+        CriticGate{"Deterministic TreeSHAP<br/>Critic Gate"}:::gate
+        VerifiedPlan["Verified Clinical Triage Brief<br/>(Passed = True)"]:::model
+        HallucinationReject["Interception & Forced Regeneration<br/>(Passed = False)"]:::gate
+
+        ThresholdOpt -.-> Agent2
+        Agent1 --> Agent2 --> Agent3 --> CriticGate
+        CriticGate -- "Grounded Claims" --> VerifiedPlan
+        CriticGate -- "Ungrounded Claims" --> HallucinationReject
+        HallucinationReject -. "Retry" .-> Agent3
+    end
+
+    subgraph OpsFrontier ["6. Stochastic Capacity Allocation Frontier"]
+        direction TB
+        MonteCarlo["1,000-Trial Monte Carlo Modeling<br/>(Intervention Efficacy ~ Beta(3.5, 6.5))"]:::ops
+        ExpectedYield["E[Averted Readmissions] = 231.55<br/>(95% Credible Interval: 228.06 – 235.12)"]:::ops
+        Knapsack["Bounded Knapsack Staffing Allocation<br/>(Diminishing Yields: 3.91 ➔ 2.61 / 100 Nurse Hours)"]:::ops
+
+        VerifiedPlan -.-> MonteCarlo
+        ThresholdOpt -.-> MonteCarlo
+        MonteCarlo --> ExpectedYield --> Knapsack
+    end
 ```
 ---
 
