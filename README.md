@@ -16,16 +16,15 @@ Hospital readmissions within 30 days of discharge among diabetes patients repres
 4. **Ungrounded Large Language Model (LLM) hallucinations** in downstream clinical summaries.
 
 **Project DiaVigil** re-engineers this pipeline from the ground up into a reproducible, research-grade clinical data science system. Evaluated on an untouched holdout audit cohort of 19,875 encounters, DiaVigil achieves:
-* **Zero Patient Leakage:** Patient-level isolation using `StratifiedGroupKFold` on 99,343 sanitized encounters across 70,442 unique patients.
-* **Standardized Clinical Ontologies:** Automated extraction of 12 Elixhauser Comorbidity Index flags, healthcare utilization indices, and pharmacotherapy titration markers.
-* **Calibrated Risk Probabilities:** Post-hoc Isotonic Regression reduces Expected Calibration Error (ECE) from **0.3289 to 0.0000** (100% reduction) and drops Brier score from **0.2121 to 0.0961**.
-* **Utility-Optimal Operating Cutoff:** Derivation of a cost-weighted threshold ($\tau^* = 0.1620$) under asymmetric clinical loss ($C_{FN} = 5 \times C_{FP}$), yielding an out-of-sample PR-AUC of **0.2036**.
-* **Algorithmic Fairness Discovery:** Empirical identification of a severe **0.5056 False Negative Rate gap** across age cohorts (49.44% miss rate for ages 30–40 vs. 86.21% for ages 90–100), despite near-perfect parity across biological sex (0.7045 Female vs. 0.7129 Male).
-* **Grounded Multi-Agent Decision Support:** A 3-agent orchestration pipeline enforced via typed Pydantic contracts and a deterministic **TreeSHAP Faithfulness Critic** that intercepts and rejects ungrounded clinical claims.
-* **Stochastic Capacity Allocation:** 1,000-trial Monte Carlo simulation and bounded knapsack optimization establishing diminishing marginal return curves for hospital nurse staffing.
+- **Zero Patient Leakage:** Patient-level isolation using `StratifiedGroupKFold` on 99,343 sanitized encounters across 70,442 unique patients.
+- **Standardized Clinical Ontologies:** Automated extraction of 12 Elixhauser Comorbidity Index flags, healthcare utilization indices, and pharmacotherapy titration markers.
+- **Calibrated Risk Probabilities:** Post-hoc Isotonic Regression reduces Expected Calibration Error (ECE) from **0.3289 to 0.0000** (100% reduction) and drops Brier score from **0.2121 to 0.0961**.
+- **Utility-Optimal Operating Cutoff:** Derivation of a cost-weighted threshold ($\tau^* = 0.1620$) under asymmetric clinical loss ($C_{FN} = 5 \times C_{FP}$), yielding an out-of-sample PR-AUC of **0.2036**.
+- **Algorithmic Fairness Discovery:** Empirical identification of a severe **0.5056 False Negative Rate gap** across age cohorts (49.44% miss rate for ages 30–40 vs. 86.21% for ages 90–100), despite near-perfect parity across biological sex (0.7045 Female vs. 0.7129 Male).
+- **Grounded Multi-Agent Decision Support:** A 3-agent orchestration pipeline enforced via typed Pydantic contracts and a deterministic **TreeSHAP Faithfulness Critic** that intercepts and rejects ungrounded clinical claims.
+- **Stochastic Capacity Allocation:** 1,000-trial Monte Carlo simulation and bounded knapsack optimization establishing diminishing marginal return curves for hospital nurse staffing.
 
 ---
-
 
 ## Architectural Workflow
 
@@ -49,6 +48,7 @@ Sanitized Cohort (99,343 Encounters | 70,442 Unique Patients | 11.27% Prevalence
 ├── Module 4: Multi-Agent Triage Engine & Local TreeSHAP Faithfulness Critic
 │
 └── Module 5: Stochastic Monte Carlo Simulation & Knapsack Staffing Frontiers
+
 ```
 ---
 
@@ -163,6 +163,7 @@ The codebase is organized into modular Google Colab notebooks that execute seque
 ├── LICENSE                   # MIT Open-Source Academic License
 └── README.md                 # System specification and empirical research findings
 ```
+---
 ## Quickstart & Execution Protocol
 
 ### 1. Repository Setup & Dependencies
@@ -214,4 +215,6 @@ Execute the notebooks in strict numerical order to preserve feature artifact sta
   journal = {GitHub repository},
   howpublished = {\url{https://github.com/nmemranhussain/DiaVigil}}
 }
+```
+
 
