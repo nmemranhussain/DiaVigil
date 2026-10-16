@@ -5,16 +5,15 @@
 [![Platform: Google Colab](https://img.shields.io/badge/Environment-Google%20Colab-orange.svg)](https://colab.research.google.com/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-
 ---
 
 ## Abstract
 
 Hospital readmissions within 30 days of discharge among diabetes patients represent a major clinical safety challenge and trigger severe institutional penalties under the CMS Hospital Readmissions Reduction Program (HRRP). Conventional predictive pipelines frequently fail in clinical deployment due to:
-1. **Patient identity leakage** across longitudinal readmission encounters.
-2. **Uncalibrated probability scores** under extreme class imbalance (~11% readmission prevalence).
-3. **Hidden demographic disparities** induced by arbitrary global decision cutoffs ($\tau = 0.50$).
-4. **Ungrounded Large Language Model (LLM) hallucinations** in downstream clinical summaries.
+- **Patient identity leakage** across longitudinal readmission encounters.
+- **Uncalibrated probability scores** under extreme class imbalance (~11% readmission prevalence).
+- **Hidden demographic disparities** induced by arbitrary global decision cutoffs ($\tau = 0.50$).
+- **Ungrounded Large Language Model (LLM) hallucinations** in downstream clinical summaries.
 
 **Project DiaVigil** re-engineers this pipeline from the ground up into a reproducible, research-grade clinical data science system. Evaluated on an untouched holdout audit cohort of 19,875 encounters, DiaVigil achieves:
 - **Zero Patient Leakage:** Patient-level isolation using `StratifiedGroupKFold` on 99,343 sanitized encounters across 70,442 unique patients.
@@ -268,11 +267,10 @@ Execute the notebooks in strict numerical order to preserve feature artifact sta
 ---
 
 ## Technical & Data Limitations
-
-1. **Historical EHR Distribution:** The UCI Diabetes dataset spans hospital encounters from 1999 to 2008. Practice patterns, clinical guidelines (such as SGLT2i/GLP-1 RA adoption), and billing coding practices have evolved significantly since this cohort was collected.
-2. **Censoring and Out-of-Hospital Mortality:** The dataset tracks inpatient readmissions to participating clinical centers but does not record out-of-hospital mortality or admissions to non-participating hospital systems, introducing potential informative right-censoring.
-3. **Unmeasured Social Determinants of Health (SDOH):** Clinical readmission risk is heavily driven by post-discharge environmental factors (e.g., medication affordability, food security, transportation access, and health literacy) that are not captured in structured administrative discharge summaries.
-4. **Coarse Glycemic Monitoring:** Glycated hemoglobin (`A1Cresult`) is recorded categorically (`None`, `Norm`, `>7`, `>8`) rather than as continuous clinical laboratory values, limiting the model's ability to capture granular glycemic volatility.
+- **Historical EHR Distribution:** The UCI Diabetes dataset spans hospital encounters from 1999 to 2008. Practice patterns, clinical guidelines (such as SGLT2i/GLP-1 RA adoption), and billing coding practices have evolved significantly since this cohort was collected.
+- **Censoring and Out-of-Hospital Mortality:** The dataset tracks inpatient readmissions to participating clinical centers but does not record out-of-hospital mortality or admissions to non-participating hospital systems, introducing potential informative right-censoring.
+- **Unmeasured Social Determinants of Health (SDOH):** Clinical readmission risk is heavily driven by post-discharge environmental factors (e.g., medication affordability, food security, transportation access, and health literacy) that are not captured in structured administrative discharge summaries.
+- **Coarse Glycemic Monitoring:** Glycated hemoglobin (`A1Cresult`) is recorded categorically (`None`, `Norm`, `>7`, `>8`) rather than as continuous clinical laboratory values, limiting the model's ability to capture granular glycemic volatility.
 
 ---
 
