@@ -72,7 +72,6 @@ Sanitized Cohort (99,343 Encounters | 70,442 Unique Patients | 11.27% Prevalence
 ├── Module 4: Multi-Agent Triage Engine & Local TreeSHAP Faithfulness Critic
 │
 └── Module 5: Stochastic Monte Carlo Simulation & Knapsack Staffing Frontiers
-
 ```
 ---
 
