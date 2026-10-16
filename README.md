@@ -7,7 +7,7 @@
 ## Abstract
 Hospital readmissions within 30 days of discharge for diabetes patients represent an acute clinical risk and impose substantial financial penalties under the CMS Hospital Readmissions Reduction Program (HRRP). Conventional predictive pipelines suffer from patient identity leakage across repeat admissions, uncalibrated risk probabilities under extreme class imbalance (~11% base prevalence), global thresholding that introduces severe demographic disparities, and ungrounded LLM hallucinations in clinical summaries. 
 
-**Project DiaVigil** re-engineers this pipeline into an end-to-end research framework:
+**Project DiaVigil** engineers this pipeline into an end-to-end research framework:
 1. Eliminates patient identity leakage via `StratifiedGroupKFold` clustering across 99,343 sanitized encounters.
 2. Maps diagnostic codes to standardized **Elixhauser Comorbidity Indices** using clinical regex ontologies.
 3. Implements nested cross-validation, hyperparameter-tuned CatBoost classification, and post-hoc **Isotonic Probability Calibration**, lowering Expected Calibration Error (ECE) from **0.3289 to 0.0000** and Brier score from **0.2121 to 0.0961**.
