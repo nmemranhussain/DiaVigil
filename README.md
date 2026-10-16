@@ -1,6 +1,3 @@
-# DiaVigil
-Calibrated machine learning and agentic decision support for 30-day diabetic readmission risk under clinical label imbalance.
-
 # Project DiaVigil: Calibrated Risk Stratification, Algorithmic Fairness, and Grounded Multi-Agent Clinical Decision Support Under Label Imbalance
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
