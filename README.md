@@ -49,7 +49,7 @@ Sanitized Cohort (99,343 Encounters | 70,442 Unique Patients | 11.27% Prevalence
 ├── Module 4: Multi-Agent Triage Engine & Local TreeSHAP Faithfulness Critic
 │
 └── Module 5: Stochastic Monte Carlo Simulation & Knapsack Staffing Frontiers
-
+```
 ---
 
 ## Methodological Contributions & Empirical Findings
@@ -107,7 +107,7 @@ To prevent generative clinical hallucinations, DiaVigil structures inference thr
                    Critic Gate: Local SHAP Attribution Audit
                      ├── Grounded Directives? ──> PASSED ──> Verified Triage Brief
                      └── Hallucinated Claims? ──> REJECTED ──> Force Regeneration
-
+```
 #### Empirical Demonstration (Encounter #1157574)
 * **Model Parameters:** Calibrated Risk = **17.79%** (Tier: High Risk - Enhanced Follow-up).
 * **Local TreeSHAP Drivers:** `elix_diabetes_complicated` (+0.091), `total_elixhauser_burden` (+0.084), `number_inpatient` (+0.076).
@@ -167,3 +167,4 @@ The codebase is organized into modular Google Colab notebooks that execute seque
 │
 ├── LICENSE                   # MIT Open-Source Academic License
 └── README.md                 # System specification and empirical research findings
+```
