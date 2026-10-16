@@ -49,6 +49,30 @@ Sanitized Cohort (99,343 Encounters | 70,442 Unique Patients | 11.27% Prevalence
 │
 └── Module 5: Stochastic Monte Carlo Simulation & Knapsack Staffing Frontiers
 
+
+## Architectural Workflow
+
+```text
+Raw Clinical Cohort (101,766 Encounters)
+│
+├── [CMS HRRP Filtering: Discharge Dispositions 11, 19, 20, 21 (2,423 Hospice/Expired Removed)]
+│
+Sanitized Cohort (99,343 Encounters | 70,442 Unique Patients | 11.27% Prevalence)
+│
+├── StratifiedGroupKFold(patient_nbr) ──> Zero Patient Identity Contamination
+│     ├── Development Cohort:  80,239 Encounters (Folds, Tuning, Calibration)
+│     └── Audit Test Cohort:    19,875 Encounters (Frozen Out-of-Sample Evaluation)
+│
+├── Module 1: Clinical Domain Transformer (Elixhauser Ontologies & Titrations)
+│
+├── Module 2: CatBoost + Isotonic Probability Calibration (tau* = 0.1620)
+│
+├── Module 3: Out-of-Sample Benchmark & Algorithmic Fairness Audit
+│
+├── Module 4: Multi-Agent Triage Engine & Local TreeSHAP Faithfulness Critic
+│
+└── Module 5: Stochastic Monte Carlo Simulation & Knapsack Staffing Frontiers
+
 ```
 ---
 
@@ -213,7 +237,7 @@ Execute the notebooks in strict numerical order to preserve feature artifact sta
   year = {2026},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/nmemranhussain/DiaVigil}}
+  howpublished = {\url{[https://github.com/nmemranhussain/DiaVigil](https://github.com/nmemranhussain/DiaVigil)}}
 }
 ```
 
