@@ -215,4 +215,4 @@ Execute the notebooks in strict numerical order to preserve feature artifact sta
   howpublished = {https://github.com/nmemranhussain/DiaVigil}
 }
 ```
-
+docs: fix ordered list indentation in abstract
