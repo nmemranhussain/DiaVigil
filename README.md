@@ -212,8 +212,7 @@ Execute the notebooks in strict numerical order to preserve feature artifact sta
   year = {2026},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/nmemranhussain/DiaVigil}}
+  howpublished = {https://github.com/nmemranhussain/DiaVigil}
 }
 ```
-
 
