@@ -51,6 +51,18 @@ Sanitized Cohort (99,343 Encounters | 70,442 Unique Patients | 11.27% Prevalence
 ```
 ---
 
+## Data Provenance & Access
+
+The underlying cohort is derived from the **Diabetes 130-US Hospitals (1999–2008)** clinical database, encompassing 101,766 inpatient encounters across 130 hospital facilities:
+
+* **Canonical Academic Archive:** [UCI Machine Learning Repository (DOI: 10.24432/C5230J)](https://doi.org/10.24432/C5230J)
+* **Foundational Publication:** [Strack et al. (2014), *BioMed Research International* (DOI: 10.1155/2014/781670)](https://doi.org/10.1155/2014/781670)
+* **Distribution Mirror:** [Kaggle Dataset Mirror (Brandão, Ph.D.)](https://www.kaggle.com/datasets/brandao/diabetes)
+
+For local replication, place the source files (`diabetic_data.csv` and `IDs_mapping.csv`) into the `data/raw/` directory prior to running `01_diavigil_cohort_filtering_and_group_split.ipynb`.
+
+---
+
 ## Methodological Contributions & Empirical Findings
 
 ### 1. Leak-Free Validation & Probability Calibration
@@ -225,6 +237,8 @@ In alignment with emerging guidelines for ethical AI in scientific computing and
 
 ## Citation & Attribution
 
+If you utilize the DiaVigil architecture or build upon these findings, please cite both the project repository and the primary data publication:
+
 ```bibtex
 @misc{hussain2026diavigil,
   author = {Hussain, N M Emran},
@@ -232,6 +246,17 @@ In alignment with emerging guidelines for ethical AI in scientific computing and
   year = {2026},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {https://github.com/nmemranhussain/DiaVigil}
+  howpublished = {[https://github.com/nmemranhussain/DiaVigil](https://github.com/nmemranhussain/DiaVigil)}
+}
+
+@article{strack2014diabetes,
+  author = {Strack, Beata and DeShazo, Jonathan P. and Gennings, Chris and Olmo, Juan L. and Ventura, Sebasti{\'a}n and Cios, Krzysztof J. and Clore, John N.},
+  title = {Impact of HbA1c Measurement on Hospital Readmission Rates: Analysis of 70,000 Clinical Database Patient Records},
+  journal = {BioMed Research International},
+  volume = {2014},
+  pages = {781670},
+  year = {2014},
+  publisher = {Hindawi},
+  doi = {10.1155/2014/781670}
 }
 ```
