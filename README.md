@@ -89,11 +89,6 @@ Auditing the frozen threshold ($\tau^* = 0.1620$) across 19,875 out-of-sample te
 ### 3. Multi-Agent Decision Support & Faithfulness Critic
 
 To prevent generative clinical hallucinations, DiaVigil structures inference through three agents governed by Pydantic schemas and a deterministic **Critic Gate**:
-
-### 3. Multi-Agent Decision Support & Faithfulness Critic
-
-To prevent generative clinical hallucinations, DiaVigil structures inference through three agents governed by Pydantic schemas and a deterministic **Critic Gate**:
-
 ```text
 [Encounter ID] ──> Agent 1: Parameterized SQL Retriever
                           │
@@ -168,3 +163,55 @@ The codebase is organized into modular Google Colab notebooks that execute seque
 ├── LICENSE                   # MIT Open-Source Academic License
 └── README.md                 # System specification and empirical research findings
 ```
+## Quickstart & Execution Protocol
+
+### 1. Repository Setup & Dependencies
+Clone the repository and install the verified core dependencies for local environments:
+
+```bash
+git clone https://github.com/nmemranhussain/DiaVigil.git
+cd DiaVigil
+pip install pandas numpy scikit-learn catboost optuna netcal shap pydantic joblib pyarrow
+```
+### 2. Sequential Pipeline Replication
+
+Execute the notebooks in strict numerical order to preserve feature artifact states and prevent data leakage:
+
+1. **`notebooks/01_diavigil_cohort_filtering_and_group_split.ipynb`**
+   - Ingests raw UCI 130-US Hospitals data, excludes CMS HRRP discharge dispositions (codes 11, 19, 20, 21), and creates group-partitioned Parquet files (`dev_cohort.parquet` and `audit_test_cohort.parquet`) clustered on `patient_nbr`.
+2. **`notebooks/02_diavigil_clinical_feature_engineering_pipeline.ipynb`**
+   - Extracts Quan's Elixhauser Comorbidity Index patterns via vectorized regex, constructs pharmacotherapy complexity metrics, and serializes `feature_engineering_pipeline.joblib`.
+3. **`notebooks/03_diavigil_nested_cv_and_probability_calibration.ipynb`**
+   - Fits `CatBoostClassifier` via nested group cross-validation, executes post-hoc Isotonic Calibration (reducing ECE to 0.0000), optimizes $\tau^* = 0.1620$ via asymmetric cost-loss matrices, and serializes `model_calibration_artifacts.joblib`.
+4. **`notebooks/04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb`**
+   - Performs frozen evaluation on the 19,875-encounter holdout test partition, compiling demographic audit tables and quantifying the 0.5056 False Negative Rate gap across age bands.
+5. **`notebooks/05_diavigil_agentic_triage_and_faithfulness_critic.ipynb`**
+   - Initializes the 3-agent clinical triage pipeline, registers Pydantic schemas, and validates the deterministic TreeSHAP Critic Gate against grounded vs. hallucinated clinical summaries.
+6. **`notebooks/06_diavigil_dynamic_resource_allocation_simulation.ipynb`**
+   - Executes 1,000-trial Monte Carlo stochastic efficacy sampling and runs bounded knapsack optimization to generate hospital nurse-hour allocation frontiers.
+
+---
+
+## Future Research Directions
+
+1. **Multiobjective Demographic-Specific Threshold Optimization ($\tau_g^*$):**
+   - Formulate a constrained optimization framework (e.g., Pareto-frontier optimization) to derive subgroup-specific decision cutoffs ($\tau_{\text{age}}^*$). The objective is to enforce Equal Opportunity by equalizing False Negative Rates between younger and geriatric cohorts without exceeding hospital care-management bed and staffing capacities.
+2. **Longitudinal State-Space Modeling on EHR Trajectories:**
+   - Transition from cross-sectional static encounter aggregations to continuous-time, structured state-space models (e.g., Mamba / S4) to model irregular temporal trajectories of inpatient glucose readings, vital sign instability, and medication titrations over sequential admissions.
+3. **Formal Verification of Agentic Clinical Synthesis:**
+   - Extend the deterministic Critic Gate beyond local TreeSHAP attribution matching to formal constraint-satisfaction solvers and automated theorem proving (e.g., SMT solvers). This will mathematically verify that LLM-generated clinical triage plans comply strictly with established clinical practice guidelines (e.g., ADA Standards of Medical Care in Diabetes).
+
+---
+
+## Citation & Attribution
+
+```bibtex
+@misc{hussain2026diavigil,
+  author = {Hussain, N M Emran},
+  title = {Project DiaVigil: Calibrated Machine Learning, Algorithmic Fairness Auditing, and Grounded Multi-Agent Decision Support for Diabetic Readmission Risk},
+  year = {2026},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/nmemranhussain/DiaVigil}}
+}
+
