@@ -137,6 +137,81 @@ For local replication, place the source files (`diabetic_data.csv` and `IDs_mapp
 
 ---
 
+## Clinical Data Dictionary
+
+The DiaVigil pipeline ingests, filters, and transforms 50 raw attributes into structured clinical representations. Below is the specification of all primary cohort identifiers, administrative features, clinical biomarkers, and engineered ontologies.
+
+### 1. Cohort Identifiers & Ground Truth Target
+
+| Feature Name | Source / Stage | Data Type | Permissible Values / Domain | Clinical & Architectural Role |
+| :--- | :--- | :--- | :--- | :--- |
+| `encounter_id` | Raw (`diabetic_data.csv`) | Integer | Unique identifier | Primary key for distinct hospital inpatient admissions. |
+| `patient_nbr` | Raw (`diabetic_data.csv`) | Integer | Unique identifier | **Group Splitting Key:** Used by `StratifiedGroupKFold` to isolate patient longitudinal trajectories and prevent identity leakage across train/test splits. |
+| `readmitted` | Raw (`diabetic_data.csv`) | String | `<30`, `>30`, `NO` | Raw multi-class administrative discharge readmission indicator. |
+| `readmitted_30d` | Notebook `01` | Binary (`int64`) | `1` ($<30$ days), `0` (else) | **Primary Target:** Binary label indicating unplanned readmission within the 30-day CMS HRRP penalty window. Baseline prevalence: **11.28%**. |
+
+---
+
+### 2. Patient Demographics & Fairness Audit Attributes
+
+| Feature Name | Source / Stage | Data Type | Permissible Values / Domain | Clinical & Architectural Role |
+| :--- | :--- | :--- | :--- | :--- |
+| `age` | Raw (`diabetic_data.csv`) | Categorical | `[0-10)`, `[10-20)`, ..., `[90-100)` | 10-year age bins. Evaluated in Notebook `04` to audit algorithmic disparity (revealed a **0.5056 FNR gap**). |
+| `gender` | Raw (`diabetic_data.csv`) | Categorical | `Female`, `Male` | Biological sex indicator (records with `Unknown/Invalid` dropped during initial filtering). Audited for sex parity (**0.84% FNR delta**). |
+| `race` | Raw (`diabetic_data.csv`) | Categorical | `Caucasian`, `AfricanAmerican`, `Hispanic`, `Asian`, `Other`, `?` | Self-reported racial demographic identifier. Missing values preserved as explicit category `?`. |
+
+---
+
+### 3. Healthcare Utilization & Inpatient Dynamics
+
+| Feature Name | Source / Stage | Data Type | Permissible Values / Domain | Clinical & Architectural Role |
+| :--- | :--- | :--- | :--- | :--- |
+| `time_in_hospital` | Raw (`diabetic_data.csv`) | Integer | $1 - 14$ days | Total length of stay (LOS) during index hospital admission. |
+| `num_lab_procedures` | Raw (`diabetic_data.csv`) | Integer | $\ge 1$ | Total count of diagnostic laboratory tests performed during encounter. |
+| `num_procedures` | Raw (`diabetic_data.csv`) | Integer | $\ge 0$ | Total count of non-lab operational/clinical procedures performed. |
+| `num_medications` | Raw (`diabetic_data.csv`) | Integer | $\ge 1$ | Total distinct pharmaceutical agents administered during hospitalization. |
+| `number_outpatient` | Raw (`diabetic_data.csv`) | Integer | $\ge 0$ | Outpatient clinic visits in the 12-month period preceding the index encounter. |
+| `number_emergency` | Raw (`diabetic_data.csv`) | Integer | $\ge 0$ | Emergency department encounters in the 12-month period preceding admission. |
+| `number_inpatient` | Raw (`diabetic_data.csv`) | Integer | $\ge 0$ | Inpatient admissions in the preceding 12 months (identified as a top TreeSHAP risk driver). |
+| `number_diagnoses` | Raw (`diabetic_data.csv`) | Integer | $1 - 16$ | Total clinical diagnostic billing codes entered into the encounter chart. |
+
+---
+
+### 4. Diagnostic Ontologies: Quan's Elixhauser Comorbidity Vectors
+
+Extracted in Notebook `02` using vectorized regular expressions applied across primary and secondary diagnostic fields (`diag_1`, `diag_2`, `diag_3`):
+
+| Feature Name | Clinical Entity | ICD-9 Mapping Logic | Architectural Significance |
+| :--- | :--- | :--- | :--- |
+| `elix_chf` | Congestive Heart Failure | `398.91`, `402.01-402.91`, `404.01-404.93`, `428.*` | Indicator of underlying cardiac compromise. |
+| `elix_cardiac_arrhythmias` | Cardiac Arrhythmias | `426.0-426.13`, `426.7`, `427.0-427.9` | Electrical conduction dysfunction marker. |
+| `elix_valvular_disease` | Valvular Disease | `093.2`, `394.0-397.9`, `424.0-424.99` | Structural cardiac pathology indicator. |
+| `elix_pulmonary_circ` | Pulmonary Circulation Disorders | `415.0-415.19`, `416.0-417.9` | Pulmonary arterial hypertension index. |
+| `elix_peripheral_vascular` | Peripheral Vascular Disease | `093.0`, `437.3`, `440.0-441.9`, `443.1-443.9` | Macrovascular complication risk vector. |
+| `elix_hypertension` | Hypertension (Combined) | `401.1-405.99` | Essential and secondary hypertensive disease. |
+| `elix_paralysis` | Paralysis / Plegia | `334.1`, `342.0-344.9`, `438.2-438.5` | Neurological immobility comorbidity marker. |
+| `elix_neuro_other` | Other Neurological Disorders | `331.9-333.9`, `340.*`, `345.0-345.9` | Cognitive/degenerative neurological conditions. |
+| `elix_chronic_pulmonary` | Chronic Pulmonary Disease | `416.8-416.9`, `490.*-505.*`, `506.4` | COPD, asthma, and chronic restrictive lung disease. |
+| `elix_diabetes_uncomplicated` | Diabetes without Complication | `250.00 - 250.33` | Baseline diabetic endocrine pathology. |
+| `elix_diabetes_complicated` | Diabetes with End-Organ Damage | `250.40 - 250.93` | Nephropathy, retinopathy, and neuropathy (top TreeSHAP risk driver). |
+| `elix_renal_failure` | Renal Failure / CKD | `403.01-404.93`, `585.0-586.*`, `V42.0` | Chronic kidney disease and end-stage renal illness. |
+| `total_elixhauser_burden` | Cumulative Comorbidity Index | $\sum (\text{Elixhauser Binary Flags})$ | Multi-morbid disease burden score ($0 - 12$). |
+
+---
+
+### 5. Glycemic Biomarkers & Pharmacotherapy Dynamics
+
+| Feature Name | Source / Stage | Data Type | Permissible Values / Domain | Clinical & Architectural Role |
+| :--- | :--- | :--- | :--- | :--- |
+| `A1Cresult` | Raw (`diabetic_data.csv`) | Categorical | `None`, `Norm`, `>7`, `>8` | Categorical glycated hemoglobin ($HbA1c$) lab monitoring indicator. |
+| `max_glu_serum` | Raw (`diabetic_data.csv`) | Categorical | `None`, `Norm`, `>200`, `>300` | Point-of-care or laboratory glucose serum reading. |
+| `insulin` | Raw (`diabetic_data.csv`) | Categorical | `No`, `Steady`, `Up`, `Down` | Subcutaneous insulin administration and acute hospital titration pattern. |
+| `change` | Raw (`diabetic_data.csv`) | Categorical | `Ch`, `No` | Indicates whether any diabetic medication regimen was modified during admission. |
+| `diabetesMed` | Raw (`diabetic_data.csv`) | Categorical | `Yes`, `No` | Indicates whether patient was discharged on any antidiabetic pharmacotherapy. |
+| `active_med_count` | Notebook `02` | Integer | $0 - 23$ | Count of distinct concurrent oral and injectable antidiabetic agents prescribed. |
+
+---
+
 ## Methodological Contributions & Empirical Findings
 
 ### 1. Leak-Free Validation & Probability Calibration
