@@ -11,29 +11,21 @@ The project emphasizes reproducible model evaluation, transparent reporting of p
 
 **Project status:** Research prototype. The current results do not establish clinical effectiveness or readiness for deployment.
 
-
 ---
-
 ## Abstract
 
-Hospital readmission risk assessment requires balancing the identification of high-risk patients against the costs of unnecessary interventions and limited healthcare resources. **DiaVigil** is a research prototype exploring an auditable machine-learning and AI-agent workflow for readmission risk assessment. It integrates clinical feature engineering, probability calibration, cost-sensitive threshold optimization, subgroup fairness auditing, patient-clustered bootstrap evaluation, resource-allocation simulation, and structured auditing of AI-agent-generated care recommendations.
+DiaVigil is a machine learning research project focused on hospital readmission risk prediction and the evaluation of decision-support strategies. The project uses clinical feature engineering, CatBoost classification, isotonic probability calibration, and cost-sensitive decision-threshold selection. It also examines subgroup false-negative rates, estimates uncertainty through patient-clustered bootstrap analysis, simulates resource allocation under staffing constraints, and explores an AI-agent workflow for generating and auditing care recommendations.
 
-### Key Results
+On a holdout cohort of 19,875 encounters, the baseline model achieved a precision-recall area under the curve (PR-AUC) of 0.2036 and a receiver operating characteristic area under the curve (ROC-AUC) of 0.6641. A revised model increased recall from 29.15% to 31.96%, while ROC-AUC decreased to 0.6578 and the number of false positives increased from 2,089 to 2,478. These results illustrate the trade-offs between identifying more patients who experience readmission and generating additional false-positive predictions. The project also evaluates probability calibration, subgroup error rates, and the consistency of saved research artifacts. The findings are limited to the available dataset and do not establish clinical effectiveness or generalizability to other healthcare settings.
 
-- **Evaluation cohort:** 19,875 hospital encounters in the holdout dataset.
-- **Baseline discrimination:** PR-AUC of 0.2036 and ROC-AUC of 0.6641.
-- **Recall:** Increased from 29.15% to 31.96% with the revised model.
-- **False-negative rate:** Decreased from 70.85% to 68.04%.
-- **Trade-off:** ROC-AUC decreased to 0.6578, while false positives increased from 2,089 to 2,478.
-- **Reproducibility:** All 18 cross-artifact consistency checks passed.
+### Project at a Glance
 
-These findings illustrate the trade-offs between identifying positive cases, overall discrimination, and potential intervention burden. They do not establish that the revised model is universally superior or that the system improves clinical outcomes.
-
-### Research Direction
-
-DiaVigil investigates how uncertainty-aware evaluation, cost-sensitive decision policies, subgroup auditing, and auditable AI-agent workflows could support more transparent clinical decision-making. External validation, further methodological development, and systematic evaluation of agent reliability and clinical utility remain important future work.
-
-**Status:** Research prototype; not validated or approved for clinical use.
+- **Research focus:** Hospital readmission risk prediction and decision-support evaluation.
+- **Modeling:** Clinical feature engineering, CatBoost, and isotonic probability calibration.
+- **Decision analysis:** Cost-sensitive threshold selection and resource-allocation simulation.
+- **Evaluation:** Holdout performance, calibration, subgroup false-negative rates, and patient-clustered bootstrap analysis.
+- **AI-agent component:** Generation and auditing of proposed care recommendations.
+- **Current status:** Research prototype requiring further validation.
 ---
 
 ## Research Questions & Hypotheses
