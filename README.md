@@ -1,13 +1,16 @@
-# Project DiaVigil: An Auditable, Uncertainty-Aware Clinical Decision-Support Research Prototype for Hospital Readmission Risk Assessment
+# Project DiaVigil: A Machine Learning Research Project on Hospital Readmission Risk Prediction
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Platform: Google Colab](https://img.shields.io/badge/Environment-Google%20Colab-orange.svg)](https://colab.research.google.com/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-DiaVigil is a research project exploring the integration of machine learning, probability calibration, cost-sensitive decision-making, subgroup fairness auditing, resource-allocation simulation, and AI-agent-assisted clinical decision support. The project emphasizes reproducible evaluation, transparent trade-offs, and systematic auditing of model predictions and agent-generated care recommendations.
+DiaVigil investigates the use of machine learning to estimate hospital readmission risk and support the evaluation of clinical decision-making strategies. The project includes clinical feature engineering, probability calibration, decision-threshold selection, subgroup error analysis, resource-allocation simulation, and an AI-agent workflow for generating and auditing care recommendations.
 
-*Research prototype — not validated or approved for clinical use.*
+The project emphasizes reproducible model evaluation, transparent reporting of performance trade-offs, and documentation of methodological limitations.
+
+**Project status:** Research prototype. The current results do not establish clinical effectiveness or readiness for deployment.
+
 
 ---
 
