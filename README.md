@@ -1,9 +1,13 @@
-# Project DiaVigil: Calibrated Machine Learning, Algorithmic Fairness Auditing, and Grounded Multi-Agent Decision Support for Diabetic Readmission Risk
+# Project DiaVigil: An Auditable, Uncertainty-Aware Clinical Decision-Support Research Prototype for Hospital Readmission Risk Assessment
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Platform: Google Colab](https://img.shields.io/badge/Environment-Google%20Colab-orange.svg)](https://colab.research.google.com/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+DiaVigil is a research project exploring the integration of machine learning, probability calibration, cost-sensitive decision-making, subgroup fairness auditing, resource-allocation simulation, and AI-agent-assisted clinical decision support. The project emphasizes reproducible evaluation, transparent trade-offs, and systematic auditing of model predictions and agent-generated care recommendations.
+
+*Research prototype — not validated or approved for clinical use.*
 
 ---
 
