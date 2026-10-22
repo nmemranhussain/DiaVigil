@@ -53,91 +53,95 @@ The project has the following objectives:
 The overall objective is to establish a transparent and reproducible basis for evaluating readmission risk models and related decision-support workflows, while identifying the additional evidence required before clinical use can be considered.
 ---
 
-## Architectural Workflow
+## Methodology and System Architecture
 
-```mermaid
-flowchart TD
-    %% Styling
-    classDef raw fill:#f8f9fa,stroke:#6c757d,stroke-width:1px,color:#212529;
-    classDef process fill:#e7f5ff,stroke:#1971c2,stroke-width:1.5px,color:#0c8599;
-    classDef model fill:#e6fcf5,stroke:#0ca678,stroke-width:1.5px,color:#099268;
-    classDef audit fill:#fff3bf,stroke:#f08c00,stroke-width:1.5px,color:#d9480f;
-    classDef agent fill:#f3f0ff,stroke:#7048e8,stroke-width:1.5px,color:#5f3dc4;
-    classDef ops fill:#ebfbee,stroke:#2b8a3e,stroke-width:1.5px,color:#2b8a3e;
-    classDef gate fill:#ffe3e3,stroke:#e03131,stroke-width:2px,color:#c92a2a;
+DiaVigil follows a sequence of data preparation, model development, probability calibration, decision-threshold selection, holdout evaluation, and decision-support analysis. The workflow also includes resource-allocation simulation and an AI-agent component for generating and checking structured care recommendations.
 
-    subgraph CohortPrep ["1. Cohort Ingestion & Leak-Free Partitioning"]
-        direction TB
-        RawData["Raw Clinical Cohort<br/>(101,766 Encounters)"]:::raw
-        HRRPFilter["CMS HRRP Exclusion Filter<br/>(Codes 11, 19, 20, 21 Removed: n=2,423)"]:::process
-        Sanitized["Sanitized Base Cohort<br/>(99,343 Encounters | 70,442 Unique Patients)"]:::process
-        GroupKFold["StratifiedGroupKFold(patient_nbr)<br/>Enforces Zero Longitudinal Overlap"]:::process
-        DevSet["Development Cohort<br/>(80,239 Encounters)"]:::process
-        AuditSet["Frozen Holdout Audit Partition<br/>(19,875 Encounters)"]:::process
+### 1. Data Preparation and Cohort Separation
 
-        RawData --> HRRPFilter --> Sanitized --> GroupKFold
-        GroupKFold --> DevSet
-        GroupKFold --> AuditSet
-    end
+The project uses an encounter-level dataset containing clinical, medication, healthcare-utilization, and demographic information. The available data are divided into development and holdout cohorts.
 
-    subgraph FeaturePipeline ["2. Clinical Feature Pipeline"]
-        direction TB
-        Elixhauser["Vectorized Quan's Elixhauser Comorbidities<br/>(12 ICD-9 Regex Binary Indicators)"]:::process
-        Pharmaco["Pharmacotherapy Complexity Metrics<br/>(Insulin Titrations & Regimen Shifts)"]:::process
-        Util["Healthcare Utilization Metrics<br/>(Inpatient/Emergency Prior Encounters)"]:::process
-        Transform["Serialized ColumnTransformer<br/>(feature_engineering_pipeline.joblib)"]:::process
+Within the development cohort, patient-grouped partitions are used to separate model training, probability calibration, and decision-threshold selection. Encounters belonging to the same patient are kept within the same partition to reduce the risk of patient-level information leakage.
 
-        DevSet --> Elixhauser & Pharmaco & Util --> Transform
-    end
+The holdout cohort is reserved for final evaluation. It is not used to fit the model, calibrate its probabilities, or select its decision threshold.
 
-    subgraph MLCore ["3. Calibrated ML Engine & Operating Cutoff"]
-        direction TB
-        CatBoostFit["CatBoost Classifier<br/>(Inner Group Cross-Validation)"]:::model
-        Isotonic["Post-Hoc Isotonic Probability Calibration<br/>(ECE: 0.3289 ➔ 0.0000 | Brier: -54.7%)"]:::model
-        CostLoss["Asymmetric Cost-Utility Function<br/>(C_FN = 5 × C_FP)"]:::model
-        ThresholdOpt["Optimal Cutoff Tau* = 0.1620<br/>(Holdout PR-AUC: 0.2036)"]:::model
+### 2. Clinical Feature Engineering
 
-        Transform --> CatBoostFit --> Isotonic --> CostLoss --> ThresholdOpt
-    end
+A custom feature-engineering transformer derives additional variables from the available encounter data. These include:
 
-    subgraph SubgroupAudit ["4. Algorithmic Fairness & Disparity Audit"]
-        direction TB
-        HoldoutEval["Frozen Threshold Evaluation<br/>(19,875 Held-out Encounters)"]:::audit
-        AgeDisparity["Age Band Vulnerability Discovery<br/>(0.5056 FNR Gap: 49.4% Young vs 86.2% Geriatric)"]:::audit
-        SexParity["Biological Sex Fairness Benchmark<br/>(0.0084 Cross-Sex FNR Difference)"]:::audit
+- Comorbidity indicators derived from selected ICD-9 diagnosis codes.
+- A summary measure of Elixhauser comorbidity burden.
+- A healthcare-utilization index based on outpatient, emergency, and inpatient encounters.
+- Diabetes medication counts and indicators of medication dosage changes.
+- An insulin-use indicator.
+- An encounter-severity measure based on length of stay, medication count, and laboratory procedures.
+- A categorical code derived from the recorded HbA1c result.
 
-        ThresholdOpt -.-> HoldoutEval
-        AuditSet --> HoldoutEval
-        HoldoutEval --> AgeDisparity & SexParity
-    end
+The transformed features are passed to a preprocessing pipeline before model training and evaluation.
 
-    subgraph MultiAgentEngine ["5. Agentic Clinical Synthesis & TreeSHAP Critic"]
-        direction TB
-        Agent1["Agent 1: SQL Retriever<br/>(Structured Encounter Fetch)"]:::agent
-        Agent2["Agent 2: ML Inference & Local TreeSHAP<br/>(Calibrated Risk + Signed Attribution)"]:::agent
-        Agent3["Agent 3: Synthesis Engine<br/>(Draft Care Plan via Pydantic Contract)"]:::agent
-        CriticGate{"Deterministic TreeSHAP<br/>Critic Gate"}:::gate
-        VerifiedPlan["Verified Clinical Triage Brief<br/>(Passed = True)"]:::model
-        HallucinationReject["Interception & Forced Regeneration<br/>(Passed = False)"]:::gate
+### 3. Model Training
 
-        ThresholdOpt -.-> Agent2
-        Agent1 --> Agent2 --> Agent3 --> CriticGate
-        CriticGate -- "Grounded Claims" --> VerifiedPlan
-        CriticGate -- "Ungrounded Claims" --> HallucinationReject
-        HallucinationReject -. "Retry" .-> Agent3
-    end
+DiaVigil uses CatBoost as its classification model. The current model configuration uses 400 boosting iterations, a learning rate of 0.05, a tree depth of 6, and balanced class weights.
 
-    subgraph OpsFrontier ["6. Stochastic Capacity Allocation Frontier"]
-        direction TB
-        MonteCarlo["1,000-Trial Monte Carlo Modeling<br/>(Intervention Efficacy ~ Beta(3.5, 6.5))"]:::ops
-        ExpectedYield["E[Averted Readmissions] = 231.55<br/>(95% Credible Interval: 228.06 – 235.12)"]:::ops
-        Knapsack["Bounded Knapsack Staffing Allocation<br/>(Diminishing Yields: 3.91 ➔ 2.61 / 100 Nurse Hours)"]:::ops
+Model training is performed using the training partition of the development cohort. The project also retains an earlier baseline model to support comparison with the revised workflow.
 
-        VerifiedPlan -.-> MonteCarlo
-        ThresholdOpt -.-> MonteCarlo
-        MonteCarlo --> ExpectedYield --> Knapsack
-    end
-```
+### 4. Probability Calibration
+
+The model's predicted probabilities are calibrated using isotonic regression. Calibration is fitted using a separate calibration partition and a model fitted on the training partition.
+
+Calibration is evaluated by comparing predicted risk with observed outcome frequencies across probability bins and by calculating the Brier score and expected calibration error (ECE).
+
+These measures assess the agreement between predicted probabilities and observed outcomes; they do not, by themselves, establish that using the predictions improves clinical decisions.
+
+### 5. Decision-Threshold Selection
+
+A decision threshold is selected on a separate threshold-selection partition. The current implementation evaluates classification thresholds using an asymmetric cost function that assigns a higher cost to false negatives than to false positives.
+
+The configured costs are:
+
+- False-positive cost (\(C_{FP}\)): 1
+- False-negative cost (\(C_{FN}\)): 5
+
+The selected threshold determines which encounters are classified as positive. Changing this threshold affects recall, precision, false-positive counts, and false-negative counts.
+
+These costs represent modeling assumptions and should not be interpreted as validated estimates of actual clinical or financial costs.
+
+### 6. Holdout Evaluation
+
+The selected model, calibrator, and threshold are evaluated on the reserved holdout cohort. The evaluation includes:
+
+- Precision-recall area under the curve (PR-AUC).
+- Receiver operating characteristic area under the curve (ROC-AUC).
+- Brier score and calibration analysis.
+- Confusion matrix, precision, recall, and false-negative rate.
+- Subgroup error analysis across available age, gender, and race categories.
+- Patient-clustered bootstrap estimates of uncertainty in selected comparisons.
+
+The baseline and revised model are compared using the same holdout cohort. This comparison makes their measured performance differences easier to interpret, but it does not establish that either model will generalize to other healthcare settings.
+
+### 7. Resource-Allocation Simulation
+
+A Monte Carlo simulation examines how assumed intervention efficacy and available nursing hours affect resource allocation among high-risk encounters. The workflow estimates patients reached, expected readmissions potentially avoided, and uncertainty around the simulated estimates.
+
+A capacity-constrained allocation procedure also ranks candidates using an estimated efficiency measure based on expected readmissions potentially avoided per required nursing hour.
+
+The results depend on the simulation assumptions, intervention-efficacy distribution, and resource constraints. They are estimates from a model, not observed clinical outcomes or demonstrated cost savings.
+
+### 8. AI-Agent Recommendation and Audit Workflow
+
+DiaVigil includes an AI-agent workflow that generates structured care-recommendation briefs from model-related information. The briefs contain fields for estimated readmission risk, risk tier, potential risk drivers, protective factors, and proposed care directives.
+
+A separate audit component checks generated outputs against predefined criteria. The current demonstration includes an example that passes the checks and an example that is rejected.
+
+These checks provide an initial assessment of output structure and specified requirements. Further evaluation is needed to establish factual accuracy, clinical appropriateness, consistency, and safety. The generated recommendations are not intended to replace clinician judgment.
+
+### 9. Reproducibility and Artifact Management
+
+The workflow saves model artifacts, evaluation results, simulation outputs, and research audit reports for subsequent inspection. The project also includes consistency checks to verify selected relationships between saved labels, predictions, thresholds, calibration results, and evaluation artifacts.
+
+A reproducibility manifest records the presence, file sizes, and SHA-256 hashes of key artifacts, along with the software environment versions recorded during the audit.
+
+These checks support reproducibility and traceability within the tested workflow. They do not independently establish the correctness of every modeling decision or guarantee identical results across all software environments.
 ---
 
 ## Data Provenance & Access
