@@ -13,21 +13,24 @@ DiaVigil is a research project exploring the integration of machine learning, pr
 
 ## Abstract
 
-Hospital readmissions within 30 days of discharge among diabetes patients represent a major clinical safety challenge and trigger severe institutional penalties under the CMS Hospital Readmissions Reduction Program (HRRP). Conventional predictive pipelines frequently fail in clinical deployment due to:
-- **Patient identity leakage** across longitudinal readmission encounters.
-- **Uncalibrated probability scores** under extreme class imbalance (~11% readmission prevalence).
-- **Hidden demographic disparities** induced by arbitrary global decision cutoffs ($\tau = 0.50$).
-- **Ungrounded Large Language Model (LLM) hallucinations** in downstream clinical summaries.
+Hospital readmission risk assessment requires balancing the identification of high-risk patients against the costs of unnecessary interventions and limited healthcare resources. **DiaVigil** is a research prototype exploring an auditable machine-learning and AI-agent workflow for readmission risk assessment. It integrates clinical feature engineering, probability calibration, cost-sensitive threshold optimization, subgroup fairness auditing, patient-clustered bootstrap evaluation, resource-allocation simulation, and structured auditing of AI-agent-generated care recommendations.
 
-**Project DiaVigil** re-engineers this pipeline from the ground up into a reproducible, research-grade clinical data science system. Evaluated on an untouched holdout audit cohort of 19,875 encounters, DiaVigil achieves:
-- **Zero Patient Leakage:** Patient-level isolation using `StratifiedGroupKFold` on 99,343 sanitized encounters across 70,442 unique patients.
-- **Standardized Clinical Ontologies:** Automated extraction of 12 Elixhauser Comorbidity Index flags, healthcare utilization indices, and pharmacotherapy titration markers.
-- **Calibrated Risk Probabilities:** Post-hoc Isotonic Regression reduces Expected Calibration Error (ECE) from **0.3289 to 0.0000** (100% reduction) and drops Brier score from **0.2121 to 0.0961**.
-- **Utility-Optimal Operating Cutoff:** Derivation of a cost-weighted threshold ($\tau^* = 0.1620$) under asymmetric clinical loss ($C_{FN} = 5 \times C_{FP}$), yielding an out-of-sample PR-AUC of **0.2036**.
-- **Algorithmic Fairness Discovery:** Empirical identification of a severe **0.5056 False Negative Rate gap** across age cohorts (49.44% miss rate for ages 30–40 vs. 86.21% for ages 90–100), despite near-perfect parity across biological sex (0.7045 Female vs. 0.7129 Male).
-- **Grounded Multi-Agent Decision Support:** A 3-agent orchestration pipeline enforced via typed Pydantic contracts and a deterministic **TreeSHAP Faithfulness Critic** that intercepts and rejects ungrounded clinical claims.
-- **Stochastic Capacity Allocation:** 1,000-trial Monte Carlo simulation and bounded knapsack optimization establishing diminishing marginal return curves for hospital nurse staffing.
+### Key Results
 
+- **Evaluation cohort:** 19,875 hospital encounters in the holdout dataset.
+- **Baseline discrimination:** PR-AUC of 0.2036 and ROC-AUC of 0.6641.
+- **Recall:** Increased from 29.15% to 31.96% with the revised model.
+- **False-negative rate:** Decreased from 70.85% to 68.04%.
+- **Trade-off:** ROC-AUC decreased to 0.6578, while false positives increased from 2,089 to 2,478.
+- **Reproducibility:** All 18 cross-artifact consistency checks passed.
+
+These findings illustrate the trade-offs between identifying positive cases, overall discrimination, and potential intervention burden. They do not establish that the revised model is universally superior or that the system improves clinical outcomes.
+
+### Research Direction
+
+DiaVigil investigates how uncertainty-aware evaluation, cost-sensitive decision policies, subgroup auditing, and auditable AI-agent workflows could support more transparent clinical decision-making. External validation, further methodological development, and systematic evaluation of agent reliability and clinical utility remain important future work.
+
+**Status:** Research prototype; not validated or approved for clinical use.
 ---
 
 ## Research Questions & Hypotheses
