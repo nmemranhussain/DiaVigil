@@ -142,6 +142,28 @@ The workflow saves model artifacts, evaluation results, simulation outputs, and 
 A reproducibility manifest records the presence, file sizes, and SHA-256 hashes of key artifacts, along with the software environment versions recorded during the audit.
 
 These checks support reproducibility and traceability within the tested workflow. They do not independently establish the correctness of every modeling decision or guarantee identical results across all software environments.
+
+
+flowchart TD
+    A["Development Cohort"] --> B["Training Partition"]
+    A --> C["Calibration Partition"]
+    A --> D["Threshold-Selection Partition"]
+
+    B --> E["Fit Feature Pipeline and CatBoost"]
+    E --> F["Fit Isotonic Calibrator"]
+    F --> G["Calibrated Probabilities"]
+    G --> H["Select Threshold Using Defined Error Costs"]
+
+    C --> F
+    D --> H
+
+    H --> I["Freeze Model, Calibrator, and Threshold"]
+    I --> J["Evaluate on Untouched Holdout"]
+    J --> K["Performance and Calibration"]
+    J --> L["Subgroup Error Analysis"]
+    J --> M["Patient-Clustered Bootstrap"]
+
+
 ---
 
 ## Data Provenance & Access
