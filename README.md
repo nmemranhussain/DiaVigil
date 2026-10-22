@@ -143,7 +143,7 @@ A reproducibility manifest records the presence, file sizes, and SHA-256 hashes 
 
 These checks support reproducibility and traceability within the tested workflow. They do not independently establish the correctness of every modeling decision or guarantee identical results across all software environments.
 
-
+```
 flowchart TD
     A["Development Cohort"] --> B["Training Partition"]
     A --> C["Calibration Partition"]
@@ -162,7 +162,7 @@ flowchart TD
     J --> K["Performance and Calibration"]
     J --> L["Subgroup Error Analysis"]
     J --> M["Patient-Clustered Bootstrap"]
-
+```
 
 ---
 
