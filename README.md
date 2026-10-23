@@ -774,7 +774,7 @@ DiaVigil is organized into modular Jupyter notebooks covering cohort constructio
 ### Notebook Inventory
 
 ```text
-notebooks/
+notebooks / 
 ├── 01_diavigil_cohort_filtering_and_group_split.ipynb
 │   └── Cohort construction, target definition, and patient-level data splitting
 ├── 02_diavigil_clinical_feature_engineering_pipeline.ipynb
