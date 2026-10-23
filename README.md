@@ -146,7 +146,6 @@ These checks support reproducibility and traceability within the tested workflow
 ## Architectural Workflow
 
 ```mermaid
-
 flowchart TD
     A["Development Cohort"] --> B["Training Partition"]
     A --> C["Calibration Partition"]
@@ -165,7 +164,6 @@ flowchart TD
     J --> K["Performance and Calibration"]
     J --> L["Subgroup Error Analysis"]
     J --> M["Patient-Clustered Bootstrap"]
-
 ---
 
 ## Data Provenance & Access
