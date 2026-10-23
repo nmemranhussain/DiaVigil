@@ -310,6 +310,80 @@ DiaVigil therefore treats model performance as a set of related measures rather 
 
 ---
 
+## Calibration and Subgroup Fairness Analysis
+
+### Probability Calibration
+
+Probability calibration examines whether predicted readmission risks agree with observed outcome frequencies. For example, among encounters assigned a predicted risk of 10%, the observed outcome rate should be close to 10% if the probabilities are well calibrated.
+
+DiaVigil evaluates calibration using an equal-frequency, 10-bin analysis. Within each bin, the mean predicted risk is compared with the observed outcome rate. Expected calibration error (ECE) summarizes the weighted average absolute difference between these quantities.
+
+On the holdout cohort of 19,875 encounters, the revised model achieved an ECE of **0.00656**. This corresponds to a weighted average absolute difference of approximately 0.656 percentage points across the evaluated bins.
+
+Calibration describes the agreement between predicted probabilities and observed outcomes. It does not establish that the model identifies the patients who would benefit most from intervention or that using its predictions improves clinical outcomes.
+
+### False-Negative Rate by Age Group
+
+The subgroup audit examines false-negative rates (FNRs) across age groups. FNR measures the proportion of actual positive outcomes that the model fails to identify:
+
+`FNR = False Negatives / (False Negatives + True Positives)`
+
+The audit uses a minimum of 50 positive outcomes when calculating the observed FNR gap between groups. The following table presents the age groups that meet this requirement.
+
+| Age group | Positive outcomes | False negatives | FNR |
+|---|---:|---:|---:|
+| 30–40 | 89 | 51 | 57.30% |
+| 40–50 | 191 | 133 | 69.63% |
+| 50–60 | 341 | 220 | 64.52% |
+| 60–70 | 486 | 343 | 70.58% |
+| 70–80 | 603 | 407 | 67.50% |
+| 80–90 | 413 | 286 | 69.25% |
+| 90–100 | 58 | 48 | 82.76% |
+
+Among groups meeting the minimum-count requirement, the observed FNR ranged from 57.30% for ages 30–40 to 82.76% for ages 90–100, a difference of 25.46 percentage points.
+
+This difference identifies an area for further investigation. The oldest group's estimate is based on 58 positive outcomes, so uncertainty remains important. Groups with fewer than 50 positive outcomes were excluded from this particular gap calculation because their estimates may be less stable.
+
+### False-Negative Rate by Gender
+
+The audit compared observed FNRs across the two reported gender categories.
+
+| Group | Positive outcomes | False negatives | FNR |
+|---|---:|---:|---:|
+| Female | 1,188 | 802 | 67.51% |
+| Male | 1,052 | 722 | 68.63% |
+
+The observed FNR was 1.12 percentage points higher for the male group. This is a descriptive difference within the evaluated cohort. It does not establish equivalent model performance across all populations or prove that the model is fair across gender categories.
+
+### False-Negative Rate by Race
+
+The audit also examined FNRs across the available race categories. The primary gap calculation included only groups with at least 50 positive outcomes.
+
+| Group | Positive outcomes | False negatives | FNR |
+|---|---:|---:|---:|
+| African American | 417 | 285 | 68.35% |
+| Caucasian | 1,731 | 1,177 | 68.00% |
+
+The observed difference between these groups was approximately 0.35 percentage points, with a higher FNR for the African American group.
+
+Other race categories had fewer than 50 positive outcomes and were excluded from this minimum-count comparison. Their exclusion from the gap calculation does not mean that their results are unimportant; rather, estimates based on small numbers of positive outcomes require particular caution.
+
+The small observed difference between the two groups included in the comparison does not establish fairness across race categories. It also does not identify the causes of any differences in model performance.
+
+### Limitations and Interpretation
+
+The calibration and subgroup analyses have several limitations:
+
+- **Dataset dependence:** The results describe the evaluated holdout cohort and may differ in other healthcare settings.
+- **Small subgroup counts:** FNR estimates based on relatively few positive outcomes may be uncertain.
+- **Metric selection:** Similar FNRs do not establish fairness across other error measures, demographic groups, or clinical outcomes.
+- **Calibration versus clinical usefulness:** Agreement between predicted risks and observed outcome frequencies does not demonstrate that the predictions improve care.
+- **No causal conclusions:** Differences in observed error rates do not, by themselves, explain why the differences occur.
+
+DiaVigil uses these analyses to document model behavior, identify subgroup differences for further investigation, and report calibration and error patterns in the available data. Independent validation, additional uncertainty analysis, and clinical review would be required before drawing conclusions about clinical use.
+
+---
+
 ## Clinical Data Dictionary
 
 The DiaVigil pipeline ingests, filters, and transforms 50 raw attributes into structured clinical representations. Below is the specification of all primary cohort identifiers, administrative features, clinical biomarkers, and engineered ontologies.
