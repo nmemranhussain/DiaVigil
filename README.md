@@ -406,8 +406,6 @@ The saved simulation artifact contains three outputs:
 | 1,500 | 465 | 1,498.0 | 52.48 | 131 | 28.17% |
 | 3,000 | 879 | 2,997.5 | 91.15 | 224 | 25.48% |
 
-*Note: The values in the table follow the saved artifact's column definitions. The allocation-summary output reports nurse-hour budget, patients reached, hours utilized, expected readmissions averted, true readmissions caught, and cohort precision, respectively. The displayed values should be checked against the original dataframe before publication if copied into a formatted README table.*
-
 ### Capacity Frontier and Marginal Yield
 
 The capacity-frontier analysis estimates how outreach and potential readmission prevention change across a wider range of staffing budgets. In the saved results, estimated readmissions averted increase from approximately 9.91 at 200 nurse-hours to 135.08 at 5,000 nurse-hours.
@@ -432,9 +430,9 @@ The resource-allocation results depend on the assumptions used to estimate inter
 
 Further evaluation would require defensible intervention-effectiveness estimates, operational validation of staffing assumptions, and evidence from an appropriate external or prospective study.
 
-### Summary
+### Summary  
+The simulation provides a way to compare hypothetical staffing budgets and examine the relationship between outreach capacity and estimated readmission prevention. It supports resource-allocation analysis with the DiaVigil research prototype but does not establish clinical effectiveness or real world- cost savings.
 
-The simulation provides a way to compare hypothetical staffing budgets and examine the relationship between outreach capacity and estimated readmission prevention. It supports resource-allocation analysis within the DiaVigil research prototype but does not establish clinical effectiveness or real-world cost savings.
 ---
 
 ## Clinical Data Dictionary
