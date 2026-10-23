@@ -384,7 +384,7 @@ DiaVigil uses these analyses to document model behavior, identify subgroup diffe
 
 ---
 
-## 7. Resource-Allocation Simulation
+## Resource-Allocation Simulation
 
 DiaVigil includes a resource-allocation simulation to examine how different nursing-hour budgets may affect patient outreach and the estimated number of hospital readmissions potentially averted. The simulation uses model-derived risk estimates, assumed intervention effectiveness, and staffing constraints. Its outputs are estimates under the specified assumptions, not measurements of actual clinical outcomes.
 
@@ -435,6 +435,48 @@ The simulation provides a way to compare hypothetical staffing budgets and exami
 
 ---
 
+## AI-Agent Recommendation and Audit Workflow
+
+DiaVigil includes an AI-agent workflow that generates structured care-recommendation briefs using encounter data, readmission-risk predictions, and model-derived feature attributions. The workflow is intended to demonstrate how model outputs can be organized into recommendations and checked against predefined criteria.
+
+### Agent 1: Encounter Data Retrieval
+
+The first component identifies an encounter for review and supplies the information needed by the subsequent workflow. The demonstration selects a high-risk encounter from the evaluation data, falling back to the encounter with the highest predicted risk when no encounter exceeds the configured threshold.
+
+The available implementation uses saved evaluation predictions when the corresponding audit artifact exists. Otherwise, it computes predictions from the saved feature pipeline and probability calibrator. The encounter is then passed to the agent workflow for further processing.
+
+### Agent 2: Risk Inference and Feature Attribution
+
+The second component obtains the encounter's estimated readmission risk and identifies features contributing to the model's prediction. The workflow uses the saved feature-engineering pipeline, probability calibrator, and decision threshold. Local TreeSHAP attributions are used to identify risk-related and protective features.
+
+These attributions provide information about the model's prediction; they do not establish causal relationships between individual features and readmission outcomes.
+
+### Agent 3: Structured Recommendation Generation
+
+The third component generates a structured brief containing the encounter identifier, estimated readmission risk, risk category, contributing and protective features, and proposed care directives.
+
+The brief follows a defined data structure so that its fields can be inspected and evaluated by the audit component. The generated directives are proposed recommendations, not independently validated clinical instructions.
+
+### Critic Audit and Pass/Reject Evaluation
+
+A separate critic evaluates whether the generated directives are supported by the model-derived risk information. The saved demonstration contains two examples:
+
+- **Accepted example:** The audit passed, with three care directives reported as grounded in verified risk drivers.
+- **Rejected example:** The audit failed because the directives referenced clinical factors that were unsupported by the local TreeSHAP attributions. The saved audit notes indicate that regeneration was required.
+
+These examples demonstrate the intended pass/reject behavior for the tested cases. They do not establish that every unsupported statement will be detected or that rejected recommendations are automatically regenerated.
+
+### Limitations
+
+The agent workflow is a research demonstration. Passing the critic's checks does not establish that a recommendation is clinically correct, safe, complete, or appropriate for a particular patient. TreeSHAP attributions explain model behavior rather than clinical causation, and the audit depends on the criteria implemented in the critic.
+
+Further evaluation would be needed to measure the reliability of recommendation generation, the critic's ability to detect unsupported claims, and the effectiveness of any regeneration process. Clinical review and human oversight would be required before considering use in patient care.
+
+### Summary
+
+DiaVigil demonstrates a workflow that connects encounter-level risk estimation, local feature attribution, structured recommendation generation, and a pass/reject audit. The saved examples provide evidence of both accepted and rejected outputs, while the system's clinical accuracy and safety remain unvalidated.
+
+---
 ## Clinical Data Dictionary
 
 The DiaVigil pipeline ingests, filters, and transforms 50 raw attributes into structured clinical representations. Below is the specification of all primary cohort identifiers, administrative features, clinical biomarkers, and engineered ontologies.
