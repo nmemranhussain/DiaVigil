@@ -62,7 +62,117 @@ The underlying cohort is derived from the **Diabetes 130-US Hospitals (1999–20
 * **Distribution Mirror:** [Kaggle Dataset Mirror (Brandão, Ph.D.)](https://www.kaggle.com/datasets/brandao/diabetes)
 
 For local replication, place the source files (`diabetic_data.csv` and `IDs_mapping.csv`) into the `data/raw/` directory prior to running `01_diavigil_cohort_filtering_and_group_split.ipynb`.
+---
+## Clinical Data Dictionary
 
+DiaVigil uses encounter-level data from the Diabetes 130-US Hospitals dataset to study hospital readmission-risk prediction. The data include demographic information, diagnoses, diabetes medication records, laboratory-related results, and healthcare-utilization measures. The project derives additional features from these fields for model training, evaluation, subgroup analysis, and the AI-agent demonstration.
+
+This dictionary describes the principal variables used in the current workflow. The exact columns retained in each processed dataset may differ from those in the original source files.
+
+### 1. Identifiers and Outcome
+
+| Variable | Description | Role |
+|---|---|---|
+| `encounter_id` | Identifier for an individual hospital encounter. | Record identification |
+| `patient_nbr` | Identifier used to associate encounters with the same patient. | Patient grouping and leakage prevention |
+| `target` | Binary outcome label used for readmission-risk classification. | Prediction target |
+
+**Outcome-definition note:** The precise mapping from the original `readmitted` field to `target` must be documented from the cohort-preparation code. Confirm whether the positive class represents readmission within 30 days and how other readmission categories are handled before publishing the final definition.
+
+The identifiers are retained for cohort construction, evaluation, and patient-level grouping. They are excluded from the model's predictor matrix.
+
+### 2. Demographic and Diagnostic Variables
+
+| Variable | Description | Use in DiaVigil |
+|---|---|---|
+| `age` | Age category recorded in the source dataset. | Subgroup false-negative-rate analysis |
+| `gender` | Gender category recorded in the source dataset. | Subgroup analysis |
+| `race` | Race category recorded in the source dataset, including an unknown category where present. | Subgroup analysis |
+| `diag_1` | Primary diagnosis code recorded for the encounter. | Comorbidity feature engineering |
+| `diag_2` | Secondary diagnosis code recorded for the encounter. | Comorbidity feature engineering |
+| `diag_3` | Additional diagnosis code recorded for the encounter. | Comorbidity feature engineering |
+
+Diagnosis codes are processed using selected ICD-9 code patterns to derive binary comorbidity indicators. These indicators are computational features, not independent clinical diagnoses.
+
+### 3. Healthcare Utilization and Encounter Variables
+
+| Variable | Description | Use in DiaVigil |
+|---|---|---|
+| `time_in_hospital` | Number of days spent in the hospital during the encounter. | Feature engineering |
+| `number_outpatient` | Number of recorded outpatient visits in the source data. | Utilization feature |
+| `number_emergency` | Number of recorded emergency visits in the source data. | Utilization feature |
+| `number_inpatient` | Number of recorded inpatient visits in the source data. | Utilization feature |
+| `num_medications` | Number of medications recorded for the encounter. | Encounter feature engineering |
+| `num_lab_procedures` | Number of laboratory procedures recorded for the encounter. | Encounter feature engineering |
+| `A1Cresult` | Recorded HbA1c result category, such as `Norm`, `>7`, `>8`, or `None`. | Glycemic-status feature engineering |
+
+The project also uses other source variables retained by the preprocessing pipeline. Their definitions and permitted values should be documented if they are included in the final model's input schema.
+
+### 4. Derived Clinical Features
+
+The feature-engineering pipeline derives the following variables from the source data.
+
+| Derived variable | Definition |
+|---|---|
+| `elix_congestive_heart_failure` | Binary indicator based on selected ICD-9 code patterns for congestive heart failure. |
+| `elix_cardiac_arrhythmias` | Binary indicator based on selected ICD-9 code patterns for cardiac arrhythmias. |
+| `elix_valvular_disease` | Binary indicator based on selected ICD-9 code patterns for valvular disease. |
+| `elix_pulmonary_circulation` | Binary indicator based on selected ICD-9 code patterns for pulmonary circulation disorders. |
+| `elix_peripheral_vascular` | Binary indicator based on selected ICD-9 code patterns for peripheral vascular disease. |
+| `elix_hypertension_uncomplicated` | Binary indicator based on selected ICD-9 code patterns for uncomplicated hypertension. |
+| `elix_hypertension_complicated` | Binary indicator based on selected ICD-9 code patterns for complicated hypertension. |
+| `elix_diabetes_complicated` | Binary indicator based on selected ICD-9 code patterns for complicated diabetes. |
+| `elix_renal_failure` | Binary indicator based on selected ICD-9 code patterns for renal failure. |
+| `elix_fluid_electrolyte` | Binary indicator based on selected ICD-9 code patterns for fluid and electrolyte disorders. |
+| `elix_chronic_pulmonary` | Binary indicator based on selected ICD-9 code patterns for chronic pulmonary disease. |
+| `elix_coagulopathy` | Binary indicator based on selected ICD-9 code patterns for coagulopathy. |
+| `total_elixhauser_burden` | Sum of the 12 binary comorbidity indicators above. |
+| `healthcare_utilization_index` | Weighted utilization measure: outpatient visits + 2 × emergency visits + 3 × inpatient visits. |
+| `active_diabetes_med_count` | Count of diabetes medication fields whose recorded value is not `No`. |
+| `dosage_titration_count` | Count of diabetes medication fields recorded as `Up` or `Down`. |
+| `on_insulin` | Binary indicator set to 1 when the insulin field is not recorded as `No`; otherwise 0. |
+| `encounter_severity_index` | Derived measure calculated as hospital days × medication count ÷ (laboratory procedure count + 1). |
+| `glycemic_status_code` | Encoded HbA1c category: `None` → 0, `Norm` → 1, and `>7` or `>8` → 2. |
+
+**Interpretation notes:**
+
+- These engineered variables are operational definitions implemented in the project code. They should not automatically be interpreted as validated clinical severity scores.
+- `total_elixhauser_burden` counts the indicators produced by this implementation; it is not necessarily equivalent to a validated comorbidity index.
+- The utilization index uses project-defined weights rather than empirically validated resource costs.
+- The `glycemic_status_code` combines the `>7` and `>8` categories. The `None` category is also mapped to zero, so the resulting feature does not distinguish an unrecorded result from a normal result.
+- Medication changes and counts describe recorded medication fields; they do not independently establish treatment adherence or clinical appropriateness.
+
+### 5. Model and AI-Agent Output Fields
+
+These fields are generated during prediction or the agent-audit workflow. They are not original clinical measurements.
+
+| Variable | Description |
+|---|---|
+| `readmission_risk` | Calibrated model-estimated probability of the project's positive outcome. |
+| `risk_tier` | Risk category assigned by the agent workflow. |
+| `primary_risk_drivers` | Features with positive local TreeSHAP attributions selected for the encounter brief. |
+| `protective_factors` | Features with negative local TreeSHAP attributions selected for the encounter brief. |
+| `synthesized_care_directives` | Proposed care recommendations generated by the agent workflow. |
+| `critic_audit_passed` | Boolean flag indicating whether the generated brief passed the implemented audit checks. |
+| `critic_audit_notes` | Text describing the audit decision or recorded reason for rejection. |
+
+The calibrated risk is a model estimate, not a clinical diagnosis. TreeSHAP attributions describe the model's behavior and do not establish causal relationships. Passing the critic audit does not establish that a proposed recommendation is clinically correct or safe.
+
+### 6. Cohort Construction and Data Handling
+
+The project begins with 101,766 source encounters. The documented cohort-preparation workflow removes 2,423 encounters under its configured discharge-disposition exclusion rules, producing a sanitized cohort of 99,343 encounters across 70,442 unique patients.
+
+The development and holdout partitions are constructed using patient-grouped splitting to prevent encounters from the same patient from appearing across those partitions. The reserved holdout contains 19,875 encounters and is used for final evaluation rather than model fitting, probability calibration, or decision-threshold selection.
+
+The exact outcome construction, exclusion rules, missing-value handling, and category encodings should be documented alongside the corresponding preprocessing code.
+
+### 7. Scope and Limitations
+
+This dictionary describes the variables and transformations documented in the current DiaVigil workflow. It is not a complete dictionary for every column in the original dataset.
+
+The source data represent hospital encounters from 1999–2008. Variable definitions, coding conventions, and missingness patterns should be considered when interpreting results. Further documentation should identify the precise target-label mapping, all retained model inputs, and any preprocessing differences between the raw, development, and holdout datasets.
+
+DiaVigil is a research prototype. Neither the data dictionary nor the derived features establish clinical validity, fairness, or readiness for use in patient care.
 
 ---
 
@@ -575,80 +685,7 @@ The next stage of DiaVigil should focus on clarifying cohort construction, stren
 
 
 ---
-## Clinical Data Dictionary
 
-The DiaVigil pipeline ingests, filters, and transforms 50 raw attributes into structured clinical representations. Below is the specification of all primary cohort identifiers, administrative features, clinical biomarkers, and engineered ontologies.
-
-### 1. Cohort Identifiers & Ground Truth Target
-
-| Feature Name | Source / Stage | Data Type | Permissible Values / Domain | Clinical & Architectural Role |
-| :--- | :--- | :--- | :--- | :--- |
-| `encounter_id` | Raw (`diabetic_data.csv`) | Integer | Unique identifier | Primary key for distinct hospital inpatient admissions. |
-| `patient_nbr` | Raw (`diabetic_data.csv`) | Integer | Unique identifier | **Group Splitting Key:** Used by `StratifiedGroupKFold` to isolate patient longitudinal trajectories and prevent identity leakage across train/test splits. |
-| `readmitted` | Raw (`diabetic_data.csv`) | String | `<30`, `>30`, `NO` | Raw multi-class administrative discharge readmission indicator. |
-| `readmitted_30d` | Notebook `01` | Binary (`int64`) | `1` ($<30$ days), `0` (else) | **Primary Target:** Binary label indicating unplanned readmission within the 30-day CMS HRRP penalty window. Baseline prevalence: **11.28%**. |
-
----
-
-### 2. Patient Demographics & Fairness Audit Attributes
-
-| Feature Name | Source / Stage | Data Type | Permissible Values / Domain | Clinical & Architectural Role |
-| :--- | :--- | :--- | :--- | :--- |
-| `age` | Raw (`diabetic_data.csv`) | Categorical | `[0-10)`, `[10-20)`, ..., `[90-100)` | 10-year age bins. Evaluated in Notebook `04` to audit algorithmic disparity (revealed a **0.5056 FNR gap**). |
-| `gender` | Raw (`diabetic_data.csv`) | Categorical | `Female`, `Male` | Biological sex indicator (records with `Unknown/Invalid` dropped during initial filtering). Audited for sex parity (**0.84% FNR delta**). |
-| `race` | Raw (`diabetic_data.csv`) | Categorical | `Caucasian`, `AfricanAmerican`, `Hispanic`, `Asian`, `Other`, `?` | Self-reported racial demographic identifier. Missing values preserved as explicit category `?`. |
-
----
-
-### 3. Healthcare Utilization & Inpatient Dynamics
-
-| Feature Name | Source / Stage | Data Type | Permissible Values / Domain | Clinical & Architectural Role |
-| :--- | :--- | :--- | :--- | :--- |
-| `time_in_hospital` | Raw (`diabetic_data.csv`) | Integer | $1 - 14$ days | Total length of stay (LOS) during index hospital admission. |
-| `num_lab_procedures` | Raw (`diabetic_data.csv`) | Integer | $\ge 1$ | Total count of diagnostic laboratory tests performed during encounter. |
-| `num_procedures` | Raw (`diabetic_data.csv`) | Integer | $\ge 0$ | Total count of non-lab operational/clinical procedures performed. |
-| `num_medications` | Raw (`diabetic_data.csv`) | Integer | $\ge 1$ | Total distinct pharmaceutical agents administered during hospitalization. |
-| `number_outpatient` | Raw (`diabetic_data.csv`) | Integer | $\ge 0$ | Outpatient clinic visits in the 12-month period preceding the index encounter. |
-| `number_emergency` | Raw (`diabetic_data.csv`) | Integer | $\ge 0$ | Emergency department encounters in the 12-month period preceding admission. |
-| `number_inpatient` | Raw (`diabetic_data.csv`) | Integer | $\ge 0$ | Inpatient admissions in the preceding 12 months (identified as a top TreeSHAP risk driver). |
-| `number_diagnoses` | Raw (`diabetic_data.csv`) | Integer | $1 - 16$ | Total clinical diagnostic billing codes entered into the encounter chart. |
-
----
-
-### 4. Diagnostic Ontologies: Quan's Elixhauser Comorbidity Vectors
-
-Extracted in Notebook `02` using vectorized regular expressions applied across primary and secondary diagnostic fields (`diag_1`, `diag_2`, `diag_3`):
-
-| Feature Name | Clinical Entity | ICD-9 Mapping Logic | Architectural Significance |
-| :--- | :--- | :--- | :--- |
-| `elix_chf` | Congestive Heart Failure | `398.91`, `402.01-402.91`, `404.01-404.93`, `428.*` | Indicator of underlying cardiac compromise. |
-| `elix_cardiac_arrhythmias` | Cardiac Arrhythmias | `426.0-426.13`, `426.7`, `427.0-427.9` | Electrical conduction dysfunction marker. |
-| `elix_valvular_disease` | Valvular Disease | `093.2`, `394.0-397.9`, `424.0-424.99` | Structural cardiac pathology indicator. |
-| `elix_pulmonary_circ` | Pulmonary Circulation Disorders | `415.0-415.19`, `416.0-417.9` | Pulmonary arterial hypertension index. |
-| `elix_peripheral_vascular` | Peripheral Vascular Disease | `093.0`, `437.3`, `440.0-441.9`, `443.1-443.9` | Macrovascular complication risk vector. |
-| `elix_hypertension` | Hypertension (Combined) | `401.1-405.99` | Essential and secondary hypertensive disease. |
-| `elix_paralysis` | Paralysis / Plegia | `334.1`, `342.0-344.9`, `438.2-438.5` | Neurological immobility comorbidity marker. |
-| `elix_neuro_other` | Other Neurological Disorders | `331.9-333.9`, `340.*`, `345.0-345.9` | Cognitive/degenerative neurological conditions. |
-| `elix_chronic_pulmonary` | Chronic Pulmonary Disease | `416.8-416.9`, `490.*-505.*`, `506.4` | COPD, asthma, and chronic restrictive lung disease. |
-| `elix_diabetes_uncomplicated` | Diabetes without Complication | `250.00 - 250.33` | Baseline diabetic endocrine pathology. |
-| `elix_diabetes_complicated` | Diabetes with End-Organ Damage | `250.40 - 250.93` | Nephropathy, retinopathy, and neuropathy (top TreeSHAP risk driver). |
-| `elix_renal_failure` | Renal Failure / CKD | `403.01-404.93`, `585.0-586.*`, `V42.0` | Chronic kidney disease and end-stage renal illness. |
-| `total_elixhauser_burden` | Cumulative Comorbidity Index | $\sum (\text{Elixhauser Binary Flags})$ | Multi-morbid disease burden score ($0 - 12$). |
-
----
-
-### 5. Glycemic Biomarkers & Pharmacotherapy Dynamics
-
-| Feature Name | Source / Stage | Data Type | Permissible Values / Domain | Clinical & Architectural Role |
-| :--- | :--- | :--- | :--- | :--- |
-| `A1Cresult` | Raw (`diabetic_data.csv`) | Categorical | `None`, `Norm`, `>7`, `>8` | Categorical glycated hemoglobin ($HbA1c$) lab monitoring indicator. |
-| `max_glu_serum` | Raw (`diabetic_data.csv`) | Categorical | `None`, `Norm`, `>200`, `>300` | Point-of-care or laboratory glucose serum reading. |
-| `insulin` | Raw (`diabetic_data.csv`) | Categorical | `No`, `Steady`, `Up`, `Down` | Subcutaneous insulin administration and acute hospital titration pattern. |
-| `change` | Raw (`diabetic_data.csv`) | Categorical | `Ch`, `No` | Indicates whether any diabetic medication regimen was modified during admission. |
-| `diabetesMed` | Raw (`diabetic_data.csv`) | Categorical | `Yes`, `No` | Indicates whether patient was discharged on any antidiabetic pharmacotherapy. |
-| `active_med_count` | Notebook `02` | Integer | $0 - 23$ | Count of distinct concurrent oral and injectable antidiabetic agents prescribed. |
-
----
 
 ## Methodological Contributions & Empirical Findings
 
