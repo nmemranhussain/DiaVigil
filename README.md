@@ -146,47 +146,25 @@ These checks support reproducibility and traceability within the tested workflow
 ## Architectural Workflow
 
 ```mermaid
+
 flowchart TD
-    subgraph Dev["1. Cohort Partitioning"]
-        A["Development Cohort"]
-        B["Training Partition"]
-        C["Calibration Partition"]
-        D["Threshold-Selection Partition"]
+    A["Development Cohort"] --> B["Training Partition"]
+    A --> C["Calibration Partition"]
+    A --> D["Threshold-Selection Partition"]
 
-        A --> B
-        A --> C
-        A --> D
-    end
+    B --> E["Fit Feature Pipeline and CatBoost"]
+    E --> F["Fit Isotonic Calibrator"]
+    F --> G["Calibrated Probabilities"]
+    G --> H["Select Threshold Using Defined Error Costs"]
 
-    subgraph Train["2. Training & Calibration"]
-        E["Fit Feature Pipeline and CatBoost"]
-        F["Fit Isotonic Calibrator"]
-        G["Calibrated Probabilities"]
-        H["Select Threshold Using Defined Error Costs"]
-        I["Freeze Model, Calibrator, and Threshold"]
-
-        E --> F
-        F --> G
-        G --> H
-        H --> I
-    end
-
-    subgraph Eval["3. Holdout Evaluation"]
-        J["Evaluate on Untouched Holdout"]
-        K["Performance and Calibration"]
-        L["Subgroup Error Analysis"]
-        M["Patient-Clustered Bootstrap"]
-
-        J --> K
-        J --> L
-        J --> M
-    end
-
-    B --> E
     C --> F
     D --> H
-    I --> J
-```
+
+    H --> I["Freeze Model, Calibrator, and Threshold"]
+    I --> J["Evaluate on Untouched Holdout"]
+    J --> K["Performance and Calibration"]
+    J --> L["Subgroup Error Analysis"]
+    J --> M["Patient-Clustered Bootstrap"]
 
 ---
 
