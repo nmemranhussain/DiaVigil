@@ -384,6 +384,59 @@ DiaVigil uses these analyses to document model behavior, identify subgroup diffe
 
 ---
 
+## 7. Resource-Allocation Simulation
+
+DiaVigil includes a resource-allocation simulation to examine how different nursing-hour budgets may affect patient outreach and the estimated number of hospital readmissions potentially averted. The simulation uses model-derived risk estimates, assumed intervention effectiveness, and staffing constraints. Its outputs are estimates under the specified assumptions, not measurements of actual clinical outcomes.
+
+### Simulation Setup
+
+The workflow evaluates allocation scenarios with different nursing-hour budgets and estimates the number of patients reached, nursing hours utilized, and readmissions potentially averted. It also examines the marginal estimated yield associated with additional nursing hours.
+
+The saved simulation artifact contains three outputs:
+
+- **Allocation summary:** Compares selected nursing-hour budgets and reports patients reached, hours utilized, expected readmissions averted, true readmissions caught, and cohort precision.
+- **Capacity frontier:** Evaluates 25 nursing-hour budgets, ranging from 200 to 5,000 hours, to examine how patient outreach and estimated readmissions averted change as capacity increases.
+- **Monte Carlo bounds:** Records the simulated mean estimate and its associated uncertainty bounds under the configured assumptions.
+
+### Selected Resource-Allocation Results
+
+| Nurse-hour budget | Patients reached | Hours utilized | Expected readmissions averted | True readmissions caught | Cohort precision |
+|---:|---:|---:|---:|---:|---:|
+| 500 | 176 | 499.8 | 21.35 | 64 | 36.36% |
+| 1,500 | 465 | 1,498.0 | 52.48 | 131 | 28.17% |
+| 3,000 | 879 | 2,997.5 | 91.15 | 224 | 25.48% |
+
+*Note: The values in the table follow the saved artifact's column definitions. The allocation-summary output reports nurse-hour budget, patients reached, hours utilized, expected readmissions averted, true readmissions caught, and cohort precision, respectively. The displayed values should be checked against the original dataframe before publication if copied into a formatted README table.*
+
+### Capacity Frontier and Marginal Yield
+
+The capacity-frontier analysis estimates how outreach and potential readmission prevention change across a wider range of staffing budgets. In the saved results, estimated readmissions averted increase from approximately 9.91 at 200 nurse-hours to 135.08 at 5,000 nurse-hours.
+
+The estimated marginal yield declines as the budget increases. For example, the saved output reports approximately 3.91 additional estimated readmissions averted per 100 nurse-hours at the 400-hour point, compared with approximately 2.07 at the 5,000-hour point. This pattern suggests diminishing marginal yield within the simulation.
+
+These estimates describe the behavior of the configured allocation model. They do not establish that increasing nursing hours in a real hospital would produce the same outcomes.
+
+### Monte Carlo Results
+
+The saved simulation artifact reports the following summary:
+
+- **Mean estimated readmissions averted:** 231.55
+- **Lower uncertainty bound:** 228.06
+- **Upper uncertainty bound:** 235.12
+
+These bounds reflect the simulation's assumptions and implementation. They should not be interpreted as a clinical confidence interval or as evidence of realized reductions in readmissions.
+
+### Limitations
+
+The resource-allocation results depend on the assumptions used to estimate intervention effectiveness, the risk model's predictions, and the available staffing capacity. The simulation does not independently demonstrate that an intervention prevents readmissions, that the allocation strategy improves patient outcomes, or that a hospital would achieve financial savings.
+
+Further evaluation would require defensible intervention-effectiveness estimates, operational validation of staffing assumptions, and evidence from an appropriate external or prospective study.
+
+### Summary
+
+The simulation provides a way to compare hypothetical staffing budgets and examine the relationship between outreach capacity and estimated readmission prevention. It supports resource-allocation analysis within the DiaVigil research prototype but does not establish clinical effectiveness or real-world cost savings.
+---
+
 ## Clinical Data Dictionary
 
 The DiaVigil pipeline ingests, filters, and transforms 50 raw attributes into structured clinical representations. Below is the specification of all primary cohort identifiers, administrative features, clinical biomarkers, and engineered ontologies.
