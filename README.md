@@ -518,6 +518,59 @@ Reproducing the full workflow would require access to the necessary source noteb
 
 DiaVigil includes a manifest-based record of its saved artifacts, recorded software versions, SHA-256 hashes, and selected cross-artifact consistency checks. All 15 listed artifacts passed the documented integrity verification, and all 18 Step 28C consistency checks passed. These results support artifact traceability and consistency within the tested workflow, while full end-to-end reproducibility remains a separate requirement.
 
+---
+
+
+## Limitations and Future Work
+
+DiaVigil provides a research prototype for evaluating hospital readmission-risk prediction, decision thresholds, subgroup errors, resource allocation, and AI-generated care-recommendation briefs. Several limitations remain before the findings can support conclusions about clinical usefulness or application in other healthcare settings.
+
+### Dataset and Cohort Definition
+
+The project uses the Diabetes 130-US Hospitals dataset, which describes hospital encounters from 1999–2008. The age of the data limits the conclusions that can be drawn about current patient populations and healthcare practices.
+
+Further work should document the target definition, encounter eligibility criteria, exclusion rules, patient-level partitioning, and data-processing steps. Cohort counts should also be reconciled across the notebooks and reported consistently in the README.
+
+### Model Evaluation and Selection
+
+The revised model increased recall and reduced the false-negative rate on the evaluated holdout cohort, but it also produced more false positives and had lower PR-AUC and ROC-AUC than the original baseline. The paired patient-clustered bootstrap supported differences in recall and ROC-AUC, while the PR-AUC, Brier-score, and estimated-cost intervals included zero.
+
+Future experiments should specify the primary evaluation metric and decision objective in advance. The assumed costs assigned to false positives and false negatives should be justified for the intended decision-support setting rather than treated as established clinical or financial values.
+
+### Probability Calibration
+
+The project evaluates calibration using the Brier score and expected calibration error (ECE). These measures describe aspects of agreement between predicted probabilities and observed outcomes, but their interpretation depends on the evaluation procedure and data.
+
+Further work should include calibration plots, uncertainty estimates, and complementary calibration measures. Evaluation on an independent cohort would help determine whether the observed calibration results hold beyond the current dataset.
+
+### Subgroup Error Analysis
+
+The subgroup audit found variation in false-negative rates across age groups and differences across race and gender categories. Some groups have relatively few positive outcomes, making their error-rate estimates uncertain.
+
+Future analysis should report subgroup sample sizes and uncertainty intervals alongside the observed rates. Any proposed fairness interventions should be evaluated for their effects on overall performance and subgroup errors. The current descriptive comparisons do not establish the cause of the observed differences or prove that the model is fair or unfair in every relevant setting.
+
+### AI-Agent Recommendation and Audit Workflow
+
+The AI-agent component demonstrates structured recommendation generation and a critic that accepts one example and rejects another containing unsupported claims. These examples show the intended behavior for the tested cases, but they do not establish the reliability of the audit across a broader range of encounters or failure conditions.
+
+Further work should test additional cases, measure how often unsupported claims are detected, assess the consistency of generated recommendations, and evaluate failure handling. Feature-attribution-based checks should not be treated as proof of clinical correctness. Clinical review and human oversight would be necessary before considering use in patient care.
+
+### Resource-Allocation Simulation
+
+The resource-allocation component estimates patient outreach and potentially averted readmissions under specified intervention-effectiveness and staffing assumptions. These are simulated estimates, not observed reductions in readmissions.
+
+Future work should justify the intervention-effectiveness assumptions, examine alternative staffing constraints, and evaluate the sensitivity of results to changes in those assumptions. Operational or financial benefits should not be claimed without appropriate real-world evidence.
+
+### External Validation and Reproducibility
+
+The current results come from the available dataset and its held-out evaluation cohort. They do not establish generalizability to other hospitals or patient populations. The artifact-integrity and consistency checks also do not demonstrate that the entire workflow can be reproduced from raw data in a clean environment.
+
+A future study should use a genuinely independent cohort, where access and permissions allow, with a predefined evaluation plan. A clean-environment rerun, documented dependencies, and clear execution instructions would further support independent reproduction of the workflow.
+
+### Summary
+
+The next stage of DiaVigil should focus on clarifying cohort construction, strengthening evaluation procedures, quantifying subgroup uncertainty, testing the AI-agent audit more broadly, validating simulation assumptions, and assessing performance on independent data. These steps would provide stronger evidence for evaluating the prototype while keeping its current findings separate from claims of clinical effectiveness or deployment readiness.
+
 
 ---
 ## Clinical Data Dictionary
