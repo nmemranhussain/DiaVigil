@@ -801,114 +801,61 @@ The workflow may depend on source data, saved artifacts, software versions, conf
 
 ---
 
-## Limitations and Future Work
+# Limitations and Future Work
 
-DiaVigil provides a research prototype for evaluating hospital readmission-risk prediction, decision thresholds, subgroup errors, resource allocation, and AI-generated care-recommendation briefs. Several limitations remain before the findings can support conclusions about clinical usefulness or application in other healthcare settings.
+DiaVigil is a research prototype for evaluating hospital readmission risk prediction, probability calibration, decision thresholds, subgroup errors, resource-allocation strategies, and AI-generated care recommendations. Its results provide a reproducible basis for methodological investigation but do not establish clinical effectiveness, operational readiness, or generalizability to other healthcare settings.
 
-### Dataset and Cohort Definition
+## Dataset and Cohort Definition
 
-The project uses the Diabetes 130-US Hospitals dataset, which describes hospital encounters from 1999–2008. The age of the data limits the conclusions that can be drawn about current patient populations and healthcare practices.
+The project uses the UCI Diabetes 130-US Hospitals dataset, which contains hospital encounters from 1999–2008. Its historical setting limits the extent to which findings can be generalized to contemporary clinical practice, coding conventions, treatment patterns, and patient populations.
 
-Further work should document the target definition, encounter eligibility criteria, exclusion rules, patient-level partitioning, and data-processing steps. Cohort counts should also be reconciled across the notebooks and reported consistently in the README.
+The available structured data also omit potentially important determinants of readmission, including medication affordability, food security, transportation access, and health literacy. The categorical representation of glycated hemoglobin (`A1Cresult`) limits the analysis of granular glycemic variation. In addition, the dataset may not capture out-of-hospital mortality or readmissions to non-participating facilities, potentially limiting the completeness of observed outcomes.
 
-### Model Evaluation and Selection
+Future work should document the cohort construction and outcome definition in greater detail, evaluate the effects of missing information, and validate the workflow using more recent, independent data.
 
-The revised model increased recall and reduced the false-negative rate on the evaluated holdout cohort, but it also produced more false positives and had lower PR-AUC and ROC-AUC than the original baseline. The paired patient-clustered bootstrap supported differences in recall and ROC-AUC, while the PR-AUC, Brier-score, and estimated-cost intervals included zero.
+## Model Evaluation and Selection
 
-Future experiments should specify the primary evaluation metric and decision objective in advance. The assumed costs assigned to false positives and false negatives should be justified for the intended decision-support setting rather than treated as established clinical or financial values.
+The revised model increased recall from 29.15% to 31.96% and reduced false negatives from 1,587 to 1,524 on the evaluated holdout cohort. However, it also produced more false positives and lower PR-AUC and ROC-AUC than the baseline model. The paired patient-clustered bootstrap analysis did not establish a statistically distinguishable improvement in the principal discrimination metrics or the project's assumed classification cost.
 
-### Probability Calibration
+These findings illustrate the trade-offs associated with model selection and decision-threshold changes. Future experiments should define the intended decision-support objective in advance, justify the assumed costs of false-positive and false-negative predictions, and evaluate whether the observed trade-offs are appropriate for that objective.
 
-The project evaluates calibration using the Brier score and expected calibration error (ECE). These measures describe aspects of agreement between predicted probabilities and observed outcomes, but their interpretation depends on the evaluation procedure and data.
+## Probability Calibration
 
-Further work should include calibration plots, uncertainty estimates, and complementary calibration measures. Evaluation on an independent cohort would help determine whether the observed calibration results hold beyond the current dataset.
+The project evaluates probability calibration using the Brier score and expected calibration error (ECE). These metrics describe agreement between predicted probabilities and observed outcome frequencies in the evaluated cohort, but they do not establish that the predictions improve clinical decisions.
 
-### Subgroup Error Analysis
+Future work should include calibration plots, uncertainty estimates, complementary calibration metrics, and evaluation on an independent cohort to assess whether calibration performance generalizes beyond the current dataset.
 
-The subgroup audit found variation in false-negative rates across age groups and differences across race and gender categories. Some groups have relatively few positive outcomes, making their error-rate estimates uncertain.
+## Subgroup Error Analysis
 
-Future analysis should report subgroup sample sizes and uncertainty intervals alongside the observed rates. Any proposed fairness interventions should be evaluated for their effects on overall performance and subgroup errors. The current descriptive comparisons do not establish the cause of the observed differences or prove that the model is fair or unfair in every relevant setting.
+The subgroup audit examines false-negative rates across available age groups, gender categories, and race categories. The observed differences identify areas for further investigation, but some subgroup estimates are based on relatively few positive outcomes and may therefore be uncertain.
 
-### AI-Agent Recommendation and Audit Workflow
+Future analysis should report subgroup sample sizes and uncertainty intervals alongside observed error rates, investigate the stability of the results across independent cohorts, and evaluate proposed fairness interventions against both overall performance and subgroup outcomes. Subgroup comparisons alone do not establish the cause of observed disparities or demonstrate that the model is fair or unfair in every relevant setting.
 
-The AI-agent component demonstrates structured recommendation generation and a critic that accepts one example and rejects another containing unsupported claims. These examples show the intended behavior for the tested cases, but they do not establish the reliability of the audit across a broader range of encounters or failure conditions.
+## AI-Agent Recommendation and Audit Workflow
 
-Further work should test additional cases, measure how often unsupported claims are detected, assess the consistency of generated recommendations, and evaluate failure handling. Feature-attribution-based checks should not be treated as proof of clinical correctness. Clinical review and human oversight would be necessary before considering use in patient care.
+DiaVigil includes a multi-agent workflow that generates structured care-recommendation briefs and checks whether proposed directives are supported by model-derived feature attributions. The saved demonstration includes an accepted example and a rejected example containing unsupported claims. These examples demonstrate the intended behavior for the tested cases, but they do not establish the reliability of recommendation generation or the critic's ability to detect all unsupported statements.
 
-### Resource-Allocation Simulation
+Future work should evaluate a broader range of encounters and failure conditions, measure the frequency of unsupported recommendations, and assess the consistency of audit decisions. Stronger rule-based or formal constraint verification could be explored to supplement the existing attribution-grounding checks. Clinical review and human oversight would remain necessary before any consideration of patient-care use.
 
-The resource-allocation component estimates patient outreach and potentially averted readmissions under specified intervention-effectiveness and staffing assumptions. These are simulated estimates, not observed reductions in readmissions.
+## Resource-Allocation Simulation
 
-Future work should justify the intervention-effectiveness assumptions, examine alternative staffing constraints, and evaluate the sensitivity of results to changes in those assumptions. Operational or financial benefits should not be claimed without appropriate real-world evidence.
+The resource-allocation component estimates patient outreach and potentially averted readmissions under specified intervention-effectiveness and staffing assumptions. Its outputs describe the behavior of the configured simulation; they are not observed reductions in readmissions or demonstrated hospital savings.
 
-### External Validation and Reproducibility
+Future work should justify the intervention-effectiveness assumptions, test alternative staffing constraints and allocation strategies, and evaluate the sensitivity of the results to uncertain inputs. Operational or financial benefits should not be claimed without appropriate empirical evidence.
 
-The current results come from the available dataset and its held-out evaluation cohort. They do not establish generalizability to other hospitals or patient populations. The artifact-integrity and consistency checks also do not demonstrate that the entire workflow can be reproduced from raw data in a clean environment.
+## External Validation and Reproducibility
 
-A future study should use a genuinely independent cohort, where access and permissions allow, with a predefined evaluation plan. A clean-environment rerun, documented dependencies, and clear execution instructions would further support independent reproduction of the workflow.
+The current findings are based on the available dataset and its reserved holdout cohort. The reproducibility manifest and artifact-integrity checks support traceability of the saved artifacts, while the documented consistency checks support the specific relationships tested within the workflow. These checks do not independently establish clinical validity or guarantee that the entire project can be reproduced from raw data in a clean environment.
 
-### Summary
+Future work should evaluate the workflow on an independent, contemporary cohort and document the dependencies, configuration settings, data-access requirements, and execution procedures needed for a clean-environment reproduction. If supported by appropriate data governance and clinical partnerships, integration with healthcare interoperability standards such as HL7 FHIR could be explored as a separate future development.
 
-The next stage of DiaVigil should focus on clarifying cohort construction, strengthening evaluation procedures, quantifying subgroup uncertainty, testing the AI-agent audit more broadly, validating simulation assumptions, and assessing performance on independent data. These steps would provide stronger evidence for evaluating the prototype while keeping its current findings separate from claims of clinical effectiveness or deployment readiness.
+## AI Assistance Disclosure
 
----
+Generative AI tools were used to assist with development tasks such as code refactoring, boilerplate generation, and Markdown formatting. The project uses conventional machine-learning and explainability components for risk prediction, probability calibration, and feature attribution, while the AI-agent workflow organizes and audits proposed recommendations. This disclosure describes the assistance used during development; it does not replace documentation of the actual implementation or independent verification of experimental results.
 
-## Quickstart & Execution Protocol
+## Summary
 
-### 1. Repository Setup & Dependencies
-Clone the repository and install the verified core dependencies for local environments:
-
-```bash
-git clone https://github.com/nmemranhussain/DiaVigil.git
-cd DiaVigil
-pip install pandas numpy scikit-learn catboost optuna netcal shap pydantic joblib pyarrow
-```
-### 2. Sequential Pipeline Replication
-
-Execute the notebooks in strict numerical order to preserve feature artifact states and prevent data leakage:
-
-1. **`notebooks/01_diavigil_cohort_filtering_and_group_split.ipynb`**
-   - Ingests raw UCI 130-US Hospitals data, excludes CMS HRRP discharge dispositions (codes 11, 19, 20, 21), and creates group-partitioned Parquet files (`dev_cohort.parquet` and `audit_test_cohort.parquet`) clustered on `patient_nbr`.
-2. **`notebooks/02_diavigil_clinical_feature_engineering_pipeline.ipynb`**
-   - Extracts Quan's Elixhauser Comorbidity Index patterns via vectorized regex, constructs pharmacotherapy complexity metrics, and serializes `feature_engineering_pipeline.joblib`.
-3. **`notebooks/03_diavigil_nested_cv_and_probability_calibration.ipynb`**
-   - Fits `CatBoostClassifier` via nested group cross-validation, executes post-hoc Isotonic Calibration (reducing ECE to 0.0000), optimizes $\tau^* = 0.1620$ via asymmetric cost-loss matrices, and serializes `model_calibration_artifacts.joblib`.
-4. **`notebooks/04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb`**
-   - Performs frozen evaluation on the 19,875-encounter holdout test partition, compiling demographic audit tables and quantifying the 0.5056 False Negative Rate gap across age bands.
-5. **`notebooks/05_diavigil_agentic_triage_and_faithfulness_critic.ipynb`**
-   - Initializes the 3-agent clinical triage pipeline, registers Pydantic schemas, and validates the deterministic TreeSHAP Critic Gate against grounded vs. hallucinated clinical summaries.
-6. **`notebooks/06_diavigil_dynamic_resource_allocation_simulation.ipynb`**
-   - Executes 1,000-trial Monte Carlo stochastic efficacy sampling and runs bounded knapsack optimization to generate hospital nurse-hour allocation frontiers.
-
----
-
-## Technical & Data Limitations
-- **Historical EHR Distribution:** The UCI Diabetes dataset spans hospital encounters from 1999 to 2008. Practice patterns, clinical guidelines (such as SGLT2i/GLP-1 RA adoption), and billing coding practices have evolved significantly since this cohort was collected.
-- **Censoring and Out-of-Hospital Mortality:** The dataset tracks inpatient readmissions to participating clinical centers but does not record out-of-hospital mortality or admissions to non-participating hospital systems, introducing potential informative right-censoring.
-- **Unmeasured Social Determinants of Health (SDOH):** Clinical readmission risk is heavily driven by post-discharge environmental factors (e.g., medication affordability, food security, transportation access, and health literacy) that are not captured in structured administrative discharge summaries.
-- **Coarse Glycemic Monitoring:** Glycated hemoglobin (`A1Cresult`) is recorded categorically (`None`, `Norm`, `>7`, `>8`) rather than as continuous clinical laboratory values, limiting the model's ability to capture granular glycemic volatility.
-
----
-
-## AI Disclosure & Academic Integrity
-
-In alignment with emerging guidelines for ethical AI in scientific computing and biomedical research:
-* **System Architecture:** Large Language Models utilized within DiaVigil are strictly restricted to downstream decision support and summary synthesis; all risk scores, probability calibrations, and feature attributions are computed deterministically via Scikit-Learn, CatBoost, and TreeSHAP.
-* **Development Assistance:** Generative AI tools (e.g., Google Gemini) were utilized for code refactoring, script boilerplate generation, and Markdown syntax formatting.
-* **Intellectual Ownership:** All experimental designs, cohort partitioning logic (`StratifiedGroupKFold`), comorbidity ontology mappings, calibration experiments, fairness audit analyses, and research hypotheses were conceptualized, directed, and verified by the author.
-
----
-
-## Future Research Directions
-
-1. **Multiobjective Demographic-Specific Threshold Optimization ($\tau_g^*$):**
-   - Formulate a constrained optimization framework (e.g., Pareto-frontier optimization) to derive subgroup-specific decision cutoffs ($\tau_{\text{age}}^*$). The objective is to enforce Equal Opportunity by equalizing False Negative Rates between younger and geriatric cohorts without exceeding hospital care-management bed and staffing capacities.
-2. **Longitudinal State-Space Modeling on EHR Trajectories:**
-   - Transition from cross-sectional static encounter aggregations to continuous-time, structured state-space models (e.g., Mamba / S4) to model irregular temporal trajectories of inpatient glucose readings, vital sign instability, and medication titrations over sequential admissions.
-3. **Formal Verification of Agentic Clinical Synthesis:**
-   - Extend the deterministic Critic Gate beyond local TreeSHAP attribution matching to formal constraint-satisfaction solvers and automated theorem proving (e.g., SMT solvers). This will mathematically verify that LLM-generated clinical triage plans comply strictly with established clinical practice guidelines (e.g., ADA Standards of Medical Care in Diabetes).
-4. **Translational Scalability & FHIR Interoperability:**
-   - Transition the parameterized retriever into an asynchronous HL7 FHIR (Fast Healthcare Interoperability Resources) endpoint capable of subscribing to discharge notifications (`Encounter/discharged`), streaming inference in real time, and depositing calibrated risk estimates directly back into clinical EHR workflows.
+DiaVigil demonstrates a research workflow that connects readmission risk prediction with calibration, decision-threshold analysis, subgroup auditing, resource-allocation simulation, AI-generated recommendations, and artifact management. Its findings highlight performance trade-offs and areas requiring further investigation. The next stage should prioritize independent validation, uncertainty-aware subgroup analysis, stronger recommendation auditing, sensitivity analysis of simulation assumptions, and improved end-to-end reproducibility before any claims of clinical effectiveness or deployment readiness are considered.
 
 ---
 
