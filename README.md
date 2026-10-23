@@ -259,13 +259,12 @@ The evaluation examined discrimination, probability error, classification perfor
 | Brier score | 0.0962 | 0.0961 |
 | Precision | 23.81% | 22.42% |
 | Recall | 29.15% | 31.96% |
-| False-positive rate of predicted cases* | 11.85% | 14.05% |
+| False-positive rate | 11.85% | 14.05% |
 | False positives | 2,089 | 2,478 |
 | False negatives | 1,587 | 1,524 |
 | False-negative rate | 70.85% | 68.04% |
 
-\*False-positive rate conventionally means false positives divided by all actual negative cases. The counts above are reported directly to avoid confusing this metric with the proportion of predicted positives that are false.
-
+\*False-positive rate (FPR) = FP / (FP + TN), representing the proportion of actual negative cases incorrectly classified as positive.
 The revised model used a selected decision threshold of approximately **0.1620** and an assumed classification cost of 1 for a false positive and 5 for a false negative.
 
 ### Interpretation of the Results
@@ -291,7 +290,7 @@ A paired patient-clustered bootstrap with 1,000 valid replicates was used to est
 
 \*Calculated using the project's assumed false-positive and false-negative costs.
 
-The paired analysis indicates that the recall increase and false-negative-rate reduction were statistically distinguishable from zero under this bootstrap procedure. The ROC-AUC decrease was also distinguishable from zero. The confidence intervals for PR-AUC, Brier score, and estimated cost per 1,000 encounters included zero.
+The paired analysis indicates that the recall increase and false-negative-rate reduction were *the 95% bootstrap confidence interval excludes zero* under this bootstrap procedure. The ROC-AUC decrease was also distinguishable from zero. The confidence intervals for PR-AUC, Brier score, and estimated cost per 1,000 encounters included zero.
 
 These comparisons do not establish that the revised model is universally preferable. Model selection depends on the intended use, the relative consequences of each error type, and the validity of the assumed cost structure.
 
@@ -305,11 +304,11 @@ Calibration and subgroup analyses are reported as evaluation results for this da
 
 ### Summary
 
-On the evaluated holdout cohort, the revised model traded some discrimination and precision for higher recall and fewer false negatives. The paired bootstrap supported the observed recall improvement, but did not establish a reduction in the project's estimated classification cost.
+On the evaluated holdout cohort, the revised model traded some discrimination and precision for higher recall and fewer false negatives. *The paired bootstrap confidence interval for the recall difference excluded zero*, but did not establish a reduction in the project's estimated classification cost.
 
 DiaVigil therefore treats model performance as a set of related measures rather than relying on a single score. Further validation on an independent cohort, review of the assumed error costs, and assessment of clinical and operational requirements are necessary before drawing conclusions about clinical use.
 
-
+---
 
 ## Clinical Data Dictionary
 
