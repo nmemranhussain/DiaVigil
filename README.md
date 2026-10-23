@@ -632,6 +632,41 @@ DiaVigil includes a manifest-based record of its saved artifacts, recorded softw
 
 ---
 
+## Repository Structure & Reproducibility Guide
+
+The codebase is organized into modular Google Colab notebooks that execute sequentially without intermediate data loss:
+
+```text
+├── notebooks/
+|   ├── 00_DiaVigil_Reproducibility_Audit.ipynb
+│   ├── 01_diavigil_cohort_filtering_and_group_split.ipynb
+│   │   └── CMS HRRP filtering, target definition, and leak-free StratifiedGroupKFold partitioning.
+│   │
+│   ├── 02_diavigil_clinical_feature_engineering_pipeline.ipynb
+│   │   └── Elixhauser comorbidity mappings, utilization indices, and ColumnTransformer assembly.
+│   │
+│   ├── 03_diavigil_nested_cv_and_probability_calibration.ipynb
+│   │   └── Inner group cross-validation, CatBoost training, Isotonic calibration, and tau* optimization.
+│   │
+│   ├── 04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb
+│   │   └── Frozen out-of-sample evaluation on 19,875 encounters with Age, Gender, and Race audits.
+│   │
+│   ├── 05_diavigil_agentic_triage_and_faithfulness_critic.ipynb
+│   │   └── Local TreeSHAP attribution, Pydantic contracts, and automated Critic Gate verification.
+│   │
+│   └── 06_diavigil_dynamic_resource_allocation_simulation.ipynb
+│       └── 1,000-trial Monte Carlo simulation and bounded knapsack capacity frontiers.
+│
+├── data/
+│   ├── raw/                  # UCI 130-US Hospitals Diabetes dataset (immutable)
+│   └── processed/            # Parquet cohorts (dev/audit test) and serialized joblib artifacts
+│
+├── LICENSE                   # MIT Open-Source Academic License
+└── README.md                 # System specification and empirical research findings
+```
+
+---
+
 ## Limitations and Future Work
 
 DiaVigil provides a research prototype for evaluating hospital readmission-risk prediction, decision thresholds, subgroup errors, resource allocation, and AI-generated care-recommendation briefs. Several limitations remain before the findings can support conclusions about clinical usefulness or application in other healthcare settings.
@@ -684,38 +719,6 @@ The next stage of DiaVigil should focus on clarifying cohort construction, stren
 
 ---
 
-## Repository Structure & Reproducibility Guide
-
-The codebase is organized into modular Google Colab notebooks that execute sequentially without intermediate data loss:
-
-```text
-├── notebooks/
-│   ├── 01_diavigil_cohort_filtering_and_group_split.ipynb
-│   │   └── CMS HRRP filtering, target definition, and leak-free StratifiedGroupKFold partitioning.
-│   │
-│   ├── 02_diavigil_clinical_feature_engineering_pipeline.ipynb
-│   │   └── Elixhauser comorbidity mappings, utilization indices, and ColumnTransformer assembly.
-│   │
-│   ├── 03_diavigil_nested_cv_and_probability_calibration.ipynb
-│   │   └── Inner group cross-validation, CatBoost training, Isotonic calibration, and tau* optimization.
-│   │
-│   ├── 04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb
-│   │   └── Frozen out-of-sample evaluation on 19,875 encounters with Age, Gender, and Race audits.
-│   │
-│   ├── 05_diavigil_agentic_triage_and_faithfulness_critic.ipynb
-│   │   └── Local TreeSHAP attribution, Pydantic contracts, and automated Critic Gate verification.
-│   │
-│   └── 06_diavigil_dynamic_resource_allocation_simulation.ipynb
-│       └── 1,000-trial Monte Carlo simulation and bounded knapsack capacity frontiers.
-│
-├── data/
-│   ├── raw/                  # UCI 130-US Hospitals Diabetes dataset (immutable)
-│   └── processed/            # Parquet cohorts (dev/audit test) and serialized joblib artifacts
-│
-├── LICENSE                   # MIT Open-Source Academic License
-└── README.md                 # System specification and empirical research findings
-```
----
 ## Quickstart & Execution Protocol
 
 ### 1. Repository Setup & Dependencies
