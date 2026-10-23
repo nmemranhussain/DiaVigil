@@ -861,26 +861,25 @@ DiaVigil demonstrates a research workflow that connects readmission risk predict
 
 ## Citation & Attribution
 
-If you utilize the DiaVigil architecture or build upon these findings, please cite both the project repository and the primary data publication:
+If you use the DiaVigil codebase, adapt its methodology, or refer to its reported findings, please cite the project repository and the relevant original data sources.
+
+### DiaVigil Project
 
 ```bibtex
 @misc{hussain2026diavigil,
-  author = {Hussain, N M Emran},
-  title = {Project DiaVigil: Calibrated Machine Learning, Algorithmic Fairness Auditing, and Grounded Multi-Agent Decision Support for Diabetic Readmission Risk},
-  year = {2026},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {https://github.com/nmemranhussain/DiaVigil}
-}
-
-@article{strack2014diabetes,
-  author = {Strack, Beata and DeShazo, Jonathan P. and Gennings, Chris and Olmo, Juan L. and Ventura, Sebasti{\'a}n and Cios, Krzysztof J. and Clore, John N.},
-  title = {Impact of HbA1c Measurement on Hospital Readmission Rates: Analysis of 70,000 Clinical Database Patient Records},
-  journal = {BioMed Research International},
-  volume = {2014},
-  pages = {781670},
-  year = {2014},
-  publisher = {Hindawi},
-  doi = {10.1155/2014/781670}
+  author       = {Hussain, N M Emran},
+  title        = {Project DiaVigil: Calibrated Machine Learning,
+                  Algorithmic Fairness Auditing, and Grounded
+                  Multi-Agent Decision Support},
+  year         = {2026},
+  publisher    = {GitHub},
+  howpublished = {\url{https://github.com/nmemranhussain/DiaVigil}}
 }
 ```
+
+### Underlying Dataset and Research
+
+- **Dataset:** UCI Machine Learning Repository, *Diabetes 130-US Hospitals for Years 1999–2008*. Cite the dataset record when using or discussing the underlying data.
+- **Related publication:** Strack, B., DeShazo, J. P., Gennings, C., et al. (2014). *Impact of HbA1c Measurement on Hospital Readmission Rates: Analysis of 70,000 Clinical Database Patient Records*. *BioMed Research International*. https://doi.org/10.1155/2014/781670
+
+Please distinguish the original dataset and published research from DiaVigil's own implementation, experiments, and findings. The project is a research prototype, and its results require independent validation before clinical conclusions can be drawn.
