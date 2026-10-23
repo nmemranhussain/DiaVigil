@@ -28,6 +28,141 @@ On a holdout cohort of 19,875 encounters, the baseline model achieved a precisio
 - **Current status:** Research prototype requiring further validation.
 ---
 
+
+## Quickstart & Execution Protocol
+
+This section describes how to set up DiaVigil, prepare the required data, execute the analytical workflow, and verify the generated artifacts. DiaVigil is organized into six analytical notebooks and one reproducibility-audit notebook.
+
+### 1. Repository Setup & Dependencies
+
+Clone the repository and install the core Python dependencies in a suitable environment.
+
+```bash
+git clone https://github.com/nmemranhussain/DiaVigil.git
+cd DiaVigil
+
+python -m venv .venv
+```
+
+Activate the environment before installing dependencies.
+
+**macOS/Linux:**
+
+```bash
+source .venv/bin/activate
+```
+
+**Windows PowerShell:**
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Install the packages used by the workflow:
+
+```bash
+python -m pip install --upgrade pip
+pip install pandas numpy scikit-learn catboost optuna netcal shap pydantic joblib pyarrow
+```
+
+For reproducible execution, use the project's verified dependency specification when available. The command above installs packages but does not guarantee that every package version matches the environment used to generate the reported results.
+
+### 2. Data Preparation & Artifact Requirements
+
+DiaVigil uses the Diabetes 130-US Hospitals dataset covering hospital encounters from 1999–2008.
+
+Before executing the workflow:
+
+- Obtain the dataset from the documented source in the **Data Provenance & Access** section.
+- Place the required source files, including `diabetic_data.csv` and `IDs_mapping.csv`, in the expected `data/raw/` directory.
+- Review the data-processing and cohort-selection logic before generating derived datasets.
+- Confirm that the required directories exist and that the environment has permission to read and write the relevant files.
+
+The notebooks generate intermediate datasets and serialized model artifacts under the project's configured data directories. Later stages depend on outputs created by earlier stages; therefore, a fresh checkout should not be assumed to contain all required generated artifacts.
+
+### 3. Notebook Execution Order
+
+Execute the six analytical notebooks in numerical order. Each notebook performs a distinct stage of the research workflow.
+
+**Step 1 — Cohort Filtering and Group Split**
+
+`notebooks/01_diavigil_cohort_filtering_and_group_split.ipynb`
+
+Constructs the analytical cohort, defines the target outcome, applies the documented exclusion criteria, and creates development and holdout partitions using patient-level grouping to reduce leakage across encounters belonging to the same patient.
+
+**Step 2 — Clinical Feature Engineering**
+
+`notebooks/02_diavigil_clinical_feature_engineering_pipeline.ipynb`
+
+Builds the clinical feature-transformation pipeline, including comorbidity-related features and medication and healthcare-utilization indicators, and saves the fitted or configured feature-engineering artifact.
+
+**Step 3 — Model Development and Probability Calibration**
+
+`notebooks/03_diavigil_nested_cv_and_probability_calibration.ipynb`
+
+Trains and evaluates the classification model, performs the documented validation and probability-calibration procedures, and selects a decision threshold under the specified error-cost assumptions. The notebook saves the model and calibration artifacts required by downstream stages.
+
+**Step 4 — Holdout Evaluation and Subgroup Audit**
+
+`notebooks/04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb`
+
+Evaluates the selected model on the reserved holdout cohort, reports classification and calibration metrics, and examines subgroup error rates across the available demographic categories. Patient-clustered bootstrap analysis is used where implemented to quantify uncertainty in selected comparisons.
+
+**Step 5 — AI-Agent Recommendation and Audit Workflow**
+
+`notebooks/05_diavigil_agentic_triage_and_faithfulness_critic.ipynb`
+
+Demonstrates encounter-level risk retrieval, model-based feature attribution, structured recommendation generation, and critic-based checks of whether generated recommendations are grounded in the available model-related evidence.
+
+**Step 6 — Resource-Allocation Simulation**
+
+`notebooks/06_diavigil_dynamic_resource_allocation_simulation.ipynb`
+
+Simulates hypothetical resource-allocation scenarios under configured staffing and intervention-effectiveness assumptions. The workflow estimates patient outreach, potential readmissions averted, and the marginal yield of additional nursing hours.
+
+The simulation results are conditional estimates, not evidence that the same outcomes would occur in a real hospital.
+
+### 4. Reproducibility and Artifact Verification
+
+After generating the required artifacts, execute the reproducibility-audit notebook:
+
+`notebooks/00_DiaVigil_Reproducibility_Audit.ipynb`
+
+This notebook supports inspection of saved artifacts, recorded software-environment details, artifact metadata, and implemented consistency or integrity checks.
+
+The audit notebook is a verification stage rather than the first step of the analytical pipeline. Run it after its required inputs and artifacts are available.
+
+A successful artifact-integrity check confirms the tested properties of the checked files; it does not, by itself, establish that the complete workflow can be recreated from raw data in a clean environment.
+
+### 5. Expected Outputs
+
+Depending on the notebook and configuration, the workflow produces:
+
+- Development and holdout cohort datasets.
+- Feature-engineering and model-calibration artifacts.
+- Holdout evaluation and subgroup-audit results.
+- Model-comparison and uncertainty-analysis reports.
+- Resource-allocation simulation outputs.
+- Structured AI-agent demonstration artifacts.
+- A reproducibility manifest and associated verification results.
+
+Output filenames and locations should be confirmed against the corresponding notebook code and the project's current artifact configuration.
+
+### 6. Reproducibility Considerations
+
+For a reliable reproduction attempt:
+
+- Use the documented source data and exclusion criteria.
+- Preserve patient-level separation between development and holdout cohorts.
+- Follow the notebook dependency order.
+- Use compatible package versions and the documented configuration.
+- Verify that saved artifacts correspond to the intended dataset and model configuration.
+- Review notebook outputs and logs for errors before interpreting the results.
+
+**Research status:** DiaVigil is a research prototype for evaluating hospital readmission-risk prediction and related decision-support workflows. Its results do not independently establish clinical effectiveness, fairness in every relevant population, or readiness for deployment.
+
+
+---
 ## Research Motivation and Objectives
 
 ### Motivation
