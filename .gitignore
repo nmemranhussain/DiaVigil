@@ -216,5 +216,24 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+# DiaVigil: local source data
+# Obtain the source files separately; do not commit local copies.
+data/raw/
+
+# DiaVigil: generated datasets and serialized model artifacts
+# Remove these rules if you intentionally version these artifacts.
+data/processed/*.parquet
+data/processed/*.joblib
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+
+# Temporary notebook and analysis files
+.ipynb_checkpoints/
+*.tmp
+
+
 # Streamlit
 .streamlit/secrets.toml
