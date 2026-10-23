@@ -190,7 +190,7 @@ The overall objective is to establish a transparent and reproducible basis for e
 
 ## Data Provenance & Access
 
-The underlying cohort is derived from the **Diabetes 130-US Hospitals (1999–2008)** clinical database, encompassing 101,766 inpatient encounters across 130 hospital facilities:
+The source dataset is the **Diabetes 130-US Hospitals (1999–2008)** clinical database, containing 101,766 inpatient encounters across 130 hospital facilities. Following the exclusion of 1,652 encounters under the project's configured CMS-related discharge criteria, 100,114 encounters remained eligible for analysis. The eligible cohort was partitioned at the patient level into a development cohort of 80,239 encounters and an untouched holdout cohort of 19,875 encounters. No patient identifiers were shared between the two partitions.  
 
 * **Canonical Academic Archive:** [UCI Machine Learning Repository (DOI: 10.24432/C5230J)](https://doi.org/10.24432/C5230J)
 * **Foundational Publication:** [Strack et al. (2014), *BioMed Research International* (DOI: 10.1155/2014/781670)](https://doi.org/10.1155/2014/781670)
