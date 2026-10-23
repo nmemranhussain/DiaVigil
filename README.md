@@ -634,36 +634,35 @@ DiaVigil includes a manifest-based record of its saved artifacts, recorded softw
 
 ## Repository Structure & Reproducibility Guide
 
-The codebase is organized into modular Google Colab notebooks that execute sequentially without intermediate data loss:
+DiaVigil is organized into modular Jupyter notebooks covering cohort construction, clinical feature engineering, model development, probability calibration, subgroup evaluation, AI-agent recommendation auditing, and resource-allocation simulation.
+
+### Notebook Inventory
 
 ```text
-├── notebooks/
-|   ├── 00_DiaVigil_Reproducibility_Audit.ipynb
-│   ├── 01_diavigil_cohort_filtering_and_group_split.ipynb
-│   │   └── CMS HRRP filtering, target definition, and leak-free StratifiedGroupKFold partitioning.
-│   │
-│   ├── 02_diavigil_clinical_feature_engineering_pipeline.ipynb
-│   │   └── Elixhauser comorbidity mappings, utilization indices, and ColumnTransformer assembly.
-│   │
-│   ├── 03_diavigil_nested_cv_and_probability_calibration.ipynb
-│   │   └── Inner group cross-validation, CatBoost training, Isotonic calibration, and tau* optimization.
-│   │
-│   ├── 04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb
-│   │   └── Frozen out-of-sample evaluation on 19,875 encounters with Age, Gender, and Race audits.
-│   │
-│   ├── 05_diavigil_agentic_triage_and_faithfulness_critic.ipynb
-│   │   └── Local TreeSHAP attribution, Pydantic contracts, and automated Critic Gate verification.
-│   │
-│   └── 06_diavigil_dynamic_resource_allocation_simulation.ipynb
-│       └── 1,000-trial Monte Carlo simulation and bounded knapsack capacity frontiers.
-│
-├── data/
-│   ├── raw/                  # UCI 130-US Hospitals Diabetes dataset (immutable)
-│   └── processed/            # Parquet cohorts (dev/audit test) and serialized joblib artifacts
-│
-├── LICENSE                   # MIT Open-Source Academic License
-└── README.md                 # System specification and empirical research findings
+notebooks/
+├── 01_diavigil_cohort_filtering_and_group_split.ipynb
+│   └── Cohort construction, target definition, and patient-level data splitting
+├── 02_diavigil_clinical_feature_engineering_pipeline.ipynb
+│   └── Clinical feature engineering and transformation pipeline
+├── 03_diavigil_nested_cv_and_probability_calibration.ipynb
+│   └── Model training, cross-validation, probability calibration, and threshold selection
+├── 04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb
+│   └── Holdout evaluation and subgroup error analysis
+├── 05_diavigil_agentic_triage_and_faithfulness_critic.ipynb
+│   └── Structured recommendation generation and critic-based auditing
+├── 06_diavigil_dynamic_resource_allocation_simulation.ipynb
+│   └── Monte Carlo simulation and capacity-constrained resource allocation
+└── 00_DiaVigil_Reproducibility_Audit.ipynb
+    └── Artifact integrity and reproducibility checks
 ```
+
+### Execution and Reproducibility
+
+Run the analytical notebooks in their documented dependency order, beginning with cohort construction and continuing through feature engineering, model development, evaluation, recommendation auditing, and simulation.
+
+Run the reproducibility audit after the required artifacts have been generated. The audit notebook should be treated as a verification step rather than automatically as the first notebook to execute.
+
+The workflow may depend on source data, saved artifacts, software versions, configuration settings, and access to the required files. Successful execution of an individual notebook does not by itself establish end-to-end reproducibility.
 
 ---
 
