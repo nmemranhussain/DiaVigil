@@ -313,93 +313,134 @@ DiaVigil is a research prototype. Neither the data dictionary nor the derived fe
 
 ## Methodology and System Architecture
 
-DiaVigil follows a sequence of data preparation, model development, probability calibration, decision-threshold selection, holdout evaluation, and decision-support analysis. The workflow also includes resource-allocation simulation and an AI-agent component for generating and checking structured care recommendations.
+DiaVigil is a machine learning research prototype for hospital readmission risk prediction and decision-support evaluation. Its workflow covers clinical data preparation, feature engineering, model training, probability calibration, decision-threshold optimization, holdout evaluation, subgroup auditing, resource-allocation simulation, and AI-agent recommendation auditing.
+
+The workflow is designed to support transparent model evaluation and reproducible research. Its outputs represent experimental findings on a historical clinical dataset, not evidence of clinical effectiveness or readiness for deployment.
 
 ### 1. Data Preparation and Cohort Separation
 
-The project uses an encounter-level dataset containing clinical, medication, healthcare-utilization, and demographic information. The available data are divided into development and holdout cohorts.
+DiaVigil uses the UCI Diabetes 130-US Hospitals dataset, which contains 101,766 inpatient encounters recorded between 1999 and 2008. The cohort-construction workflow applies the configured CMS Hospital Readmissions Reduction Program (HRRP)-related exclusion criteria, removing 1,652 encounters associated with specified discharge dispositions.
 
-Within the development cohort, patient-grouped partitions are used to separate model training, probability calibration, and decision-threshold selection. Encounters belonging to the same patient are kept within the same partition to reduce the risk of patient-level information leakage.
+After these exclusions, the eligible cohort contains 100,114 encounters. Notebook 01 partitions this cohort into:
 
-The holdout cohort is reserved for final evaluation. It is not used to fit the model, calibrate its probabilities, or select its decision threshold.
+- **Development cohort:** 80,239 encounters used for model development and associated analyses.
+- **Untouched holdout cohort:** 19,875 encounters reserved for final evaluation.
+
+Patient-level grouping is used during the development/holdout split to prevent encounters belonging to the same patient from appearing in both partitions. The holdout cohort is excluded from model fitting and decision-threshold selection.
+
+Within the development cohort, Notebook 03 uses patient-grouped cross-validation to separate model fitting from internal validation. The current implementation fits the probability calibrator and selects the operating threshold using the internal validation fold. Because these operations use the same fold, the resulting internal calibration and threshold-optimization diagnostics should not be interpreted as independent estimates of generalization performance. The untouched holdout evaluation provides a separate assessment of the saved workflow.
 
 ### 2. Clinical Feature Engineering
 
-A custom feature-engineering transformer derives additional variables from the available encounter data. These include:
+DiaVigil implements a custom feature-engineering transformer that derives additional variables from the available encounter-level data. The current pipeline includes:
 
-- Comorbidity indicators derived from selected ICD-9 diagnosis codes.
-- A summary measure of Elixhauser comorbidity burden.
-- A healthcare-utilization index based on outpatient, emergency, and inpatient encounters.
-- Diabetes medication counts and indicators of medication dosage changes.
-- An insulin-use indicator.
-- An encounter-severity measure based on length of stay, medication count, and laboratory procedures.
-- A categorical code derived from the recorded HbA1c result.
+- **Comorbidity indicators:** Binary features derived from selected ICD-9 diagnosis codes using predefined Elixhauser-related mappings.
+- **Comorbidity burden:** A summary measure based on the derived comorbidity indicators.
+- **Healthcare utilization:** An index combining outpatient, emergency, and inpatient encounter counts.
+- **Medication complexity:** Counts of diabetes medications and indicators of medication changes based on recorded medication fields.
+- **Insulin use:** An indicator derived from the recorded insulin medication field.
+- **Encounter severity:** A constructed index based on length of hospital stay, medication count, and laboratory procedure count.
+- **Glycemic status:** A categorical numeric encoding of the recorded HbA1c result.
 
-The transformed features are passed to a preprocessing pipeline before model training and evaluation.
+The transformer is incorporated into a preprocessing pipeline so that feature construction can be applied consistently during training and inference.
+
+These variables are derived from the available administrative and clinical fields. They should not be interpreted as validated clinical severity scores or comprehensive measures of disease status.
 
 ### 3. Model Training
 
-DiaVigil uses CatBoost as its classification model. The current model configuration uses 400 boosting iterations, a learning rate of 0.05, a tree depth of 6, and balanced class weights.
+DiaVigil uses CatBoost as its primary classification algorithm to estimate the probability of a qualifying readmission outcome.
 
-Model training is performed using the training partition of the development cohort. The project also retains an earlier baseline model to support comparison with the revised workflow.
+The current model configuration uses:
+
+- Boosting iterations: 400
+- Learning rate: 0.05
+- Tree depth: 6
+- Class weighting: Balanced
+- Random seed: 42
+
+Model fitting is performed on the training portion of the development cohort within the patient-grouped validation workflow. The project also retains an earlier baseline model to support comparisons with the revised modeling approach.
+
+The model configuration and associated preprocessing pipeline are saved as research artifacts for subsequent evaluation. Performance is assessed using multiple metrics because no single metric fully characterizes the trade-offs involved in identifying potentially high-risk encounters.
 
 ### 4. Probability Calibration
 
-The model's predicted probabilities are calibrated using isotonic regression. Calibration is fitted using a separate calibration partition and a model fitted on the training partition.
+Probability calibration assesses whether predicted readmission probabilities agree with observed outcome frequencies. DiaVigil uses isotonic regression to calibrate the CatBoost model's predicted probabilities.
 
-Calibration is evaluated by comparing predicted risk with observed outcome frequencies across probability bins and by calculating the Brier score and expected calibration error (ECE).
+Calibration is evaluated using the Brier score and expected calibration error (ECE). ECE summarizes the weighted average absolute difference between mean predicted risks and observed outcome frequencies across probability bins.
 
-These measures assess the agreement between predicted probabilities and observed outcomes; they do not, by themselves, establish that using the predictions improves clinical decisions.
+During the internal validation run, Notebook 03 reported an uncalibrated ECE of 0.3289 and a calibrated ECE of 0.0000, rounded to four decimal places. However, the calibrator was fitted and evaluated on the same validation fold. These figures therefore describe the internal development-fold result and do not establish independent calibration performance on unseen encounters.
+
+The saved calibration artifact is subsequently used in the holdout evaluation workflow. Calibration performance should be interpreted using the results calculated on the untouched holdout cohort, alongside the Brier score and other predictive metrics.
+
+Good calibration does not, by itself, establish that a model ranks patients correctly, identifies those most likely to benefit from intervention, or improves clinical outcomes.
 
 ### 5. Decision-Threshold Selection
 
-A decision threshold is selected on a separate threshold-selection partition. The current implementation evaluates classification thresholds using an asymmetric cost function that assigns a higher cost to false negatives than to false positives.
-
-The configured costs are:
+DiaVigil selects an operating threshold by minimizing an explicitly configured classification-cost function. The current implementation assigns different penalties to false-positive and false-negative predictions:
 
 - False-positive cost (\(C_{FP}\)): 1
 - False-negative cost (\(C_{FN}\)): 5
 
-The selected threshold determines which encounters are classified as positive. Changing this threshold affects recall, precision, false-positive counts, and false-negative counts.
+Under this assumed cost structure, a missed positive outcome receives five times the penalty assigned to a false-positive prediction. The internal validation workflow reported an optimal decision threshold of approximately **0.1620**.
 
-These costs represent modeling assumptions and should not be interpreted as validated estimates of actual clinical or financial costs.
+The threshold determines which encounters are classified as positive. Lowering the threshold generally increases the number of encounters flagged as positive, potentially increasing recall while also increasing false-positive predictions. Raising it generally reduces the number flagged, potentially missing more positive outcomes.
+
+The reported threshold is an optimization result under the configured assumptions, not a clinically validated decision boundary. Because threshold optimization uses the same internal validation fold as calibration in the current implementation, its development-fold cost estimate may be optimistic. Independent evaluation is required to assess performance at the selected threshold.
 
 ### 6. Holdout Evaluation
 
-The selected model, calibrator, and threshold are evaluated on the reserved holdout cohort. The evaluation includes:
+The selected modeling workflow is evaluated on the untouched holdout cohort of 19,875 encounters. The holdout cohort is not used to fit the model or select the operating threshold.
 
-- Precision-recall area under the curve (PR-AUC).
-- Receiver operating characteristic area under the curve (ROC-AUC).
-- Brier score and calibration analysis.
-- Confusion matrix, precision, recall, and false-negative rate.
-- Subgroup error analysis across available age, gender, and race categories.
-- Patient-clustered bootstrap estimates of uncertainty in selected comparisons.
+The evaluation includes:
 
-The baseline and revised model are compared using the same holdout cohort. This comparison makes their measured performance differences easier to interpret, but it does not establish that either model will generalize to other healthcare settings.
+- **Discrimination:** Precision-recall area under the curve (PR-AUC) and receiver operating characteristic area under the curve (ROC-AUC).
+- **Probability error:** Brier score and calibration analysis.
+- **Classification performance:** Precision, recall, confusion-matrix counts, false-positive rate, and false-negative rate at the selected threshold.
+- **Subgroup evaluation:** Descriptive error-rate comparisons across available age, gender, and race categories.
+- **Uncertainty analysis:** Patient-clustered bootstrap estimates for selected differences between model evaluations.
+
+The baseline and revised models are evaluated on the same holdout cohort to facilitate paired comparisons. The results are interpreted across multiple metrics, including trade-offs between recall, precision, false-positive counts, false-negative counts, and discrimination.
+
+These comparisons describe performance on the available holdout cohort. They do not establish that the revised model is universally preferable or that either model will generalize to other hospitals, more recent patient populations, or prospective clinical workflows.
 
 ### 7. Resource-Allocation Simulation
 
-A Monte Carlo simulation examines how assumed intervention efficacy and available nursing hours affect resource allocation among high-risk encounters. The workflow estimates patients reached, expected readmissions potentially avoided, and uncertainty around the simulated estimates.
+DiaVigil includes a Monte Carlo simulation to examine how hypothetical intervention effectiveness and available nursing hours may affect resource allocation among encounters identified as high risk.
 
-A capacity-constrained allocation procedure also ranks candidates using an estimated efficiency measure based on expected readmissions potentially avoided per required nursing hour.
+The simulation evaluates scenarios under specified staffing budgets and intervention-effectiveness assumptions. Its outputs include estimated patients reached, nursing hours utilized, estimated readmissions potentially averted, simulated readmissions captured, and uncertainty bounds under the configured model.
 
-The results depend on the simulation assumptions, intervention-efficacy distribution, and resource constraints. They are estimates from a model, not observed clinical outcomes or demonstrated cost savings.
+A capacity-constrained allocation procedure also ranks candidates according to an estimated efficiency measure based on expected readmissions potentially averted per required nursing hour.
+
+These outputs are conditional on the risk predictions, assumed intervention-effectiveness distribution, staffing constraints, and allocation rules. They are simulation estimates rather than observed clinical outcomes, demonstrated intervention effects, or verified hospital cost savings.
 
 ### 8. AI-Agent Recommendation and Audit Workflow
 
-DiaVigil includes an AI-agent workflow that generates structured care-recommendation briefs from model-related information. The briefs contain fields for estimated readmission risk, risk tier, potential risk drivers, protective factors, and proposed care directives.
+DiaVigil includes an AI-agent workflow that generates structured care-recommendation briefs using encounter information, model-estimated readmission risk, and model-derived feature attributions.
 
-A separate audit component checks generated outputs against predefined criteria. The current demonstration includes an example that passes the checks and an example that is rejected.
+The workflow consists of three conceptual stages:
 
-These checks provide an initial assessment of output structure and specified requirements. Further evaluation is needed to establish factual accuracy, clinical appropriateness, consistency, and safety. The generated recommendations are not intended to replace clinician judgment.
+1. **Encounter data retrieval:** Retrieves the selected encounter's available information and relevant model outputs.
+2. **Risk inference and feature attribution:** Obtains the estimated risk and identifies model-associated risk and protective factors using the saved feature pipeline and TreeSHAP-based attribution.
+3. **Structured recommendation generation:** Produces a recommendation brief containing an encounter identifier, estimated risk, risk category, contributing features, and proposed care directives.
+
+A separate deterministic audit component checks generated outputs against predefined structural and grounding criteria. The current demonstration includes an accepted example and a rejected example containing unsupported claims.
+
+The audit checks provide evidence that the implemented rules can accept and reject the tested examples. They do not establish that all generated recommendations are factually correct, clinically appropriate, complete, or safe. Feature attributions describe model behavior and should not be interpreted as causal explanations of readmission.
+
+The AI-agent workflow is an experimental decision-support demonstration. Its outputs are not intended to replace clinician judgment, and clinical review and human oversight would be necessary before considering use in patient care.
 
 ### 9. Reproducibility and Artifact Management
 
-The workflow saves model artifacts, evaluation results, simulation outputs, and research audit reports for subsequent inspection. The project also includes consistency checks to verify selected relationships between saved labels, predictions, thresholds, calibration results, and evaluation artifacts.
+DiaVigil saves model artifacts, processed cohort files, evaluation outputs, simulation results, and research audit reports to support inspection of the completed workflow.
 
-A reproducibility manifest records the presence, file sizes, and SHA-256 hashes of key artifacts, along with the software environment versions recorded during the audit.
+The reproducibility manifest records selected software-environment details, artifact filenames, file sizes, and SHA-256 hashes. An integrity check confirmed that all 15 listed artifacts existed and matched their recorded file sizes and hashes at the time of verification.
 
-These checks support reproducibility and traceability within the tested workflow. They do not independently establish the correctness of every modeling decision or guarantee identical results across all software environments.
+The workflow also includes cross-artifact consistency checks for selected relationships among saved cohort labels, predictions, decision thresholds, calibration outputs, and evaluation results. The documented run reported that all 18 implemented consistency checks passed.
+
+These checks support artifact integrity and traceability within the tested workflow. They do not independently establish the correctness of every model prediction, the validity of the modeling assumptions, or the clinical usefulness of the results. Full end-to-end reproducibility would additionally require verification that the notebooks, source data, dependencies, configuration, and execution instructions can reproduce the workflow in a clean environment.
+
+
+---
 
 ## Architectural Workflow
 
