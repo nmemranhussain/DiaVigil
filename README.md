@@ -290,7 +290,7 @@ A paired patient-clustered bootstrap with 1,000 valid replicates was used to est
 
 \*Calculated using the project's assumed false-positive and false-negative costs.
 
-The paired analysis indicates that the recall increase and false-negative-rate reduction were *the 95% bootstrap confidence interval excludes zero* under this bootstrap procedure. The ROC-AUC decrease was also distinguishable from zero. The confidence intervals for PR-AUC, Brier score, and estimated cost per 1,000 encounters included zero.
+The paired analysis indicates that the 95% bootstrap confidence intervals for the recall increase and false-negative-rate reduction excluded zero. The ROC-AUC decrease was also distinguishable from zero. The confidence intervals for PR-AUC, Brier score, and estimated cost per 1,000 encounters included zero.
 
 These comparisons do not establish that the revised model is universally preferable. Model selection depends on the intended use, the relative consequences of each error type, and the validity of the assumed cost structure.
 
