@@ -241,6 +241,76 @@ For local replication, place the source files (`diabetic_data.csv` and `IDs_mapp
 
 ---
 
+## Experimental Results
+
+### Evaluation Setup
+
+The baseline and revised models were evaluated on the same untouched holdout cohort of **19,875 encounters**. The cohort was kept separate from model training, probability calibration, and decision-threshold selection. Both models were evaluated using their saved predictions and operating thresholds.
+
+The evaluation examined discrimination, probability error, classification performance, and the trade-off between false-positive and false-negative predictions.
+
+### Holdout Performance
+
+| Metric | Original baseline | Revised model |
+|---|---:|---:|
+| Holdout encounters | 19,875 | 19,875 |
+| PR-AUC | 0.2036 | 0.2013 |
+| ROC-AUC | 0.6641 | 0.6578 |
+| Brier score | 0.0962 | 0.0961 |
+| Precision | 23.81% | 22.42% |
+| Recall | 29.15% | 31.96% |
+| False-positive rate of predicted cases* | 11.85% | 14.05% |
+| False positives | 2,089 | 2,478 |
+| False negatives | 1,587 | 1,524 |
+| False-negative rate | 70.85% | 68.04% |
+
+\*False-positive rate conventionally means false positives divided by all actual negative cases. The counts above are reported directly to avoid confusing this metric with the proportion of predicted positives that are false.
+
+The revised model used a selected decision threshold of approximately **0.1620** and an assumed classification cost of 1 for a false positive and 5 for a false negative.
+
+### Interpretation of the Results
+
+The revised model increased recall from 29.15% to 31.96% and reduced false negatives from 1,587 to 1,524. This represents 63 fewer missed positive cases in the evaluated cohort.
+
+However, false positives increased from 2,089 to 2,478, while precision decreased from 23.81% to 22.42%. ROC-AUC also decreased from 0.6641 to 0.6578, and PR-AUC decreased from 0.2036 to 0.2013. The Brier score changed only slightly, from 0.096154 to 0.096093.
+
+These results indicate a change in the operating-point trade-off rather than a consistent improvement across all metrics.
+
+### Paired Patient-Clustered Bootstrap Analysis
+
+A paired patient-clustered bootstrap with 1,000 valid replicates was used to estimate uncertainty in the differences between the two models. Encounters belonging to the same patient were sampled together to account for repeated encounters within patients.
+
+| Metric difference (revised − baseline) | Estimate | 95% bootstrap confidence interval |
+|---|---:|---:|
+| PR-AUC | −0.00227 | [−0.00807, 0.00362] |
+| ROC-AUC | −0.00627 | [−0.01091, −0.00136] |
+| Brier score | −0.000061 | [−0.000411, 0.000276] |
+| Recall | +0.02813 | [+0.01543, +0.04162] |
+| False-negative rate | −0.02813 | [−0.04162, −0.01543] |
+| Cost per 1,000 encounters* | +3.72 | [−4.50, +11.75] |
+
+\*Calculated using the project's assumed false-positive and false-negative costs.
+
+The paired analysis indicates that the recall increase and false-negative-rate reduction were statistically distinguishable from zero under this bootstrap procedure. The ROC-AUC decrease was also distinguishable from zero. The confidence intervals for PR-AUC, Brier score, and estimated cost per 1,000 encounters included zero.
+
+These comparisons do not establish that the revised model is universally preferable. Model selection depends on the intended use, the relative consequences of each error type, and the validity of the assumed cost structure.
+
+### Calibration and Subgroup Evaluation
+
+The audit also examined agreement between predicted probabilities and observed outcome frequencies, as well as false-negative rates across available age, gender, and race categories. Patient-clustered bootstrap analysis was used to quantify uncertainty in selected subgroup comparisons.
+
+Subgroup estimates require particular caution when positive-outcome counts are small. Differences in observed error rates do not, by themselves, establish the cause of a disparity or demonstrate that a model is fair or unfair in every relevant sense.
+
+Calibration and subgroup analyses are reported as evaluation results for this dataset. They do not establish clinical usefulness, fairness in other populations, or improved patient outcomes.
+
+### Summary
+
+On the evaluated holdout cohort, the revised model traded some discrimination and precision for higher recall and fewer false negatives. The paired bootstrap supported the observed recall improvement, but did not establish a reduction in the project's estimated classification cost.
+
+DiaVigil therefore treats model performance as a set of related measures rather than relying on a single score. Further validation on an independent cohort, review of the assumed error costs, and assessment of clinical and operational requirements are necessary before drawing conclusions about clinical use.
+
+
+
 ## Clinical Data Dictionary
 
 The DiaVigil pipeline ingests, filters, and transforms 50 raw attributes into structured clinical representations. Below is the specification of all primary cohort identifiers, administrative features, clinical biomarkers, and engineered ontologies.
