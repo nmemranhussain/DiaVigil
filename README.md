@@ -147,23 +147,86 @@ These checks support reproducibility and traceability within the tested workflow
 
 ```mermaid
 flowchart TD
-    A["Development Cohort"] --> B["Training Partition"]
-    A --> C["Calibration Partition"]
-    A --> D["Threshold-Selection Partition"]
+    %% Styling
+    classDef data fill:#f8f9fa,stroke:#6c757d,color:#212529
+    classDef process fill:#e7f5ff,stroke:#1971c2,color:#1864ab
+    classDef model fill:#e6fcf5,stroke:#0ca678,color:#087f5b
+    classDef audit fill:#fff3bf,stroke:#f08c00,color:#a65d03
+    classDef agent fill:#f3f0ff,stroke:#7048e8,color:#5f3dc4
+    classDef gate fill:#ffe3e3,stroke:#e03131,color:#c92a2a
+    classDef ops fill:#ebfbee,stroke:#2b8a3e,color:#2b8a3e
 
-    B --> E["Fit Feature Pipeline and CatBoost"]
-    E --> F["Fit Isotonic Calibrator"]
-    F --> G["Calibrated Probabilities"]
-    G --> H["Select Threshold Using Defined Error Costs"]
+    subgraph DATA["1. Cohort Preparation"]
+        direction TB
+        A["Clinical Encounter Dataset"]:::data
+        B["Patient-Grouped Data Partitions"]:::process
+        C["Development Data"]:::process
+        D["Untouched Holdout Cohort"]:::audit
+        A --> B
+        B --> C
+        B --> D
+    end
 
-    C --> F
-    D --> H
+    subgraph ML["2. Model Training and Evaluation"]
+        direction TB
+        E["Clinical Feature Engineering"]:::process
+        F["CatBoost Classifier"]:::model
+        G["Isotonic Probability Calibration"]:::model
+        H["Cost-Based Threshold Selection"]:::model
+        I["Freeze Pipeline, Model and Threshold"]:::model
+        J["Holdout Performance and Calibration"]:::audit
+        K["Subgroup Error Analysis"]:::audit
+        L["Paired Patient-Clustered Bootstrap"]:::audit
 
-    H --> I["Freeze Model, Calibrator, and Threshold"]
-    I --> J["Evaluate on Untouched Holdout"]
-    J --> K["Performance and Calibration"]
-    J --> L["Subgroup Error Analysis"]
-    J --> M["Patient-Clustered Bootstrap"]
+        C --> E --> F --> G --> H --> I
+        I --> J
+        D --> J
+        J --> K
+        J --> L
+    end
+
+    subgraph AGENTS["3. Three-Agent Recommendation Workflow"]
+        direction TB
+        M["Agent 1: Structured Data Retriever<br/>Retrieve encounter information"]:::agent
+        N["Agent 2: ML Inference and TreeSHAP<br/>Estimate risk and identify feature contributions"]:::agent
+        O["Agent 3: Recommendation Synthesis<br/>Draft structured care recommendations<br/>using a Pydantic contract"]:::agent
+        P{"Deterministic Critic Gate<br/>Check structure and attribution grounding"}:::gate
+        Q["Accepted Triage Brief<br/>Critic checks passed"]:::model
+        R["Rejected Draft<br/>Record audit notes and revise"]:::gate
+
+        M --> N --> O --> P
+        P -->|Checks passed| Q
+        P -->|Checks failed| R
+        R -.->|Retry| O
+    end
+
+    I -.->|Saved model artifacts| N
+    A -.->|Encounter records| M
+
+    subgraph RESOURCE["4. Resource-Allocation Simulation"]
+        direction TB
+        S["Risk-Scored Cohort and Staffing Assumptions"]:::ops
+        T["Monte Carlo Simulation"]:::ops
+        U["Capacity-Constrained Allocation"]:::ops
+        V["Estimated Outcomes and Uncertainty"]:::ops
+
+        S --> T --> U --> V
+    end
+
+    I -.-> S
+    Q -.-> S
+
+    subgraph REPRO["5. Audit and Reproducibility"]
+        direction TB
+        W["Saved Predictions, Thresholds<br/>and Evaluation Results"]:::data
+        X["Artifact Consistency Checks<br/>and Reproducibility Manifest"]:::audit
+        W --> X
+    end
+
+    J -.-> W
+    K -.-> W
+    L -.-> W
+    P -.-> W
 ```
 
 ## Data Provenance & Access
