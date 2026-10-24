@@ -531,148 +531,132 @@ flowchart TD
 
 ## Experimental Results
 
-### Evaluation Setup
+### Holdout Model Comparison
 
-The baseline and revised models were evaluated on the same untouched holdout cohort of **19,875 encounters**. The cohort was kept separate from model training, probability calibration, and decision-threshold selection. Both models were evaluated using their saved predictions and operating thresholds.
+The original baseline and the Step 23 model were evaluated on the same untouched holdout cohort of 19,875 encounters, using the selected decision threshold of approximately 0.1620.
 
-The evaluation examined discrimination, probability error, classification performance, and the trade-off between false-positive and false-negative predictions.
-
-### Holdout Performance
-
-| Metric | Original baseline | Revised model |
+| Metric | Original baseline | Step 23 model |
 |---|---:|---:|
-| Holdout encounters | 19,875 | 19,875 |
-| PR-AUC | 0.2036 | 0.2013 |
-| ROC-AUC | 0.6641 | 0.6578 |
-| Brier score | 0.0962 | 0.0961 |
+| PR-AUC | 0.203595 | 0.201322 |
+| ROC-AUC | 0.664123 | 0.657848 |
+| Brier score | 0.096154 | 0.096093 |
 | Precision | 23.81% | 22.42% |
 | Recall | 29.15% | 31.96% |
-| False-positive rate | 11.85% | 14.05% |
+| False-positive rate | 11.83% | 14.05% |
+| False-negative rate | 70.85% | 68.04% |
 | False positives | 2,089 | 2,478 |
 | False negatives | 1,587 | 1,524 |
-| False-negative rate | 70.85% | 68.04% |
+| True positives | 653 | 716 |
+| True negatives | 15,546 | 15,157 |
 
-\*False-positive rate (FPR) = FP / (FP + TN), representing the proportion of actual negative cases incorrectly classified as positive.
-The revised model used a selected decision threshold of approximately **0.1620** and an assumed classification cost of 1 for a false positive and 5 for a false negative.
+The Step 23 model identified 63 additional positive outcomes and reduced false negatives by 63 compared with the baseline. Recall increased by 2.81 percentage points, while precision declined by approximately 1.40 percentage points. The model also produced 389 additional false positives.
 
-### Interpretation of the Results
+PR-AUC declined by 0.002273 and ROC-AUC declined by 0.006274. The Brier score improved slightly, from 0.096154 to 0.096093. These results show a trade-off between identifying more positive outcomes and maintaining discrimination and precision.
 
-The revised model increased recall from 29.15% to 31.96% and reduced false negatives from 1,587 to 1,524. This represents 63 fewer missed positive cases in the evaluated cohort.
+### Paired Patient-Cluster Bootstrap
 
-However, false positives increased from 2,089 to 2,478, while precision decreased from 23.81% to 22.42%. ROC-AUC also decreased from 0.6641 to 0.6578, and PR-AUC decreased from 0.2036 to 0.2013. The Brier score changed only slightly, from 0.096154 to 0.096093.
+A paired bootstrap with 1,000 replicates resampled 14,022 unique holdout patient clusters to estimate uncertainty in the differences between the two models.
 
-These results indicate a change in the operating-point trade-off rather than a consistent improvement across all metrics.
-
-### Paired Patient-Clustered Bootstrap Analysis
-
-A paired patient-clustered bootstrap with 1,000 valid replicates was used to estimate uncertainty in the differences between the two models. Encounters belonging to the same patient were sampled together to account for repeated encounters within patients.
-
-| Metric difference (revised − baseline) | Estimate | 95% bootstrap confidence interval |
+| Metric | Difference (Step 23 − baseline) | 95% bootstrap confidence interval |
 |---|---:|---:|
-| PR-AUC | −0.00227 | [−0.00807, 0.00362] |
-| ROC-AUC | −0.00627 | [−0.01091, −0.00136] |
+| PR-AUC | −0.002273 | [−0.008068, 0.003624] |
+| ROC-AUC | −0.006274 | [−0.010908, −0.001361] |
 | Brier score | −0.000061 | [−0.000411, 0.000276] |
-| Recall | +0.02813 | [+0.01543, +0.04162] |
-| False-negative rate | −0.02813 | [−0.04162, −0.01543] |
-| Cost per 1,000 encounters* | +3.72 | [−4.50, +11.75] |
+| Recall | +0.028125 | [+0.015426, +0.041615] |
+| False-negative rate | −0.028125 | [−0.041615, −0.015426] |
+| Cost per 1,000 encounters | +3.723270 | [−4.495490, 11.750153] |
 
-\*Calculated using the project's assumed false-positive and false-negative costs.
+The bootstrap confidence intervals for ROC-AUC and recall exclude zero, indicating differences in opposite directions for these metrics in the evaluated cohort. The intervals for PR-AUC, Brier score, and cost per 1,000 encounters include zero.
 
-The paired analysis indicates that the 95% bootstrap confidence intervals for the recall increase and false-negative-rate reduction excluded zero. The ROC-AUC decrease was also distinguishable from zero. The confidence intervals for PR-AUC, Brier score, and estimated cost per 1,000 encounters included zero.
+The results do not establish that the Step 23 model is uniformly better than the baseline. Model selection depends on the intended use, the consequences of missed cases and false alarms, and the uncertainty associated with each metric.
 
-These comparisons do not establish that the revised model is universally preferable. Model selection depends on the intended use, the relative consequences of each error type, and the validity of the assumed cost structure.
+### Interpretation
 
-### Calibration and Subgroup Evaluation
+The Step 23 model is more sensitive to positive outcomes at the selected threshold, but this comes with more false positives, lower precision, and a lower ROC-AUC. Its slightly lower Brier score and improved recall do not independently establish clinical usefulness.
 
-The audit also examined agreement between predicted probabilities and observed outcome frequencies, as well as false-negative rates across available age, gender, and race categories. Patient-clustered bootstrap analysis was used to quantify uncertainty in selected subgroup comparisons.
+The classification-cost comparison also requires caution. Under the configured costs of 1 for a false positive and 5 for a false negative, the observed holdout cost was 10,098 for the Step 23 model and 10,024 for the baseline. The bootstrap confidence interval for the cost difference includes zero, so these results do not establish a statistically distinguishable cost advantage for either model.
 
-Subgroup estimates require particular caution when positive-outcome counts are small. Differences in observed error rates do not, by themselves, establish the cause of a disparity or demonstrate that a model is fair or unfair in every relevant sense.
-
-Calibration and subgroup analyses are reported as evaluation results for this dataset. They do not establish clinical usefulness, fairness in other populations, or improved patient outcomes.
-
-### Summary
-
-On the evaluated holdout cohort, the revised model traded some discrimination and precision for higher recall and fewer false negatives. *The paired bootstrap confidence interval for the recall difference excluded zero*, but did not establish a reduction in the project's estimated classification cost.
-
-DiaVigil therefore treats model performance as a set of related measures rather than relying on a single score. Further validation on an independent cohort, review of the assumed error costs, and assessment of clinical and operational requirements are necessary before drawing conclusions about clinical use.
-
+All findings describe the evaluated historical dataset. Independent external validation and clinical assessment would be needed before drawing conclusions about performance in other healthcare settings.
 ---
 
 ## Calibration and Subgroup Fairness Analysis
 
 ### Probability Calibration
 
-Probability calibration examines whether predicted readmission risks agree with observed outcome frequencies. For example, among encounters assigned a predicted risk of 10%, the observed outcome rate should be close to 10% if the probabilities are well calibrated.
+Probability calibration examines whether predicted readmission risks agree with observed outcome frequencies. DiaVigil evaluates calibration on the untouched holdout cohort of 19,875 encounters using 10 equal-frequency bins. For each bin, the mean predicted risk is compared with the observed outcome rate.
 
-DiaVigil evaluates calibration using an equal-frequency, 10-bin analysis. Within each bin, the mean predicted risk is compared with the observed outcome rate. Expected calibration error (ECE) summarizes the weighted average absolute difference between these quantities.
+The Step 24 holdout audit reported an expected calibration error (ECE) of **0.00656**, equivalent to a weighted average absolute difference of approximately 0.656 percentage points across the bins.
 
-The previously reported revised-model ECE was **0.00656**, equivalent to a weighted average absolute calibration error of approximately 0.656 percentage points across the evaluated bins. This value should be retained only after confirming it against the saved calibration results from Notebook 03 or the corresponding calibration artifact; the latest displayed output of Notebook 04 does not independently reproduce this metric.
+The Brier score for the Step 23 model was **0.096093** in the holdout evaluation. ECE and the Brier score measure different aspects of probabilistic prediction error and should be interpreted alongside discrimination and classification performance.
 
-Calibration describes agreement between predicted probabilities and observed outcome frequencies. It does not establish that the model identifies patients who would benefit most from intervention or that using its predictions improves clinical outcomes.
+These holdout results are distinct from the internal-validation output in Notebook 03, which reported a calibrated ECE of 0.0000 on the validation data used to fit the calibrator. The internal result should not be presented as the independent holdout result.
+
+Calibration describes agreement between predicted probabilities and observed outcomes. It does not establish that the model identifies patients who would benefit most from intervention or that using its predictions improves clinical outcomes.
 
 ### False-Negative Rate by Age Group
 
-The subgroup audit examines false-negative rates (FNRs) across age groups. FNR measures the proportion of actual positive outcomes that the model fails to identify:
+The subgroup audit examines false-negative rates (FNRs) across age groups. FNR is the proportion of actual positive outcomes that the model fails to identify:
 
 `FNR = False Negatives / (False Negatives + True Positives)`
 
-The primary age-group comparison requires at least 50 positive outcomes per group. The latest audit reports the following results:
+The primary age-group comparison requires at least 50 positive outcomes in each group. The Step 24 holdout audit reported:
 
-| Age group | Positive outcomes | FNR |
-|---|---:|---:|
-| 30–40 | 89 | 49.44% |
-| 40–50 | 191 | 65.45% |
-| 50–60 | 341 | 65.59% |
-| 60–70 | 486 | 73.46% |
-| 70–80 | 603 | 71.31% |
-| 80–90 | 413 | 76.27% |
-| 90–100 | 58 | 86.21% |
+| Age group | Positive outcomes | False negatives | FNR |
+|---|---:|---:|---:|
+| 30–40 | 89 | 51 | 57.30% |
+| 40–50 | 191 | 133 | 69.63% |
+| 50–60 | 341 | 220 | 64.52% |
+| 60–70 | 486 | 343 | 70.58% |
+| 70–80 | 603 | 407 | 67.50% |
+| 80–90 | 413 | 286 | 69.25% |
+| 90–100 | 58 | 48 | 82.76% |
 
-Among groups meeting the minimum-count requirement, the observed FNR ranged from 49.44% for ages 30–40 to 86.21% for ages 90–100, a difference of **36.77 percentage points**.
+Among groups meeting the minimum-count requirement, the observed FNR ranged from 57.30% for ages 30–40 to 82.76% for ages 90–100, a difference of **25.46 percentage points**.
 
-The latest audit also reports three younger age groups with fewer than 50 positive outcomes: ages 0–10 (1 positive outcome), 10–20 (11), and 20–30 (47). Their observed FNRs were 100.00%, 90.91%, and 65.96%, respectively. These groups are excluded from the primary gap calculation because their small positive-outcome counts make their estimates less stable.
+The audit also reported the following groups with fewer than 50 positive outcomes: ages 0–10 (1 positive outcome), 10–20 (11), and 20–30 (47). Their FNRs were 100.00%, 90.91%, and 53.19%, respectively. These groups were excluded from the primary gap calculation because their estimates are based on relatively few positive outcomes.
 
-The observed age-group differences warrant further investigation, particularly for older patients. However, the estimates are descriptive and do not establish the causes of the differences or demonstrate that the model is fair or unfair under every relevant criterion.
+The observed age-group differences warrant further investigation, particularly for the oldest group, which has 58 positive outcomes. The results are descriptive and do not establish the causes of the differences or demonstrate fairness under every relevant criterion.
 
 ### False-Negative Rate by Gender
 
-The audit compares observed FNRs across the two reported gender categories.
+The audit compared observed FNRs across the two reported gender categories.
 
-| Group | Positive outcomes | FNR |
-|---|---:|---:|
-| Female | 1,188 | 70.45% |
-| Male | 1,052 | 71.29% |
+| Group | Positive outcomes | False negatives | FNR |
+|---|---:|---:|---:|
+| Female | 1,188 | 802 | 67.51% |
+| Male | 1,052 | 722 | 68.63% |
 
-The observed FNR was approximately **0.84 percentage points higher for the male group**. This is a descriptive difference within the evaluated cohort. It does not establish equivalent performance across all populations or demonstrate that the model satisfies broader fairness criteria.
+The observed FNR was approximately **1.12 percentage points higher for the male group**. Both groups meet the minimum-50-positive-outcomes requirement.
+
+This is a descriptive difference within the evaluated cohort. It does not establish equivalent model performance across all populations or prove that the model satisfies broader fairness criteria.
 
 ### False-Negative Rate by Race
 
-The audit examines FNRs across the available race categories. The primary comparison includes groups with at least 50 positive outcomes.
+The primary race comparison includes groups with at least 50 positive outcomes.
 
-| Group | Positive outcomes | FNR |
-|---|---:|---:|
-| African American | 417 | 69.78% |
-| Asian | 145 | 61.54% |
-| Caucasian | 1,731 | 71.35% |
+| Group | Positive outcomes | False negatives | FNR |
+|---|---:|---:|---:|
+| African American | 417 | 285 | 68.35% |
+| Caucasian | 1,731 | 1,177 | 68.00% |
 
-Among these groups, the observed FNR ranged from 61.54% for the Asian group to 71.35% for the Caucasian group, a difference of **9.81 percentage points**.
+The observed difference between these groups was approximately **0.35 percentage points**, with a higher FNR for the African American group.
 
-The latest audit also reports smaller positive-outcome counts for Hispanic (33), Other (22), and unreported or unknown race (24) categories. These groups do not meet the minimum-50-positive-outcomes requirement for the primary comparison. Their results should not be interpreted as evidence of equivalent performance or disregarded entirely; the estimates require additional data and uncertainty analysis.
+Other categories did not meet the minimum-count requirement: Asian (13 positive outcomes), Hispanic (33), Other (22), and unreported or unknown race (24). Their results are excluded from the primary gap calculation but remain relevant to further investigation. Estimates based on small numbers of positive outcomes require particular caution.
 
-The observed differences are descriptive. They do not establish fairness across race categories, explain the causes of performance differences, or demonstrate that the model satisfies other fairness criteria.
+The small observed difference between the two included groups does not establish fairness across race categories, explain the causes of performance differences, or demonstrate that the model satisfies other fairness criteria.
 
 ### Limitations and Interpretation
 
 The calibration and subgroup analyses have several limitations:
 
-- **Dataset dependence:** Results describe the evaluated holdout cohort and may differ in other healthcare settings or patient populations.
-- **Small subgroup counts:** FNR estimates based on relatively few positive outcomes may be unstable. The minimum-count rule reduces reliance on small groups in the primary comparisons but does not eliminate uncertainty.
+- **Dataset dependence:** The results describe the evaluated holdout cohort and may differ in other healthcare settings.
+- **Small subgroup counts:** Estimates based on relatively few positive outcomes may be unstable. The minimum-count rule reduces reliance on small groups in the primary comparisons but does not eliminate uncertainty.
 - **Metric selection:** Similar FNRs do not establish fairness across other error measures, demographic groups, or clinical outcomes.
-- **Calibration versus clinical usefulness:** Agreement between predicted risks and observed outcome frequencies does not demonstrate that predictions improve care or patient outcomes.
+- **Calibration versus clinical usefulness:** Agreement between predicted probabilities and observed outcome frequencies does not demonstrate that predictions improve care.
 - **No causal conclusions:** Differences in observed error rates do not, by themselves, explain why the differences occur.
-- **No independent validation:** These results do not establish generalizability to other hospitals, more recent clinical populations, or prospective clinical workflows.
+- **No independent external validation:** These results do not establish generalizability to other hospitals, contemporary patient populations, or prospective clinical workflows.
 
-DiaVigil uses these analyses to document model behavior, identify subgroup differences for further investigation, and report calibration and error patterns in the available data. Independent validation, uncertainty analysis, assessment of additional fairness measures, and clinical review would be required before drawing conclusions about clinical use.
+DiaVigil uses these analyses to document model behavior and identify subgroup differences for further investigation. Independent validation, uncertainty analysis, assessment of additional fairness measures, and clinical review would be required before drawing conclusions about clinical use.
 
 ---
 
