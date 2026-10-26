@@ -37,7 +37,6 @@ The project also demonstrates hypothetical resource-allocation simulations and a
 
 ---
 
-
 ## Quickstart & Execution Protocol
 
 This section describes how to set up DiaVigil, prepare the required data, execute the analytical workflow, and verify the generated artifacts. DiaVigil is organized into six analytical notebooks and one reproducibility-audit notebook.
@@ -109,7 +108,7 @@ The published notebooks use Google Drive paths under `/content/drive/MyDrive/Dia
 
 ### 3. Notebook Execution Order
 
-Execute the six analytical notebooks in numerical order. Each notebook performs a distinct stage of the research workflow.
+Execute analytical Notebooks 01–06 in numerical order, followed by Notebook 00 for the revised-model analysis and research audit.
 
 **Step 1 — Cohort Filtering and Group Split**
 
@@ -123,7 +122,7 @@ Constructs the analytical cohort, defines the target outcome, applies the docume
 
 Builds the clinical feature-transformation pipeline, including comorbidity-related features and medication and healthcare-utilization indicators, and saves the fitted or configured feature-engineering artifact.
 
-Step 3 — Model Development and Probability Calibration
+**Step 3 — Model Development and Probability Calibration**
 
 notebooks/03_diavigil_nested_cv_and_probability_calibration.ipynb
 
@@ -131,13 +130,14 @@ Trains the original CatBoost classification model using patient-grouped cross-va
 
 The revised modeling procedure is documented separately in Notebook 00, Steps 23A–23C, which use distinct patient-grouped training, calibration, and threshold-selection partitions.
 
-Step 4 — Holdout Evaluation and Subgroup Audit
+**Step 4 — Holdout Evaluation and Subgroup Audit**
 
 notebooks/04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb
 
 Evaluates the original model on the reserved holdout cohort and reports classification performance and subgroup error rates across the available demographic categories.
 
 The revised model's holdout evaluation, calibration analysis, subgroup false-negative audit, and paired patient-cluster bootstrap comparison are documented in Notebook 00, Steps 23–27.
+
 **Step 5 — AI-Agent Recommendation and Audit Workflow**
 
 `notebooks/05_diavigil_agentic_triage_and_faithfulness_critic.ipynb`
