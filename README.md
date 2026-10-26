@@ -11,7 +11,6 @@
 
 - **Project status:** Research prototype evaluated on historical data. The results do not establish clinical effectiveness, recommendation safety, generalizability to other healthcare settings, or readiness for deployment.
 ---
-## Abstract
 
 ## Abstract
 
