@@ -249,13 +249,93 @@ The project does not establish that its predictions, resource-allocation strateg
 
 ## Data Provenance & Access
 
-The source dataset is the **Diabetes 130-US Hospitals (1999–2008)** clinical database, containing 101,766 inpatient encounters across 130 hospital facilities. Following the exclusion of 1,652 encounters under the project's configured CMS-related discharge criteria, 100,114 encounters remained eligible for analysis. The eligible cohort was partitioned at the patient level into a development cohort of 80,239 encounters and an untouched holdout cohort of 19,875 encounters. No patient identifiers were shared between the two partitions.  
+### Dataset Source
 
-* **Canonical Academic Archive:** [UCI Machine Learning Repository (DOI: 10.24432/C5230J)](https://doi.org/10.24432/C5230J)
-* **Foundational Publication:** [Strack et al. (2014), *BioMed Research International* (DOI: 10.1155/2014/781670)](https://doi.org/10.1155/2014/781670)
-* **Distribution Mirror:** [Kaggle Dataset Mirror (Brandão, Ph.D.)](https://www.kaggle.com/datasets/brandao/diabetes)
+DiaVigil uses the **Diabetes 130-US Hospitals dataset (1999–2008)**, a historical collection of hospital encounter records involving patients with diabetes from 130 U.S. hospitals and integrated delivery networks.
 
-For local replication, place the source files (`diabetic_data.csv` and `IDs_mapping.csv`) into the `data/raw/` directory prior to running `01_diavigil_cohort_filtering_and_group_split.ipynb`.
+The dataset is available through the UCI Machine Learning Repository:
+
+**Dataset:** [Diabetes 130-US Hospitals for Years 1999–2008](https://archive.ics.uci.edu/dataset/296/diabetes+130+us+hospitals+for+years+1999+2008)
+
+**Dataset reference:**
+
+Strack, B., DeShazo, J. P., Gennings, C., Olmo, J. L., Ventura, S., Cios, K. J., & Clore, J. N. (2014). Impact of HbA1c measurement on hospital readmission rates: Analysis of 70,000 clinical database patient records. *BioMed Research International*, 2014, Article 781670. https://doi.org/10.1155/2014/781670
+
+The data are historical and may not reflect current patient populations, clinical practices, or hospital operations.
+
+### Data Files and Access
+
+The original dataset can be obtained from the UCI repository. The primary source files used by the project are:
+
+| File | Purpose |
+|---|---|
+| `diabetic_data.csv` | Hospital encounter records, including demographic information, diagnoses, medications, utilization variables, and readmission categories. |
+| `IDs_mapping.csv` | Reference mappings for selected coded variables in the dataset. |
+
+Place the source files in the project's configured `data/raw/` directory before executing the analytical workflow.
+
+The published notebooks were developed using Google Colab and Google Drive. Their file paths may need adjustment when running the project in another environment.
+
+Access to the original dataset does not imply access to all processed cohorts, trained models, or intermediate research artifacts. These must be generated or obtained separately as appropriate.
+
+### Analytical Cohort
+
+DiaVigil applies cohort-selection and preprocessing procedures to construct the analytical dataset used for model development and evaluation.
+
+The recorded workflow reports the following encounter counts:
+
+| Cohort | Hospital encounters |
+|---|---:|
+| Eligible analytical cohort | 100,114 |
+| Development cohort | 80,239 |
+| Reserved holdout cohort | 19,875 |
+
+The development and holdout cohorts are separated at the patient level to prevent encounters from the same recorded patient identifier appearing in both cohorts.
+
+The reserved holdout cohort was used for the documented evaluation of the original and revised models. The revised model's development procedure additionally separates training, probability calibration, and decision-threshold selection into distinct patient-grouped partitions.
+
+The cohort-selection implementation and generated partitions should be reviewed in Notebook 01 and the relevant sections of Notebook 00.
+
+### Outcome Definition
+
+The project examines hospital readmission recorded within 30 days of discharge, using the dataset's `readmitted` field.
+
+The source dataset represents readmission using three categories:
+
+- `<30`: Readmission recorded within 30 days.
+- `>30`: Readmission recorded after 30 days.
+- `NO`: No recorded readmission.
+
+For binary classification, the intended positive outcome is readmission within 30 days. The exact transformation of these source categories into the project's `target` variable should be verified against the cohort-processing code.
+
+The outcome represents a recorded event in the historical dataset, not an independently adjudicated measure of avoidable readmission or intervention effectiveness.
+
+### Cohort Selection and Data Processing
+
+The analytical workflow includes cohort filtering, target construction, feature preparation, and patient-level data partitioning.
+
+The exact inclusion and exclusion criteria, missing-value handling, and transformation rules are defined in the corresponding notebooks rather than inferred from the final cohort counts.
+
+Relevant implementation files include:
+
+- `notebooks/01_diavigil_cohort_filtering_and_group_split.ipynb`
+- `notebooks/02_diavigil_clinical_feature_engineering_pipeline.ipynb`
+- `notebooks/00_DiaVigil_Reproducibility_Audit.ipynb`
+
+The project retains encounter and patient identifiers for partitioning and verification where required, while excluding them from the model input features in the documented evaluation procedures.
+
+### Data Limitations and Responsible Use
+
+The dataset has several limitations relevant to interpreting DiaVigil's findings:
+
+- **Historical coverage:** Records originate from 1999–2008 and may not represent contemporary clinical practice.
+- **Population scope:** The dataset concerns hospital encounters involving patients with diabetes; results should not be generalized to all hospitalized patients.
+- **Recorded outcomes:** Readmission categories do not independently establish preventability, clinical severity, or the benefit of a particular intervention.
+- **Demographic representation:** Available age, gender, and race categories may contain unequal sample sizes, missing information, or small positive-outcome counts.
+- **External validity:** Evaluation on the reserved holdout cohort does not establish performance at independent hospitals or on later patient populations.
+
+DiaVigil uses these data for retrospective machine learning research and experimental decision-support analysis. The dataset and model outputs should not be used as substitutes for clinical assessment or as evidence of demonstrated patient benefit.
+
 ---
 ## Clinical Data Dictionary
 
