@@ -295,34 +295,52 @@ The development and holdout cohorts are separated at the patient level to preven
 The reserved holdout cohort was used for the documented evaluation of the original and revised models. The revised model's development procedure additionally separates training, probability calibration, and decision-threshold selection into distinct patient-grouped partitions.
 
 The cohort-selection implementation and generated partitions should be reviewed in Notebook 01 and the relevant sections of Notebook 00.
-
 ### Outcome Definition
 
-The project examines hospital readmission recorded within 30 days of discharge, using the dataset's `readmitted` field.
+DiaVigil defines the binary prediction target using the `readmitted` field in the Diabetes 130-US Hospitals dataset.
 
-The source dataset represents readmission using three categories:
+| Original category | Binary target | Interpretation |
+|---|---|---|
+| `<30` | 1 | Readmission recorded within 30 days |
+| `>30` | 0 | Readmission recorded after 30 days |
+| `NO` | 0 | No recorded readmission |
 
-- `<30`: Readmission recorded within 30 days.
-- `>30`: Readmission recorded after 30 days.
-- `NO`: No recorded readmission.
+The eligible analytical cohort contains 11,357 encounters with a recorded readmission within 30 days, representing approximately 11.34% of eligible encounters.
 
-For binary classification, the intended positive outcome is readmission within 30 days. The exact transformation of these source categories into the project's `target` variable should be verified against the cohort-processing code.
+The target mapping was verified against the cohort data. All 100,114 eligible encounters had nonmissing target values consistent with the documented binary definition.
 
-The outcome represents a recorded event in the historical dataset, not an independently adjudicated measure of avoidable readmission or intervention effectiveness.
+The outcome represents recorded readmission in the historical dataset. It does not independently establish readmission preventability, clinical severity, or intervention effectiveness.
 
 ### Cohort Selection and Data Processing
 
-The analytical workflow includes cohort filtering, target construction, feature preparation, and patient-level data partitioning.
+The original dataset contains 101,766 hospital encounters. DiaVigil excludes encounters associated with death-related discharge disposition codes 11, 19, 20, and 21.
 
-The exact inclusion and exclusion criteria, missing-value handling, and transformation rules are defined in the corresponding notebooks rather than inferred from the final cohort counts.
+The verification results identified 1,652 excluded encounters, leaving 100,114 eligible encounters for analysis.
 
-Relevant implementation files include:
+| Cohort | Encounters | Unique patients |
+|---|---:|---:|
+| Eligible analytical cohort | 100,114 | — |
+| Development cohort | 80,239 | 56,417 |
+| Reserved holdout cohort | 19,875 | 14,022 |
+
+The development and holdout partitions were constructed using patient-grouped stratified splitting with a fixed random seed of 42.
+
+Verification confirmed that:
+
+- No patient identifiers were shared between the development and holdout partitions.
+- No encounter identifiers were shared between the partitions.
+- Together, the partitions contained all 100,114 eligible encounters.
+- The key fields `encounter_id`, `patient_nbr`, `readmitted`, and `target` contained no missing values in the eligible cohort.
+
+The resulting datasets were saved as `dev_cohort.parquet` and `audit_test_cohort.parquet`.
+
+Subsequent clinical feature transformations are implemented separately in Notebook 02. The verified cohort checks do not establish the correctness of every downstream feature transformation or modeling procedure.
+
+Relevant implementation files:
 
 - `notebooks/01_diavigil_cohort_filtering_and_group_split.ipynb`
 - `notebooks/02_diavigil_clinical_feature_engineering_pipeline.ipynb`
 - `notebooks/00_DiaVigil_Reproducibility_Audit.ipynb`
-
-The project retains encounter and patient identifiers for partitioning and verification where required, while excluding them from the model input features in the documented evaluation procedures.
 
 ### Data Limitations and Responsible Use
 
