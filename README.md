@@ -44,7 +44,9 @@ This section describes how to set up DiaVigil, prepare the required data, execut
 
 ### 1. Repository Setup & Dependencies
 
-Clone the repository and install the core Python dependencies in a suitable environment.
+### 1. Repository Setup & Dependencies
+
+Clone the DiaVigil repository and create a Python virtual environment.
 
 ```bash
 git clone https://github.com/nmemranhussain/DiaVigil.git
@@ -53,7 +55,7 @@ cd DiaVigil
 python -m venv .venv
 ```
 
-Activate the environment before installing dependencies.
+Activate the virtual environment.
 
 **macOS/Linux:**
 
@@ -64,17 +66,33 @@ source .venv/bin/activate
 **Windows PowerShell:**
 
 ```powershell
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
-Install the packages used by the workflow:
+Install the main Python dependencies:
 
 ```bash
 python -m pip install --upgrade pip
-pip install pandas numpy scikit-learn catboost optuna netcal shap pydantic joblib pyarrow
+python -m pip install numpy pandas scikit-learn catboost optuna netcal shap pydantic joblib pyarrow
 ```
 
-For reproducible execution, use the project's verified dependency specification when available. The command above installs packages but does not guarantee that every package version matches the environment used to generate the reported results.
+The research notebooks were executed using Google Colab with Google Drive storage. Some notebook paths and environment setup instructions are specific to that environment and may require modification for local execution.
+
+**Recorded research environment**
+
+Notebook 00, Step 30, recorded the following package versions:
+
+| Package | Recorded version |
+|---|---|
+| Python | 3.13.16 |
+| NumPy | 2.1.3 |
+| pandas | 2.2.3 |
+| scikit-learn | 1.6.1 |
+| CatBoost | 1.2.10 |
+| joblib | 1.6.0 |
+| PyArrow | 23.0.1 |
+
+These versions document the environment recorded during the artifact audit. The installation command above does not pin package versions, and the project has not yet demonstrated complete end-to-end reproduction in a fresh environment.
 
 ### 2. Data Preparation & Artifact Requirements
 
