@@ -231,7 +231,7 @@ DiaVigil uses historical hospital encounter data to investigate these questions.
 
 ### Research Objectives
 
-1. **Evaluate readmission-risk prediction:** Develop and compare CatBoost-based classification models for predicting 30-day hospital readmission, using patient-level separation and a reserved holdout cohort to assess predictive performance.
+1. **Evaluate readmission-risk prediction:** Develop and compare CatBoost-based classification models for predicting the dataset-defined readmission outcome within 30 days, using patient-level separation and a reserved holdout cohort to assess predictive performance.
 
 2. **Examine calibration and decision thresholds:** Assess predicted probabilities and investigate how different classification thresholds affect recall, false-positive predictions, and estimated error costs under specified assumptions.
 
