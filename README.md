@@ -470,7 +470,7 @@ DiaVigil is a research prototype. Neither the data dictionary nor the derived fe
 
 ---
 
-## Methodology and System Architecture
+## Research Methodology and System Architecture
 
 DiaVigil is a machine learning research prototype for hospital readmission risk prediction and decision-support evaluation. Its workflow covers clinical data preparation, feature engineering, model training, probability calibration, decision-threshold optimization, holdout evaluation, subgroup auditing, resource-allocation simulation, and AI-agent recommendation auditing.
 
