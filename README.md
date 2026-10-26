@@ -423,8 +423,8 @@ The feature-engineering pipeline derives the following variables from the source
 | `active_diabetes_med_count` | Count of diabetes medication fields whose recorded value is not `No`. |
 | `dosage_titration_count` | Count of diabetes medication fields recorded as `Up` or `Down`. |
 | `on_insulin` | Binary indicator set to 1 when the insulin field is not recorded as `No`; otherwise 0. |
-| `encounter_severity_index` | Derived measure calculated as hospital days × medication count ÷ (laboratory procedure count + 1). |
-| `glycemic_status_code` | Encoded HbA1c category: `None` → 0, `Norm` → 1, and `>7` or `>8` → 2. |
+| `encounter_severity_index` | Project-defined composite feature calculated as `time_in_hospital × num_medications + num_lab_procedures + 1`. It summarizes selected encounter characteristics and is not a validated clinical severity score. |
+| `glycemic_status_code` | Encoded HbA1c result category: None = 0, Norm = 1, and both >7 and >8 = 2. This is a project-defined categorical encoding, not a validated clinical severity scale. |
 
 **Interpretation notes:**
 
