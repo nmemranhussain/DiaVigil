@@ -114,63 +114,63 @@ Execute analytical Notebooks 01–06 in numerical order, followed by Notebook 00
 
 `notebooks/01_diavigil_cohort_filtering_and_group_split.ipynb`
 
-Constructs the analytical cohort, defines the target outcome, applies the documented exclusion criteria, and creates development and holdout partitions using patient-level grouping to reduce leakage across encounters belonging to the same patient.
+- Constructs the analytical cohort, defines the target outcome, applies the documented exclusion criteria, and creates development and holdout partitions using patient-level grouping to reduce leakage across encounters belonging to the same patient.
 
 **Step 2 — Clinical Feature Engineering**
 
 `notebooks/02_diavigil_clinical_feature_engineering_pipeline.ipynb`
 
-Builds the clinical feature-transformation pipeline, including comorbidity-related features and medication and healthcare-utilization indicators, and saves the fitted or configured feature-engineering artifact.
+- Builds the clinical feature-transformation pipeline, including comorbidity-related features and medication and healthcare-utilization indicators, and saves the fitted or configured feature-engineering artifact.
 
 **Step 3 — Model Development and Probability Calibration**
 
-notebooks/03_diavigil_nested_cv_and_probability_calibration.ipynb
+`notebooks/03_diavigil_nested_cv_and_probability_calibration.ipynb`
 
-Trains the original CatBoost classification model using patient-grouped cross-validation, applies isotonic probability calibration, and selects a decision threshold under the specified error-cost assumptions. The notebook saves the original model and calibration artifacts used in subsequent evaluation and comparison.
+- Trains the original CatBoost classification model using patient-grouped cross-validation, applies isotonic probability calibration, and selects a decision threshold under the specified error-cost assumptions. The notebook saves the original model and calibration artifacts used in subsequent evaluation and comparison.
 
-The revised modeling procedure is documented separately in Notebook 00, Steps 23A–23C, which use distinct patient-grouped training, calibration, and threshold-selection partitions.
+- The revised modeling procedure is documented separately in Notebook 00, Steps 23A–23C, which use distinct patient-grouped training, calibration, and threshold-selection partitions.
 
 **Step 4 — Holdout Evaluation and Subgroup Audit**
 
-notebooks/04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb
+`notebooks/04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb`
 
-Evaluates the original model on the reserved holdout cohort and reports classification performance and subgroup error rates across the available demographic categories.
+- Evaluates the original model on the reserved holdout cohort and reports classification performance and subgroup error rates across the available demographic categories.
 
-The revised model's holdout evaluation, calibration analysis, subgroup false-negative audit, and paired patient-cluster bootstrap comparison are documented in Notebook 00, Steps 23–27.
+- The revised model's holdout evaluation, calibration analysis, subgroup false-negative audit, and paired patient-cluster bootstrap comparison are documented in Notebook 00, Steps 23–27.
 
 **Step 5 — AI-Agent Recommendation and Audit Workflow**
 
 `notebooks/05_diavigil_agentic_triage_and_faithfulness_critic.ipynb`
 
-Demonstrates encounter-level risk retrieval, model-based feature attribution, structured recommendation generation, and critic-based checks of whether generated recommendations are grounded in the available model-related evidence.
+- Demonstrates encounter-level risk retrieval, model-based feature attribution, structured recommendation generation, and critic-based checks of whether generated recommendations are grounded in the available model-related evidence.
 
 **Step 6 — Resource-Allocation Simulation**
 
 `notebooks/06_diavigil_dynamic_resource_allocation_simulation.ipynb`
 
-Simulates hypothetical resource-allocation scenarios under configured staffing and intervention-effectiveness assumptions. The workflow estimates patient outreach, potential readmissions averted, and the marginal yield of additional nursing hours.
+- Simulates hypothetical resource-allocation scenarios under configured staffing and intervention-effectiveness assumptions. The workflow estimates patient outreach, potential readmissions averted, and the marginal yield of additional nursing hours.
 
-The simulation results are conditional estimates, not evidence that the same outcomes would occur in a real hospital.
+- The simulation results are conditional estimates, not evidence that the same outcomes would occur in a real hospital.
 
-Final Stage — Research Audit and Artifact Verification
+**Final Stage — Research Audit and Artifact Verification**
 
-notebooks/00_DiaVigil_Reproducibility_Audit.ipynb
+`notebooks/00_DiaVigil_Reproducibility_Audit.ipynb`
 
-Notebook 00 contains the revised modeling and evaluation workflow and the subsequent research-audit procedures:
+- Notebook 00 contains the revised modeling and evaluation workflow and the subsequent research-audit procedures:
 
-Steps 23–24: Revised model development, holdout evaluation, calibration, and subgroup false-negative analysis.
+- Steps 23–24: Revised model development, holdout evaluation, calibration, and subgroup false-negative analysis.
 
-Steps 25–27: Same-holdout baseline comparison, paired patient-cluster bootstrap, and research summary.
+- Steps 25–27: Same-holdout baseline comparison, paired patient-cluster bootstrap, and research summary.
 
-Steps 28–29: Artifact inspection, cross-artifact consistency checks, and final research decision report.
+- Steps 28–29: Artifact inspection, cross-artifact consistency checks, and final research decision report.
 
-Step 30: Artifact manifest containing recorded environment details, file sizes, and SHA-256 hashes.
+- Step 30: Artifact manifest containing recorded environment details, file sizes, and SHA-256 hashes.
 
-Step 31: Verification that saved baseline and revised-model predictions can be reproduced from their respective saved artifacts on the same holdout rows.
+- Step 31: Verification that saved baseline and revised-model predictions can be reproduced from their respective saved artifacts on the same holdout rows.
 
-Notebook 00 depends on outputs from the earlier analytical notebooks. It should be executed after those required artifacts have been generated, rather than treated as the first notebook in the pipeline.
+- Notebook 00 depends on outputs from the earlier analytical notebooks. It should be executed after those required artifacts have been generated, rather than treated as the first notebook in the pipeline.
 
-The verification results support the documented artifact relationships and saved-prediction consistency. They do not independently establish complete end-to-end reproducibility from raw data.
+- The verification results support the documented artifact relationships and saved-prediction consistency. They do not independently establish complete end-to-end reproducibility from raw data.
 
 ### 4. Reproducibility and Artifact Verification
 
