@@ -108,7 +108,7 @@ The published notebooks use Google Drive paths under `/content/drive/MyDrive/Dia
 
 ### 3. Notebook Execution Order
 
-Execute analytical Notebooks 01–06 in numerical order, followed by Notebook 00 for the revised-model analysis and research audit.
+Execute analytical Notebooks 01–06 in numerical order. After their required artifacts have been generated, execute Notebook 00 for the revised-model development, comparative evaluation, and research-artifact verification.
 
 **Step 1 — Cohort Filtering and Group Split**
 
@@ -188,7 +188,7 @@ The recorded audit results include:
 - **Prediction verification:** Step 31 reproduced the saved baseline and Step 23 probability arrays from their respective saved model artifacts on the same 19,875 holdout encounters.
 - **Artifact manifest:** Step 30 recorded software-environment information, artifact sizes, and SHA-256 hashes for 15 research files.
 
-These checks provide evidence of saved-artifact integrity and consistency within the tested environment. They do not demonstrate that the entire project has been reproduced independently from raw data in a clean environment.
+These checks confirm the tested artifact availability, successful loading, internal consistency, and saved-prediction reproducibility within the recorded environment. The SHA-256 manifest supports subsequent file-integrity verification. These results do not demonstrate that the complete workflow has been independently reproduced from raw data in a clean environment.
 
 The saved model artifacts should be loaded only from trusted sources because serialized Python objects may execute code during deserialization.
 
