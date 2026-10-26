@@ -295,11 +295,13 @@ The calibrated risk is a model estimate, not a clinical diagnosis. TreeSHAP attr
 
 ### 6. Cohort Construction and Data Handling
 
-The project begins with 101,766 source encounters. The documented cohort-preparation workflow removes 2,423 encounters under its configured discharge-disposition exclusion rules, producing a sanitized cohort of 99,343 encounters across 70,442 unique patients.
+- The project begins with 101,766 source encounters. The documented cohort-preparation workflow excludes 1,652 encounters under the configured discharge-disposition criteria, producing an eligible cohort of 100,114 encounters.
 
-The development and holdout partitions are constructed using patient-grouped splitting to prevent encounters from the same patient from appearing across those partitions. The reserved holdout contains 19,875 encounters and is used for final evaluation rather than model fitting, probability calibration, or decision-threshold selection.
+- Patient-grouped splitting partitions this eligible cohort into 80,239 development encounters and 19,875 untouched holdout encounters. The holdout cohort is reserved for final evaluation and is excluded from model fitting, probability calibration, and decision-threshold selection.
 
-The exact outcome construction, exclusion rules, missing-value handling, and category encodings should be documented alongside the corresponding preprocessing code.
+- The development and holdout partitions are constructed using patient-grouped splitting to prevent encounters from the same patient from appearing across those partitions. The reserved holdout contains 19,875 encounters and is used for final evaluation rather than model fitting, probability calibration, or decision-threshold selection.
+
+- The exact outcome construction, exclusion rules, missing-value handling, and category encodings should be documented alongside the corresponding preprocessing code.
 
 ### 7. Scope and Limitations
 
