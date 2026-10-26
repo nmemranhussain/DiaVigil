@@ -44,8 +44,6 @@ This section describes how to set up DiaVigil, prepare the required data, execut
 
 ### 1. Repository Setup & Dependencies
 
-### 1. Repository Setup & Dependencies
-
 Clone the DiaVigil repository and create a Python virtual environment.
 
 ```bash
@@ -107,6 +105,8 @@ Before executing the workflow:
 
 The notebooks generate intermediate datasets and serialized model artifacts under the project's configured data directories. Later stages depend on outputs created by earlier stages; therefore, a fresh checkout should not be assumed to contain all required generated artifacts.
 
+The published notebooks use Google Drive paths under /content/drive/MyDrive/DiaVigil/. Researchers executing them locally must adapt these paths and ensure that the expected input files and intermediate artifacts are available.
+
 ### 3. Notebook Execution Order
 
 Execute the six analytical notebooks in numerical order. Each notebook performs a distinct stage of the research workflow.
@@ -123,18 +123,21 @@ Constructs the analytical cohort, defines the target outcome, applies the docume
 
 Builds the clinical feature-transformation pipeline, including comorbidity-related features and medication and healthcare-utilization indicators, and saves the fitted or configured feature-engineering artifact.
 
-**Step 3 — Model Development and Probability Calibration**
+Step 3 — Model Development and Probability Calibration
 
-`notebooks/03_diavigil_nested_cv_and_probability_calibration.ipynb`
+notebooks/03_diavigil_nested_cv_and_probability_calibration.ipynb
 
-Trains and evaluates the classification model, performs the documented validation and probability-calibration procedures, and selects a decision threshold under the specified error-cost assumptions. The notebook saves the model and calibration artifacts required by downstream stages.
+Trains the original CatBoost classification model using patient-grouped cross-validation, applies isotonic probability calibration, and selects a decision threshold under the specified error-cost assumptions. The notebook saves the original model and calibration artifacts used in subsequent evaluation and comparison.
 
-**Step 4 — Holdout Evaluation and Subgroup Audit**
+The revised modeling procedure is documented separately in Notebook 00, Steps 23A–23C, which use distinct patient-grouped training, calibration, and threshold-selection partitions.
 
-`notebooks/04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb`
+Step 4 — Holdout Evaluation and Subgroup Audit
 
-Evaluates the selected model on the reserved holdout cohort, reports classification and calibration metrics, and examines subgroup error rates across the available demographic categories. Patient-clustered bootstrap analysis is used where implemented to quantify uncertainty in selected comparisons.
+notebooks/04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb
 
+Evaluates the original model on the reserved holdout cohort and reports classification performance and subgroup error rates across the available demographic categories.
+
+The revised model's holdout evaluation, calibration analysis, subgroup false-negative audit, and paired patient-cluster bootstrap comparison are documented in Notebook 00, Steps 23–27.
 **Step 5 — AI-Agent Recommendation and Audit Workflow**
 
 `notebooks/05_diavigil_agentic_triage_and_faithfulness_critic.ipynb`
@@ -149,17 +152,45 @@ Simulates hypothetical resource-allocation scenarios under configured staffing a
 
 The simulation results are conditional estimates, not evidence that the same outcomes would occur in a real hospital.
 
+Final Stage — Research Audit and Artifact Verification
+
+notebooks/00_DiaVigil_Reproducibility_Audit.ipynb
+
+Notebook 00 contains the revised modeling and evaluation workflow and the subsequent research-audit procedures:
+
+Steps 23–24: Revised model development, holdout evaluation, calibration, and subgroup false-negative analysis.
+
+Steps 25–27: Same-holdout baseline comparison, paired patient-cluster bootstrap, and research summary.
+
+Steps 28–29: Artifact inspection, cross-artifact consistency checks, and final research decision report.
+
+Step 30: Artifact manifest containing recorded environment details, file sizes, and SHA-256 hashes.
+
+Step 31: Verification that saved baseline and revised-model predictions can be reproduced from their respective saved artifacts on the same holdout rows.
+
+Notebook 00 depends on outputs from the earlier analytical notebooks. It should be executed after those required artifacts have been generated, rather than treated as the first notebook in the pipeline.
+
+The verification results support the documented artifact relationships and saved-prediction consistency. They do not independently establish complete end-to-end reproducibility from raw data.
+
 ### 4. Reproducibility and Artifact Verification
 
-After generating the required artifacts, execute the reproducibility-audit notebook:
+After generating the required analytical artifacts, execute:
 
 `notebooks/00_DiaVigil_Reproducibility_Audit.ipynb`
 
-This notebook supports inspection of saved artifacts, recorded software-environment details, artifact metadata, and implemented consistency or integrity checks.
+The notebook documents the revised modeling procedure, comparative evaluation, and research-artifact verification.
 
-The audit notebook is a verification stage rather than the first step of the analytical pipeline. Run it after its required inputs and artifacts are available.
+The recorded audit results include:
 
-A successful artifact-integrity check confirms the tested properties of the checked files; it does not, by itself, establish that the complete workflow can be recreated from raw data in a clean environment.
+- **Artifact inventory:** All 15 expected research artifacts were present.
+- **Artifact inspection:** Six selected serialized artifacts were successfully loaded and inspected.
+- **Cross-artifact consistency:** All 18 implemented checks passed.
+- **Prediction verification:** Step 31 reproduced the saved baseline and Step 23 probability arrays from their respective saved model artifacts on the same 19,875 holdout encounters.
+- **Artifact manifest:** Step 30 recorded software-environment information, artifact sizes, and SHA-256 hashes for 15 research files.
+
+These checks provide evidence of saved-artifact integrity and consistency within the tested environment. They do not demonstrate that the entire project has been reproduced independently from raw data in a clean environment.
+
+The saved model artifacts should be loaded only from trusted sources because serialized Python objects may execute code during deserialization.
 
 ### 5. Expected Outputs
 
