@@ -105,7 +105,7 @@ Before executing the workflow:
 
 The notebooks generate intermediate datasets and serialized model artifacts under the project's configured data directories. Later stages depend on outputs created by earlier stages; therefore, a fresh checkout should not be assumed to contain all required generated artifacts.
 
-The published notebooks use Google Drive paths under /content/drive/MyDrive/DiaVigil/. Researchers executing them locally must adapt these paths and ensure that the expected input files and intermediate artifacts are available.
+The published notebooks use Google Drive paths under `/content/drive/MyDrive/DiaVigil/`. Researchers executing them locally must adapt these paths and ensure that the expected input files and intermediate artifacts are available.
 
 ### 3. Notebook Execution Order
 
