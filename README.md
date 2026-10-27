@@ -1007,44 +1007,198 @@ The resource-allocation simulation has several important limitations:
 
 ## AI-Agent Recommendation and Audit Workflow
 
-DiaVigil includes an AI-agent workflow that generates structured care-recommendation briefs using encounter data, readmission-risk predictions, and model-derived feature attributions. The workflow is intended to demonstrate how model outputs can be organized into recommendations and checked against predefined criteria.
+**Implementation notebook:** `notebooks/05_diavigil_agentic_triage_and_faithfulness_critic.ipynb`
 
-### Agent 1: Encounter Data Retrieval
+DiaVigil implements an experimental, deterministic multi-agent workflow that combines calibrated hospital readmission-risk predictions, local TreeSHAP feature attributions, structured recommendation synthesis, and rule-based grounding verification.
 
-The first component identifies an encounter for review and supplies the information needed by the subsequent workflow. The demonstration selects a high-risk encounter from the evaluation data, falling back to the encounter with the highest predicted risk when no encounter exceeds the configured threshold.
+The workflow uses three sequential agent components and a separate deterministic critic gate. Pydantic schemas enforce the structure of generated encounter-level recommendation briefs.
 
-The available implementation uses saved evaluation predictions when the corresponding audit artifact exists. Otherwise, it computes predictions from the saved feature pipeline and probability calibrator. The encounter is then passed to the agent workflow for further processing.
+The current implementation uses predefined recommendation rules rather than a generative large language model (LLM). Its purpose is to investigate how model-derived evidence can support structured, auditable decision-support outputs.
 
-### Agent 2: Risk Inference and Feature Attribution
+The generated recommendations are experimental and have not been clinically validated.
 
-The second component obtains the encounter's estimated readmission risk and identifies features contributing to the model's prediction. The workflow uses the saved feature-engineering pipeline, probability calibrator, and decision threshold. Local TreeSHAP attributions are used to identify risk-related and protective features.
+### 1. Research Objectives
 
-These attributions provide information about the model's prediction; they do not establish causal relationships between individual features and readmission outcomes.
+The AI-agent experiment addresses four research questions:
 
-### Agent 3: Structured Recommendation Generation
+1. How can calibrated readmission-risk predictions and encounter-level information be integrated into structured recommendation briefs?
+2. How can local TreeSHAP attributions identify model-derived risk drivers and protective factors?
+3. Can a deterministic critic distinguish grounded recommendation outputs from outputs containing unsupported clinical claims?
+4. How can typed data contracts and explicit verification rules improve the inspectability of an experimental multi-agent decision-support workflow?
 
-The third component generates a structured brief containing the encounter identifier, estimated readmission risk, risk category, contributing and protective features, and proposed care directives.
+The objective is to demonstrate computational integration and rule-based verification rather than establish clinical recommendation effectiveness.
 
-The brief follows a defined data structure so that its fields can be inspected and evaluated by the audit component. The generated directives are proposed recommendations, not independently validated clinical instructions.
+### 2. Multi-Agent System Architecture
 
-### Critic Audit and Pass/Reject Evaluation
+The implementation consists of three sequential agents and a critic gate.
 
-A separate critic evaluates whether the generated directives are supported by the model-derived risk information. The saved demonstration contains two examples:
+| Component | Implemented responsibility |
+|---|---|
+| Agent 1 — Clinical Retriever | Retrieves the selected encounter record from the reserved holdout dataset |
+| Agent 2 — Inference Core | Computes calibrated readmission probability and local TreeSHAP attributions |
+| Agent 3 — Synthesis Engine | Generates a structured recommendation brief using predefined rules |
+| Critic Gate — Grounding Verifier | Checks whether the generated directives satisfy implemented feature-grounding rules |
 
-- **Accepted example:** The audit passed, with three care directives reported as grounded in verified risk drivers.
-- **Rejected example:** The audit failed because the directives referenced clinical factors that were unsupported by the local TreeSHAP attributions. The saved audit notes indicate that regeneration was required.
+**Execution sequence:**
 
-These examples demonstrate the intended pass/reject behavior for the tested cases. They do not establish that every unsupported statement will be detected or that rejected recommendations are automatically regenerated.
+Encounter Retrieval → Calibrated Risk Inference → TreeSHAP Explanation → Rule-Based Recommendation Synthesis → Deterministic Critic Audit
 
-### Limitations
+The components are orchestrated by the `MultiAgentClinical` class.
 
-The agent workflow is a research demonstration. Passing the critic's checks does not establish that a recommendation is clinically correct, safe, complete, or appropriate for a particular patient. TreeSHAP attributions explain model behavior rather than clinical causation, and the audit depends on the criteria implemented in the critic.
+The `run_pipeline()` method executes retrieval, inference, synthesis, and auditing in sequence.
 
-Further evaluation would be needed to measure the reliability of recommendation generation, the critic's ability to detect unsupported claims, and the effectiveness of any regeneration process. Clinical review and human oversight would be required before considering use in patient care.
+This architecture separates data retrieval, predictive inference, recommendation construction, and verification into identifiable functional stages.
 
-### Summary
+### 3. Encounter Retrieval and Risk Inference
 
-DiaVigil demonstrates a workflow that connects encounter-level risk estimation, local feature attribution, structured recommendation generation, and a pass/reject audit. The saved examples provide evidence of both accepted and rejected outputs, while the system's clinical accuracy and safety remain unvalidated.
+The Clinical Retriever selects an encounter using its `encounter_id` from the reserved holdout cohort.
+
+The Inference Core applies the saved preprocessing pipeline and calibrated CatBoost model to the selected encounter.
+
+The implementation retrieves:
+
+- Encounter identifier and patient identifier.
+- Calibrated readmission probability.
+- Binary high-risk classification using the saved operating threshold.
+- Three highest positive TreeSHAP attributions.
+- Two most negative TreeSHAP attributions.
+
+The recorded model operating threshold is approximately **0.1620**.
+
+The threshold is used to assign the encounter to a high-risk or standard-care category within the experimental workflow.
+
+These categories are model-derived classifications, not independently validated clinical triage designations.
+
+### 4. TreeSHAP-Based Risk Explanation
+
+The inference component uses `shap.TreeExplainer` with the fitted CatBoost model to calculate local feature attributions.
+
+The implementation selects:
+
+- **Primary risk drivers:** The three features with the largest positive SHAP values.
+- **Protective factors:** The two features with the most negative SHAP values.
+
+The selected feature names and attribution values are incorporated into the structured recommendation brief.
+
+TreeSHAP provides an explanation of model behavior for the selected encounter. Positive and negative attribution values should not be interpreted as causal effects or evidence that changing a particular feature would prevent readmission.
+
+### 5. Structured Recommendation Synthesis
+
+The Synthesis Engine constructs recommendation briefs using predefined conditional rules.
+
+The current implementation distinguishes between two risk categories.
+
+| Risk category | Implemented synthesis behavior |
+|---|---|
+| High Risk — Enhanced Follow-up | Generates follow-up directives according to the detected model-derived risk drivers |
+| Standard Care | Generates a standard follow-up directive |
+
+For high-risk encounters, the implemented rules examine whether selected risk-driver feature names contain terms such as `hypertension` or `cardiac`.
+
+The synthesis logic also includes a fallback follow-up directive when the specified conditions are not met.
+
+The recommendations are therefore generated through deterministic rules rather than free-form LLM text generation.
+
+### 6. Pydantic Output Schema
+
+DiaVigil uses Pydantic models to define the structure of the recommendation brief.
+
+The implementation includes a `FeatureImpact` schema for feature names and attribution values, and a `PatientTriageBrief` schema for encounter-level outputs.
+
+| Output field | Description |
+|---|---|
+| `encounter_id` | Selected hospital encounter identifier |
+| `patient_nbr` | Recorded patient identifier |
+| `readmission_risk` | Calibrated model-estimated readmission probability |
+| `risk_tier` | Assigned experimental risk category |
+| `primary_risk_drivers` | Three selected positive TreeSHAP feature attributions |
+| `protective_factors` | Two selected negative TreeSHAP feature attributions |
+| `synthesized_care_directives` | Rule-generated follow-up directives |
+| `critic_audit_passed` | Boolean result of the deterministic audit |
+| `critic_audit_notes` | Explanation of the audit decision |
+
+The structured schema supports consistent output representation, validation, inspection, and serialization.
+
+Schema validation establishes that the output satisfies the implemented data contract. It does not establish clinical correctness.
+
+### 7. Deterministic Critic and Grounding Verification
+
+The Critic Gate evaluates synthesized directives against the encounter's selected model-derived risk drivers.
+
+For high-risk encounters, the implementation searches for references to selected clinical concepts in the generated directive text.
+
+The current critic specifically checks for `hypertension` and `cardiac` terminology and compares those references against the names of the selected primary risk-driver features.
+
+If a directive references one of these concepts without a corresponding selected risk driver, the critic rejects the recommendation brief.
+
+Otherwise, the brief passes the implemented grounding check.
+
+Standard-care briefs are accepted through a separate branch of the critic logic.
+
+This is a limited, rule-based verification mechanism. It does not perform comprehensive medical fact-checking, semantic entailment analysis, or clinical safety evaluation.
+
+### 8. Recorded Agent Demonstration Results
+
+Notebook 05 demonstrates the workflow using a selected high-risk encounter from the reserved holdout cohort.
+
+The recorded demonstration contains two scenarios.
+
+**Scenario 1 — Grounded synthesis (expected acceptance)**
+
+The pipeline generates a structured recommendation brief without deliberately injecting unsupported clinical factors.
+
+Recorded result:
+
+- Risk category: High Risk — Enhanced Follow-up.
+- Critic audit: **Passed**.
+- Audit explanation: The directives were grounded in the verified risk drivers under the implemented rules.
+
+**Scenario 2 — Hallucinated synthesis (expected rejection)**
+
+The demonstration deliberately injects unsupported clinical claims into the synthesized recommendation.
+
+The injected directive refers to clinical factors that are not supported by the selected TreeSHAP risk drivers.
+
+Recorded result:
+
+- Critic audit: **Failed**.
+- Audit explanation: Unsupported clinical-factor references were detected.
+- Recommended audit action: Regenerate or revise the unsupported recommendation.
+
+These results demonstrate that the implemented critic accepted the tested grounded example and rejected the deliberately constructed unsupported example.
+
+They do not establish a general hallucination-detection accuracy, false-acceptance rate, false-rejection rate, or reliability across a representative set of clinical encounters.
+
+### 9. Reproducibility and Saved Artifacts
+
+Notebook 05 saves the demonstration outputs to:
+
+`data/processed/agent_audit_demonstration.joblib`
+
+The saved artifact contains:
+
+- `sample_passed_brief`: Serialized structured output from the accepted scenario.
+- `sample_rejected_brief`: Serialized structured output from the rejected scenario.
+
+The notebook uses Pydantic serialization to convert the demonstration outputs into dictionary representations before saving.
+
+The saved artifacts support subsequent inspection of the generated recommendation fields and critic decisions.
+
+Serialized Python artifacts should be loaded only from trusted sources because deserialization may execute code.
+
+### 10. Limitations and Responsible Use
+
+The AI-agent workflow has several important limitations:
+
+- **Deterministic synthesis:** The current recommendation generator uses predefined rules and does not demonstrate open-ended LLM reasoning or generation.
+- **Limited grounding coverage:** The critic checks specific terminology against selected SHAP risk-driver names and cannot detect every unsupported claim.
+- **No causal interpretation:** TreeSHAP attributions describe model behavior rather than the effects of clinical interventions.
+- **Limited demonstration:** Two constructed scenarios do not establish audit reliability across diverse encounters.
+- **No clinical validation:** The generated care directives have not been evaluated for clinical appropriateness, safety, or effectiveness.
+- **Model dependence:** Prediction and attribution errors may influence the information used in recommendation synthesis.
+- **No prospective evaluation:** The workflow has not been tested as an operational clinical decision-support system.
+
+**Research interpretation:** DiaVigil demonstrates a deterministic multi-agent research prototype integrating calibrated readmission-risk prediction, local TreeSHAP explanation, structured recommendation synthesis, and rule-based grounding verification. The recorded demonstration shows acceptance of one grounded output and rejection of one deliberately unsupported output. These findings support further investigation of auditable AI-assisted decision-support architectures but do not establish comprehensive hallucination detection, clinical effectiveness, or readiness for patient-care deployment.
 
 ---
 
