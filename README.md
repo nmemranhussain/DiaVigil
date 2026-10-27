@@ -850,9 +850,9 @@ The simulation uses the reserved holdout cohort and saved prediction outputs fro
 
 The simulation defines required nursing hours using:
 
-\[
-H_i=\operatorname{clip}(1.5+0.25L_i+0.5P_i,\ 1.5,\ 8.0)
-\]
+$$
+H_i = \operatorname{clip}\left(1.5 + 0.25L_i + 0.5P_i,\ 1.5,\ 8.0\right)
+$$
 
 where:
 
@@ -868,9 +868,11 @@ DiaVigil performs 1,000 Monte Carlo iterations to examine uncertainty in hypothe
 
 For each simulated intervention-effectiveness value, the model estimates potential readmissions averted as:
 
-\[
-A_i=p_i e_i
-\]
+
+$$
+A_i = p_i \times e_i
+$$
+
 
 where:
 
@@ -900,9 +902,11 @@ DiaVigil implements a greedy allocation procedure that ranks high-risk encounter
 
 The allocation efficiency score is defined as:
 
-\[
-E_i=\frac{A_i}{H_i}
-\]
+
+$$
+E_i = \frac{A_i}{H_i}
+$$
+
 
 where \(A_i\) represents expected readmissions potentially averted and \(H_i\) represents estimated nursing hours required.
 
@@ -932,9 +936,11 @@ To examine diminishing marginal returns, DiaVigil evaluates 25 staffing budgets 
 
 The marginal yield is calculated as the change in expected readmissions averted per additional 100 nursing hours:
 
-\[
-M=\frac{\Delta A}{\Delta H}\times100
-\]
+
+$$
+M = \frac{\Delta A}{\Delta H} \times 100
+$$
+
 
 Selected results from the recorded capacity-allocation frontier are shown below.
 
@@ -994,6 +1000,7 @@ The resource-allocation simulation has several important limitations:
 - **No prospective validation:** The allocation strategy has not been evaluated through prospective clinical implementation.
 
 **Research interpretation:** DiaVigil demonstrates a computational framework connecting calibrated readmission-risk predictions with stochastic intervention-effectiveness assumptions and capacity-constrained nursing-resource allocation. The findings support investigation of operational decision-support methods but do not establish actual readmission prevention, clinical effectiveness, verified cost savings, or readiness for deployment.
+
 ---
 
 ## AI-Agent Recommendation and Audit Workflow
