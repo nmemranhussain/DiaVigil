@@ -813,91 +813,187 @@ However, the analysis is limited to a historical dataset from 1999–2008. Indep
 
 ## Resource Allocation Simulation
 
-DiaVigil incorporates a Monte Carlo resource-allocation simulation to investigate how calibrated hospital readmission-risk estimates may inform hypothetical care-management decisions under limited nursing resources.
+**Implementation notebook:** `notebooks/06_diavigil_dynamic_resource_allocation_simulation.ipynb`
 
-The simulation combines predicted readmission probabilities, assumed intervention effectiveness, staffing constraints, and resource-allocation rules to estimate potential intervention outcomes.
+DiaVigil implements a Monte Carlo resource-allocation simulation to investigate how calibrated hospital readmission-risk estimates may support hypothetical care-management decisions under limited nursing resources.
 
-This component extends the predictive modeling workflow into experimental decision-support analysis. Its outputs are simulated estimates rather than observed clinical outcomes.
+The simulation combines model-estimated readmission probabilities, assumed intervention effectiveness, encounter-level nursing-time requirements, and capacity-constrained allocation rules.
+
+The analysis evaluates potential intervention coverage, expected readmissions averted, and marginal returns from additional nursing capacity. These outputs are conditional simulation estimates rather than observed intervention effects or clinically validated outcomes.
 
 ### 1. Simulation Objectives
 
-The resource-allocation experiment investigates three research questions:
+The resource-allocation experiment addresses four research questions:
 
-1. How does the availability of nursing hours affect the number of high-risk encounters that can receive hypothetical follow-up interventions?
-2. How do assumptions about intervention effectiveness influence the estimated number of readmissions potentially averted?
-3. How can capacity-constrained allocation prioritize encounters according to predicted risk, assumed intervention benefit, and required nursing time?
+1. How many high-risk encounters can receive hypothetical follow-up interventions under different nursing-hour budgets?
+2. How does uncertainty in assumed intervention effectiveness affect estimated readmissions potentially averted?
+3. How can limited nursing resources be allocated according to expected intervention benefit per required nursing hour?
+4. How do the marginal estimated benefits of additional nursing hours change as staffing capacity increases?
 
-The objective is to study resource-allocation trade-offs rather than establish a clinically validated intervention strategy.
+The objective is to examine operational trade-offs rather than establish a clinically validated intervention strategy.
 
-### 2. Simulation Inputs and Assumptions
+### 2. Simulation Population and Assumptions
 
-The simulation uses model-generated risk estimates and configurable operational assumptions.
+The simulation uses the reserved holdout cohort and saved prediction outputs from the preceding evaluation workflow.
 
-| Component | Description |
+| Component | Recorded value or definition |
 |---|---|
-| Readmission probability | Calibrated model-estimated probability of the recorded positive outcome |
-| Intervention effectiveness | Assumed reduction in readmission risk associated with hypothetical follow-up |
-| Nursing capacity | Available nursing hours under a specified staffing scenario |
-| Intervention time | Estimated nursing time required for a candidate intervention |
-| Allocation priority | Estimated intervention benefit relative to required nursing resources |
-| Simulation uncertainty | Variation introduced through Monte Carlo sampling of assumed outcomes or effectiveness |
+| Holdout cohort | 19,875 encounters |
+| High-risk encounters flagged | 2,742 (13.80%) |
+| Risk estimate | Saved calibrated readmission probability |
+| Intervention effectiveness | Beta distribution with α = 3.5 and β = 6.5 |
+| Mean assumed effectiveness | 35% |
+| Monte Carlo iterations | 1,000 |
+| Random seed | 42 |
+| Nursing-time requirement | Encounter-dependent estimate |
+| Allocation method | Greedy ranking by expected benefit per nursing hour |
 
-The intervention-effectiveness assumptions are not derived from a randomized clinical trial within DiaVigil.
+The simulation defines required nursing hours using:
 
-The simulation therefore evaluates hypothetical scenarios rather than verified treatment effects.
+\[
+H_i=\operatorname{clip}(1.5+0.25L_i+0.5P_i,\ 1.5,\ 8.0)
+\]
+
+where:
+
+- \(H_i\) represents estimated nursing hours for encounter \(i\).
+- \(L_i\) represents the recorded hospital length of stay.
+- \(P_i\) represents the number of prior inpatient encounters.
+
+The formula is an experimental workload assumption and has not been validated against observed nursing-time requirements.
 
 ### 3. Monte Carlo Intervention-Yield Simulation
 
-DiaVigil uses Monte Carlo simulation to examine how uncertainty in intervention effectiveness may influence estimated resource-allocation outcomes.
+DiaVigil performs 1,000 Monte Carlo iterations to examine uncertainty in hypothetical intervention effectiveness among the 2,742 high-risk encounters.
 
-Across simulated scenarios, the workflow estimates potential readmission reductions under the specified assumptions.
+For each simulated intervention-effectiveness value, the model estimates potential readmissions averted as:
 
-The outputs may include:
+\[
+A_i=p_i e_i
+\]
 
-- Estimated number of patients or encounters reached.
-- Estimated readmissions potentially averted.
-- Nursing hours utilized.
-- Estimated positive readmission outcomes captured by the allocation strategy.
-- Simulation-derived uncertainty bounds.
+where:
 
-The estimates depend on the predictive model, assumed intervention effectiveness, simulation design, and allocation constraints.
+- \(p_i\) is the calibrated model-estimated readmission probability.
+- \(e_i\) is the sampled hypothetical intervention effectiveness.
+- \(A_i\) is the expected number of readmissions averted for that encounter under the assumed risk-reduction model.
+
+The simulation aggregates expected benefits across the flagged cohort.
+
+**Recorded Monte Carlo results**
+
+| Metric | Result |
+|---|---:|
+| High-risk encounters | 2,742 |
+| Monte Carlo iterations | 1,000 |
+| Mean expected readmissions averted | 231.55 |
+| Lower 2.5th percentile | 228.06 |
+| Upper 97.5th percentile | 235.12 |
+
+The percentile interval describes variability under the specified simulation assumptions. It does not represent a clinical confidence interval for an empirically established intervention effect.
+
+The estimated 231.55 readmissions potentially averted is a hypothetical expectation, not a count of observed prevented readmissions.
 
 ### 4. Capacity-Constrained Nursing Allocation
 
-The allocation procedure evaluates candidate encounters under a limited nursing-hour budget.
+DiaVigil implements a greedy allocation procedure that ranks high-risk encounters according to expected intervention benefit per required nursing hour.
 
-Candidates are prioritized using an estimated efficiency measure based on expected readmissions potentially averted per required nursing hour.
+The allocation efficiency score is defined as:
 
-The simulation evaluates how many candidates can be accommodated without exceeding the configured resource capacity.
+\[
+E_i=\frac{A_i}{H_i}
+\]
 
-This provides an experimental framework for studying trade-offs between intervention coverage, expected benefit, and staffing limitations.
+where \(A_i\) represents expected readmissions potentially averted and \(H_i\) represents estimated nursing hours required.
 
-The resulting ranking should not be interpreted as a clinically validated treatment-priority recommendation.
+Candidates are ranked from highest to lowest estimated efficiency. The algorithm then selects encounters within the configured nursing-hour budget.
 
-### 5. Interpretation of Simulation Results
+Three operational staffing scenarios were evaluated.
 
-The resource-allocation simulation provides a framework for examining how model-estimated risk and operational constraints interact.
+**Recorded staffing-allocation results**
 
-Increasing nursing capacity may allow additional candidates to receive hypothetical interventions, while changes in assumed effectiveness can alter the estimated number of readmissions potentially averted.
+| Nursing-hour budget | Encounters reached | Hours utilized | Expected readmissions averted | Observed readmissions among selected encounters |
+|---|---:|---:|---:|---:|
+| 500 | 176 | 499.8 | 21.35 | 64 |
+| 1,500 | 465 | 1,498.0 | 52.48 | 131 |
+| 3,000 | 879 | 2,997.5 | 91.15 | 224 |
 
-However, the magnitude and reliability of these outcomes depend on assumptions that have not been prospectively validated.
+The results illustrate how increasing available nursing hours expands hypothetical intervention coverage.
 
-In particular, a higher predicted readmission risk does not necessarily imply a larger achievable benefit from a specific intervention.
+At a budget of 500 nursing hours, the algorithm selects 176 encounters, with an estimated 21.35 readmissions potentially averted.
 
-### 6. Limitations and Responsible Use
+At 3,000 nursing hours, the selected population increases to 879 encounters, with an estimated 91.15 readmissions potentially averted.
 
-The simulation has several important limitations:
+The observed readmission counts describe recorded outcomes among selected holdout encounters. They do not indicate that the simulated interventions prevented those events.
 
-- **Unverified intervention effectiveness:** The historical dataset does not establish causal effects of the hypothetical interventions.
-- **Estimated resource requirements:** Nursing-hour assumptions may not reflect actual hospital workflows.
-- **Model uncertainty:** Errors in readmission-risk estimates can affect allocation decisions.
-- **Generalizability:** Results derived from the historical cohort may not transfer to contemporary hospitals.
-- **Clinical applicability:** The allocation strategy has not been evaluated through prospective implementation or clinician review.
+### 5. Marginal Returns Under Staffing Constraints
 
-The simulated readmissions potentially averted should not be interpreted as observed clinical improvements or verified hospital cost savings.
+To examine diminishing marginal returns, DiaVigil evaluates 25 staffing budgets ranging from 200 to 5,000 nursing hours.
 
-**Research interpretation:** DiaVigil demonstrates how predictive risk modeling can be connected to uncertainty-aware, capacity-constrained resource-allocation experiments. The simulation provides a basis for investigating operational decision-support strategies, but further clinical validation and intervention-effectiveness evidence are required before real-world application.
+The marginal yield is calculated as the change in expected readmissions averted per additional 100 nursing hours:
 
+\[
+M=\frac{\Delta A}{\Delta H}\times100
+\]
+
+Selected results from the recorded capacity-allocation frontier are shown below.
+
+| Nursing-hour budget | Encounters reached | Expected readmissions averted | Marginal yield per 100 additional hours |
+|---|---:|---:|---:|
+| 400 | 144 | 17.73 | 3.91 |
+| 800 | 269 | 31.47 | 3.32 |
+| 1,200 | 387 | 43.85 | 3.05 |
+| 1,600 | 499 | 55.34 | 2.85 |
+| 2,000 | 609 | 66.19 | 2.68 |
+| 2,200 | 662 | 71.41 | 2.61 |
+
+The simulated marginal yield decreases as the nursing-hour budget expands.
+
+This behavior is consistent with the greedy allocation procedure, which prioritizes encounters with higher estimated benefit per nursing hour before allocating resources to lower-ranked encounters.
+
+The findings demonstrate diminishing estimated marginal returns within the configured simulation. They do not establish the actual clinical or economic value of additional nursing staff.
+
+### 6. Interpretation of Simulation Results
+
+The recorded results support three principal observations.
+
+**Resource availability influences intervention coverage.** Increasing the nursing-hour budget allows the allocation procedure to select more high-risk encounters.
+
+**Estimated intervention benefits depend on model predictions and assumed effectiveness.** The Monte Carlo simulation estimates approximately 231.55 potentially averted readmissions across the flagged high-risk cohort under the specified assumptions, without imposing the three operational staffing budgets.
+
+**Marginal estimated benefits decline as allocation capacity expands.** The simulated yield per additional 100 nursing hours decreases from approximately 3.91 at the 400-hour scenario to 2.61 at the 2,200-hour scenario.
+
+These observations characterize the implemented computational allocation framework rather than demonstrating improved patient outcomes.
+
+### 7. Reproducibility and Saved Artifacts
+
+Notebook 06 saves the simulation outputs as:
+
+`data/processed/simulation_artifacts.joblib`
+
+The serialized artifact includes:
+
+- `allocation_summary`: Results for the three operational staffing budgets.
+- `capacity_frontier`: Results across the 25 staffing-capacity scenarios.
+- `monte_carlo_bounds`: Mean expected readmissions averted and the lower and upper simulation percentile bounds.
+
+These outputs support subsequent inspection, comparison, and research reporting.
+
+The artifact should be loaded only from trusted sources because serialized Python objects may execute code during deserialization.
+
+### 8. Limitations and Responsible Use
+
+The resource-allocation simulation has several important limitations:
+
+- **Assumed intervention effectiveness:** The Beta-distributed effectiveness values are hypothetical and are not validated treatment-effect estimates.
+- **Unvalidated nursing-time assumptions:** Encounter-level nursing-hour requirements are derived from a configured formula rather than measured care-management workload.
+- **No causal identification:** The historical observational data do not establish that the simulated interventions would prevent readmissions.
+- **Model uncertainty:** Prediction errors and calibration limitations may affect allocation rankings and estimated benefits.
+- **Simplified allocation constraints:** The greedy procedure does not represent all clinical, staffing, scheduling, or patient-care constraints.
+- **Limited generalizability:** The simulation uses a historical diabetes-related hospital encounter dataset and may not reflect contemporary clinical practice.
+- **No prospective validation:** The allocation strategy has not been evaluated through prospective clinical implementation.
+
+**Research interpretation:** DiaVigil demonstrates a computational framework connecting calibrated readmission-risk predictions with stochastic intervention-effectiveness assumptions and capacity-constrained nursing-resource allocation. The findings support investigation of operational decision-support methods but do not establish actual readmission prevention, clinical effectiveness, verified cost savings, or readiness for deployment.
 ---
 
 ## AI-Agent Recommendation and Audit Workflow
