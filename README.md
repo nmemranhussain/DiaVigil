@@ -1866,30 +1866,33 @@ Independent external validation, clinical expert review, and prospective evaluat
 
 ## License and Responsible Use
 
-### License
+### Software License
 
-Project DiaVigil is an independently developed research prototype intended for academic study, methodological evaluation, and reproducible machine learning experimentation.
+Project DiaVigil's original software and associated documentation are distributed under the **MIT License**.
 
-The licensing terms for the project's original source code and documentation are specified in the repository's `LICENSE` file, where applicable.
+**Copyright © 2026 N M Emran Hussain.**
 
-The underlying Diabetes 130-US Hospitals dataset is maintained by the UCI Machine Learning Repository and remains subject to its original licensing and attribution requirements. The project's software license does not supersede the terms governing third-party data or dependencies.
+The MIT License permits use, modification, distribution, and commercial reuse, subject to retaining the applicable copyright and license notices.
 
-### Responsible Use
+See the repository's [LICENSE](LICENSE) file for the complete terms.
 
-DiaVigil investigates hospital readmission-risk prediction, probability calibration, subgroup performance, resource-allocation simulation, and structured AI-agent recommendation auditing.
+The Diabetes 130-US Hospitals dataset, third-party libraries, and other external resources remain subject to their respective licensing, attribution, and usage requirements. DiaVigil's MIT License does not override those terms.
 
-The project is intended for research and educational purposes.
+### Responsible Use and Clinical Disclaimer
 
-- **Not a medical device:** DiaVigil has not been validated or authorized for clinical diagnosis, treatment selection, or operational patient-care decisions.
-- **No demonstrated clinical effectiveness:** Predicted risks and simulated readmissions potentially averted do not establish actual improvements in patient outcomes.
-- **Human oversight:** Generated care recommendations are experimental and must not replace qualified clinical judgment.
-- **Fairness limitations:** Subgroup evaluations do not establish fairness across all populations or healthcare settings.
-- **Data responsibility:** Users must comply with applicable dataset licensing, privacy, and institutional requirements.
+DiaVigil is an experimental machine learning research prototype developed using historical hospital encounter data.
+
+- **Clinical validation:** The project has not undergone independent external or prospective clinical validation and is not established as safe or effective for patient-care decisions.
+- **Predictive uncertainty:** Estimated readmission probabilities and model explanations are subject to statistical, methodological, and dataset limitations.
+- **Simulated outcomes:** Resource-allocation estimates and potentially averted readmissions are hypothetical outcomes derived from configured assumptions, not observed clinical benefits.
+- **AI-agent recommendations:** Structured recommendations and deterministic grounding checks are experimental and do not establish clinical correctness or recommendation safety.
+- **Human oversight:** Healthcare professionals should not rely on DiaVigil outputs as a substitute for validated clinical evidence and qualified clinical judgment.
+- **Data governance:** Users are responsible for complying with applicable privacy, institutional, and third-party dataset requirements.
 
 ### Research Status
 
-DiaVigil is a computational research prototype evaluated using historical hospital encounter data.
+DiaVigil is intended to support methodological research into explainable, auditable, and resource-aware machine learning systems.
 
-Its current results support methodological investigation but do not establish external generalizability, clinical safety, or deployment readiness.
+The current implementation does not establish generalizability to contemporary healthcare settings, demonstrated intervention effectiveness, or readiness for clinical deployment.
 
-Independent validation and appropriate clinical assessment would be required before considering real-world healthcare applications.
+Independent reproduction, external validation, clinical expert assessment, and appropriately designed prospective studies would be required to evaluate.
