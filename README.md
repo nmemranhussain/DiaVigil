@@ -37,6 +37,40 @@ The project also demonstrates hypothetical resource-allocation simulations and a
 
 ---
 
+## Repository Structure & Reproducibility Guide
+
+DiaVigil is organized into modular Jupyter notebooks covering cohort construction, clinical feature engineering, model development, probability calibration, subgroup evaluation, AI-agent recommendation auditing, and resource-allocation simulation.
+
+### Notebook Inventory
+
+```text
+notebooks/
+├── 01_diavigil_cohort_filtering_and_group_split.ipynb
+│   └── Cohort construction, target definition, and patient-level data splitting
+├── 02_diavigil_clinical_feature_engineering_pipeline.ipynb
+│   └── Clinical feature engineering and transformation pipeline
+├── 03_diavigil_nested_cv_and_probability_calibration.ipynb
+│   └── Model training, cross-validation, probability calibration, and threshold selection
+├── 04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb
+│   └── Holdout evaluation and subgroup error analysis
+├── 05_diavigil_agentic_triage_and_faithfulness_critic.ipynb
+│   └── Structured recommendation generation and critic-based auditing
+├── 06_diavigil_dynamic_resource_allocation_simulation.ipynb
+│   └── Monte Carlo simulation and capacity-constrained resource allocation
+└── 00_DiaVigil_Reproducibility_Audit.ipynb
+    └── Artifact integrity and reproducibility checks
+```
+
+### Execution and Reproducibility
+
+Run the analytical notebooks in their documented dependency order, beginning with cohort construction and continuing through feature engineering, model development, evaluation, recommendation auditing, and simulation.
+
+Run the reproducibility audit after the required artifacts have been generated. The audit notebook should be treated as a verification step rather than automatically as the first notebook to execute.
+
+The workflow may depend on source data, saved artifacts, software versions, configuration settings, and access to the required files. Successful execution of an individual notebook does not by itself establish end-to-end reproducibility.
+
+---
+
 ## Quickstart & Execution Protocol
 
 This section describes how to set up DiaVigil, prepare the required data, execute the analytical workflow, and verify the generated artifacts. DiaVigil is organized into six analytical notebooks and one reproducibility-audit notebook.
@@ -1202,79 +1236,497 @@ The AI-agent workflow has several important limitations:
 
 ---
 
+# Reproducibility, Artifact Integrity, and Research Limitations
 
-## Reproducibility and Artifact Management
+DiaVigil incorporates a research-audit workflow to examine the availability, internal consistency, integrity, and saved-prediction reproducibility of its analytical artifacts.
 
-DiaVigil saves model artifacts, cohort data, evaluation results, simulation outputs, and research audit reports to support inspection and verification of the completed workflow. A reproducibility manifest records the saved artifacts and selected details of the software environment.
+The audit examines artifacts generated during cohort construction, feature engineering, model development, calibration, holdout evaluation, and subsequent research analyses.
 
-### Reproducibility Manifest
+The recorded results provide evidence that selected artifacts can be inspected and that saved predictions can be reproduced within the tested environment. They do not independently establish complete end-to-end reproducibility from raw data or clinical validity.
 
-The Step 30 manifest (`step30_reproducibility_manifest.json`) records the project name, manifest creation timestamp, Python version, operating platform, selected package versions, and metadata for each listed artifact.
+**Primary audit notebook:** `notebooks/00_DiaVigil_Reproducibility_Audit.ipynb`
 
-The recorded environment includes Python 3.13.16 on Linux x86-64, with versions specified for NumPy, pandas, scikit-learn, CatBoost, joblib, and PyArrow.
+## 1. Reproducibility Objectives
 
-### Artifact Inventory and Integrity
+The reproducibility assessment addresses five objectives:
 
-The manifest lists 15 artifacts, including:
+1. **Artifact availability:** Verify that the expected research artifacts are present.
+2. **Artifact inspection:** Confirm that selected serialized artifacts can be loaded and inspected.
+3. **Cross-artifact consistency:** Evaluate implemented consistency relationships among saved research outputs.
+4. **Prediction verification:** Confirm that saved model artifacts reproduce their corresponding saved probability predictions on the reserved holdout cohort.
+5. **Artifact traceability:** Record software-environment information, file sizes, and cryptographic hashes to support subsequent integrity verification.
 
-- Development and holdout cohort files in Parquet format.
-- The saved feature-engineering pipeline and model calibration artifacts.
-- Holdout evaluation and subgroup fairness results.
-- Baseline comparison and patient-clustered bootstrap results.
-- Resource-allocation simulation outputs and agent-audit examples.
-- Research audit and final model-decision reports.
+These objectives concern computational consistency and artifact management rather than independent clinical validation.
 
-A subsequent integrity check confirmed that all 15 listed artifacts existed and that their current file sizes and SHA-256 hashes matched the manifest. This provides evidence that the checked files had not changed relative to their recorded metadata at the time of verification.
+## 2. Research Artifact Inventory
 
-### Cross-Artifact Consistency
+Notebook 00 performs an inventory of the expected research artifacts.
 
-The workflow also includes checks of selected relationships between saved cohort labels, predictions, decision thresholds, evaluation results, calibration outputs, and subgroup audit artifacts. In Step 28C, all 18 implemented consistency checks passed.
+The recorded audit identified all 15 expected research files.
 
-These checks establish consistency for the tested relationships. They do not independently establish the correctness of every model prediction, the validity of the modeling assumptions, or the clinical usefulness of the results.
+| Verification measure | Recorded result |
+|---|---|
+| Expected research artifacts | 15 |
+| Artifacts found | 15 |
+| Missing expected artifacts | 0 |
+| Serialized artifacts selected for inspection | 6 |
+| Successfully loaded and inspected | 6 |
 
-### Reproducibility Limitations
+The inventory confirms that the expected files were available in the tested research environment.
 
-The manifest documents selected environment details and saved-artifact metadata, but it does not, by itself, demonstrate that the entire project can be recreated from raw data in a fresh environment. The recorded package versions also do not constitute a complete dependency specification.
+Successful loading establishes that the selected serialized objects could be deserialized and inspected. It does not independently establish that their underlying data, model parameters, or analytical assumptions are correct.
 
-Reproducing the full workflow would require access to the necessary source notebooks, input data, dependencies, configuration settings, and execution procedures. Further validation in a clean environment would help establish whether the workflow can be rerun and its results reproduced.
+The inventory results also do not establish that every expected artifact is included in a fresh GitHub repository checkout.
 
-### Summary
+## 3. Cross-Artifact Consistency Verification
 
-DiaVigil includes a manifest-based record of its saved artifacts, recorded software versions, SHA-256 hashes, and selected cross-artifact consistency checks. All 15 listed artifacts passed the documented integrity verification, and all 18 Step 28C consistency checks passed. These results support artifact traceability and consistency within the tested workflow, while full end-to-end reproducibility remains a separate requirement.
+Notebook 00 implements consistency checks across selected saved research outputs.
+
+The checks examine documented relationships among cohort information, prediction outputs, decision thresholds, calibration-related results, and evaluation artifacts.
+
+**Recorded result:**
+
+| Measure | Result |
+|---|---|
+| Implemented consistency checks | 18 |
+| Checks passed | 18 |
+| Checks failed | 0 |
+| Recorded pass rate | 100% |
+
+All 18 implemented checks passed in the recorded audit.
+
+These results provide evidence of internal consistency for the relationships explicitly tested.
+
+They do not establish the correctness of every modeling assumption, feature transformation, statistical procedure, or saved research result.
+
+## 4. Saved-Prediction Reproducibility
+
+Notebook 00, Step 31, verifies whether the saved baseline and revised model artifacts can reproduce their respective stored holdout probability arrays.
+
+The verification uses the same reserved holdout cohort of 19,875 hospital encounters.
+
+The recorded procedure:
+
+1. Loads the corresponding saved model and preprocessing artifacts.
+2. Applies the saved modeling components to the reserved holdout data.
+3. Recomputes predicted readmission probabilities.
+4. Compares the recomputed probabilities against the corresponding saved prediction arrays.
+5. Reports the results of the implemented verification checks.
+
+**Recorded verification summary:**
+
+| Component | Verification result |
+|---|---|
+| Original baseline model | Saved holdout probabilities reproduced |
+| Revised model (Step 23) | Saved holdout probabilities reproduced |
+| Holdout encounters | 19,875 |
+| Verification procedure | Notebook 00, Step 31 |
+
+The recorded results support saved-prediction reproducibility for both model configurations within the tested environment.
+
+This is narrower than independently reproducing model development. It does not demonstrate that retraining from raw data in a new environment will yield identical fitted models, calibrated probabilities, thresholds, or evaluation metrics.
+
+## 5. Artifact Manifest and SHA-256 Integrity Records
+
+Notebook 00, Step 30, generates a research-artifact manifest.
+
+The recorded manifest contains:
+
+- Software-environment information.
+- Research-artifact filenames.
+- Recorded file sizes.
+- SHA-256 cryptographic hashes.
+
+**Recorded manifest coverage:**
+
+| Property | Result |
+|---|---|
+| Research files recorded | 15 |
+| File-size metadata | Recorded |
+| SHA-256 hashes | Recorded |
+| Software-environment information | Recorded |
+
+SHA-256 hashes provide file fingerprints that can be compared against subsequently calculated hashes to detect changes in file contents.
+
+A matching hash supports byte-level consistency with the recorded artifact. It does not establish that the artifact was generated using a scientifically valid method or that its contents are clinically correct.
+
+The manifest supports traceability and subsequent integrity checks, but its existence alone does not prove independent reproduction of the analytical workflow.
+
+## 6. Recorded Software Environment
+
+Notebook 00, Step 30, recorded the following software versions during the research-artifact audit.
+
+| Software | Recorded version |
+|---|---|
+| Python | 3.13.16 |
+| NumPy | 2.1.3 |
+| pandas | 2.2.3 |
+| scikit-learn | 1.6.1 |
+| CatBoost | 1.2.10 |
+| joblib | 1.6.0 |
+| PyArrow | 23.0.1 |
+
+These versions describe the environment recorded during the audit.
+
+The analytical notebooks were developed using Google Colab and Google Drive storage. Some notebook paths and environment configurations are specific to that setup.
+
+The project has not yet demonstrated that installing the recorded dependencies in a fresh environment is sufficient to reproduce every analytical result.
+
+Package-version compatibility, execution configuration, source-data availability, and artifact dependencies must be considered when attempting independent reproduction.
+
+## 7. Research Reproducibility Status
+
+The current reproducibility evidence can be summarized as follows.
+
+| Reproducibility component | Current status |
+|---|---|
+| Expected artifact inventory | Verified in recorded audit |
+| Selected artifact deserialization | Verified in recorded audit |
+| Implemented cross-artifact checks | 18 of 18 passed |
+| Saved baseline predictions | Reproduced in tested environment |
+| Saved revised-model predictions | Reproduced in tested environment |
+| SHA-256 artifact manifest | Recorded |
+| Complete fresh-environment execution | Not demonstrated |
+| Independent raw-data-to-results reproduction | Not demonstrated |
+| Independent external dataset validation | Not performed |
+| Prospective clinical validation | Not performed |
+
+These results distinguish the verification activities completed within the existing research environment from additional validation and reproduction activities that remain necessary.
+
+## 8. Research Limitations
+
+DiaVigil has several methodological, statistical, operational, and clinical limitations.
+
+### 8.1 Historical Data and Generalizability
+
+The project uses the Diabetes 130-US Hospitals dataset, covering hospital encounters recorded between 1999 and 2008.
+
+The historical dataset may not reflect contemporary patient populations, treatment practices, hospital operations, or readmission-management procedures.
+
+Although the evaluation uses a reserved patient-separated holdout cohort, performance on that cohort does not establish generalizability to independent hospitals, later patient populations, or different healthcare systems.
+
+### 8.2 Outcome Definition and Measurement
+
+The binary outcome is constructed from the dataset's recorded `readmitted` categories.
+
+The positive class represents a recorded readmission within 30 days.
+
+The dataset does not independently establish whether an observed readmission was preventable, clinically avoidable, or causally related to a particular treatment decision.
+
+Consequently, the prediction target should not be interpreted as a direct measure of preventable readmission.
+
+### 8.3 Model Development and Probability Calibration
+
+The project evaluates CatBoost classification models with probability calibration and cost-sensitive decision-threshold selection.
+
+The original modeling workflow and revised modeling workflow use different internal validation procedures.
+
+The revised workflow separates patient-grouped training, probability-calibration, and threshold-selection partitions.
+
+This separation addresses important sources of internal information leakage, but it does not eliminate all sources of modeling uncertainty or establish generalization beyond the evaluated data.
+
+The selected decision threshold depends on configured false-positive and false-negative cost assumptions.
+
+Those assumptions are experimental and have not been established as clinically or economically optimal.
+
+### 8.4 Subgroup Evaluation and Fairness
+
+DiaVigil examines selected subgroup error rates across available demographic categories.
+
+These analyses support descriptive investigation of model behavior across the represented groups.
+
+However, subgroup estimates may be affected by unequal sample sizes, missing demographic information, historical data limitations, and statistical uncertainty.
+
+The reported analyses do not establish fairness across every relevant population, clinical setting, or definition of algorithmic fairness.
+
+### 8.5 Statistical Uncertainty
+
+The project uses paired patient-cluster bootstrap analysis with 1,000 replicates for selected comparisons between the original and revised models.
+
+Patient-level clustering accounts for repeated encounters within the sampled patient groups during the implemented resampling procedure.
+
+The resulting uncertainty estimates depend on the available cohort, the bootstrap design, and the statistics being compared.
+
+They do not account for every possible source of uncertainty, including dataset shift, changes in clinical practice, or deployment-related effects.
+
+### 8.6 Resource-Allocation Simulation
+
+The resource-allocation workflow uses calibrated risk estimates, assumed intervention effectiveness, estimated nursing-hour requirements, and capacity-constrained allocation rules.
+
+The simulation includes 1,000 Monte Carlo iterations and evaluates hypothetical staffing scenarios.
+
+The intervention-effectiveness distribution and nursing-time requirements are configured research assumptions rather than estimates validated through a clinical intervention study.
+
+Estimated readmissions potentially averted are simulated expectations, not observed prevented readmissions.
+
+The simulation does not establish verified hospital cost savings, clinical intervention effectiveness, or an optimal real-world staffing policy.
+
+### 8.7 AI-Agent Recommendation and Audit Workflow
+
+The AI-agent workflow combines model-derived predictions, TreeSHAP feature attributions, deterministic recommendation synthesis, and a rule-based critic.
+
+The recorded demonstration includes an accepted grounded recommendation and a rejected recommendation containing deliberately unsupported clinical references.
+
+The critic verifies selected grounding rules rather than conducting comprehensive clinical fact-checking.
+
+The demonstration does not establish general hallucination-detection performance, clinical recommendation safety, or the effectiveness of generated care directives.
+
+### 8.8 Reproducibility and Software Dependencies
+
+The recorded audit verifies selected saved artifacts and internal consistency relationships.
+
+However, full reproduction from source data in a clean environment has not been demonstrated.
+
+Additional challenges include:
+
+- Environment-specific Google Colab and Google Drive paths.
+- Dependencies between sequential analytical notebooks.
+- Compatibility of saved Python model artifacts with installed software versions.
+- Availability of generated intermediate datasets and model artifacts.
+- Reproduction of training, calibration, threshold-selection, and evaluation procedures.
+
+Serialized Python artifacts should be loaded only from trusted sources because deserialization can execute code.
+
+## 9. Future Validation and Reproducibility Priorities
+
+Further research could strengthen DiaVigil through the following activities:
+
+1. **Clean-environment reproduction:** Execute the complete workflow from documented source data using a newly configured environment.
+2. **Dependency management:** Establish and test a reproducible dependency specification and execution configuration.
+3. **Independent external validation:** Evaluate the trained modeling approach on suitable data from different institutions or time periods.
+4. **Calibration and subgroup robustness:** Examine probability calibration, classification errors, and subgroup performance under additional validation settings.
+5. **Sensitivity analysis:** Evaluate how alternative error-cost ratios, intervention-effectiveness assumptions, and staffing constraints influence reported conclusions.
+6. **Expanded agent auditing:** Test the critic on a larger and more diverse set of grounded and unsupported recommendations.
+7. **Clinical expert assessment:** Obtain qualified clinical review of the proposed recommendation rules, risk explanations, and simulated intervention assumptions.
+8. **Prospective evaluation:** Investigate operational feasibility and patient outcomes through appropriately designed studies before considering clinical use.
+
+These activities represent future research directions and should not be interpreted as completed validation.
+
+## 10. Research Interpretation and Responsible Use
+
+DiaVigil demonstrates a computational research workflow integrating hospital readmission-risk prediction, probability calibration, cost-sensitive threshold selection, subgroup evaluation, statistical uncertainty analysis, resource-allocation simulation, and deterministic AI-agent recommendation auditing.
+
+The recorded reproducibility audit supports artifact availability, selected artifact inspection, internal consistency, and saved-prediction reproducibility within the tested environment.
+
+The findings are limited to the historical dataset, implemented analytical procedures, recorded research artifacts, and specified experimental assumptions.
+
+**DiaVigil is a research prototype, not a clinically validated medical decision-support system. Its predictions, simulated resource-allocation results, and generated recommendations should not be used independently to guide patient care, allocate clinical resources, or claim demonstrated improvements in hospital outcomes.**
+
+Independent reproduction, external validation, clinical review, and prospective assessment would be necessary before considering operational deployment.
 
 ---
 
-## Repository Structure & Reproducibility Guide
+# Research Contributions and Future Work
 
-DiaVigil is organized into modular Jupyter notebooks covering cohort construction, clinical feature engineering, model development, probability calibration, subgroup evaluation, AI-agent recommendation auditing, and resource-allocation simulation.
+DiaVigil investigates how hospital readmission-risk prediction can be connected to probability calibration, cost-sensitive decision-making, subgroup evaluation, resource-allocation simulation, and structured AI-assisted decision support.
 
-### Notebook Inventory
+Rather than treating predictive classification as an isolated task, the project examines several interconnected components of a research decision-support workflow using historical hospital encounter data.
 
-```text
-notebooks/
-├── 01_diavigil_cohort_filtering_and_group_split.ipynb
-│   └── Cohort construction, target definition, and patient-level data splitting
-├── 02_diavigil_clinical_feature_engineering_pipeline.ipynb
-│   └── Clinical feature engineering and transformation pipeline
-├── 03_diavigil_nested_cv_and_probability_calibration.ipynb
-│   └── Model training, cross-validation, probability calibration, and threshold selection
-├── 04_diavigil_algorithmic_fairness_and_subgroup_audit.ipynb
-│   └── Holdout evaluation and subgroup error analysis
-├── 05_diavigil_agentic_triage_and_faithfulness_critic.ipynb
-│   └── Structured recommendation generation and critic-based auditing
-├── 06_diavigil_dynamic_resource_allocation_simulation.ipynb
-│   └── Monte Carlo simulation and capacity-constrained resource allocation
-└── 00_DiaVigil_Reproducibility_Audit.ipynb
-    └── Artifact integrity and reproducibility checks
-```
+The contributions are methodological and computational. They do not establish clinical effectiveness, real-world readmission prevention, or deployment readiness.
 
-### Execution and Reproducibility
+## 1. Research Contributions
 
-Run the analytical notebooks in their documented dependency order, beginning with cohort construction and continuing through feature engineering, model development, evaluation, recommendation auditing, and simulation.
+### 1.1 Patient-Level Data Partitioning and Leakage-Aware Model Development
 
-Run the reproducibility audit after the required artifacts have been generated. The audit notebook should be treated as a verification step rather than automatically as the first notebook to execute.
+DiaVigil implements patient-grouped data partitioning to reduce information leakage between development and holdout evaluation.
 
-The workflow may depend on source data, saved artifacts, software versions, configuration settings, and access to the required files. Successful execution of an individual notebook does not by itself establish end-to-end reproducibility.
+The analytical cohort contains 100,114 eligible encounters, partitioned into:
+
+- 80,239 development encounters.
+- 19,875 reserved holdout encounters.
+
+Verification confirmed that no patient identifiers were shared between the development and holdout partitions.
+
+The revised modeling procedure further separates the development cohort into patient-grouped training, probability-calibration, and decision-threshold-selection partitions.
+
+This approach provides a structured framework for examining predictive performance while reducing overlap between patients used in distinct modeling stages.
+
+**Research contribution:** An implemented patient-grouped modeling and evaluation workflow that explicitly separates development, calibration, threshold selection, and final holdout assessment.
+
+### 1.2 Calibrated Readmission-Risk Prediction and Cost-Sensitive Decision Analysis
+
+DiaVigil develops and compares CatBoost-based readmission-risk classification workflows with isotonic probability calibration.
+
+The project evaluates model behavior using discrimination, calibration, classification, and error-cost measures rather than relying on classification accuracy alone.
+
+The decision-threshold procedure assigns a configured false-negative penalty five times the false-positive penalty.
+
+The revised modeling workflow selected an operating threshold of approximately 0.1620 under these assumptions.
+
+The original and revised models are evaluated on the same reserved holdout cohort to support paired comparisons.
+
+**Research contribution:** An experimental framework connecting calibrated risk estimation with explicit error-cost assumptions and threshold-dependent classification outcomes.
+
+The selected threshold represents an optimization result under configured assumptions, not a clinically validated decision boundary.
+
+### 1.3 Subgroup Evaluation and Statistical Uncertainty
+
+DiaVigil examines subgroup false-negative rates across available age, gender, and race categories.
+
+The project also uses paired patient-cluster bootstrap analysis with 1,000 replicates to estimate uncertainty in selected differences between the original and revised models.
+
+These analyses provide a basis for examining how model comparisons may vary across performance measures and patient subgroups.
+
+**Research contribution:** Integration of descriptive subgroup error analysis and patient-clustered uncertainty estimation into the comparative model-evaluation workflow.
+
+The results do not establish fairness across every relevant population or eliminate uncertainty arising from historical data and external distribution shifts.
+
+### 1.4 Stochastic Resource-Allocation Simulation
+
+DiaVigil extends risk prediction into an experimental nursing-resource allocation framework.
+
+Notebook 06 combines saved readmission-risk predictions with hypothetical intervention-effectiveness assumptions, estimated nursing-time requirements, and capacity-constrained allocation rules.
+
+The recorded simulation includes:
+
+- 2,742 high-risk encounters.
+- 1,000 Monte Carlo iterations.
+- Three illustrated staffing-allocation budgets.
+- A 25-scenario nursing-capacity analysis.
+- A greedy allocation procedure prioritizing estimated benefit per required nursing hour.
+
+Under the specified simulation assumptions, the mean estimated number of potentially averted readmissions among flagged encounters was approximately 231.55, before imposing the illustrated staffing-allocation budgets.
+
+In the capacity-constrained analysis, a budget of 500 nursing hours selected 176 encounters with an estimated 21.35 readmissions potentially averted. At 3,000 nursing hours, the selected population increased to 879 encounters with an estimated 91.15 readmissions potentially averted.
+
+**Research contribution:** A computational framework for examining how predictive risk estimates, assumed intervention effectiveness, and limited nursing resources interact under alternative allocation scenarios.
+
+These results are simulated expectations, not observed intervention effects or verified hospital cost savings.
+
+### 1.5 Structured Multi-Agent Recommendation and Grounding Audit
+
+DiaVigil implements an experimental deterministic multi-agent workflow comprising:
+
+1. A Clinical Retriever for encounter-level information.
+2. An Inference Core for calibrated risk prediction and TreeSHAP attribution.
+3. A Synthesis Engine for structured, rule-based recommendation generation.
+4. A deterministic Critic Gate for selected feature-grounding checks.
+
+Pydantic schemas define the structure of generated recommendation briefs.
+
+The recorded demonstration includes one accepted grounded recommendation and one rejected recommendation containing deliberately unsupported clinical references.
+
+**Research contribution:** A modular computational demonstration linking predictive model outputs, local feature explanations, structured recommendation synthesis, and explicit rule-based verification.
+
+The current implementation does not use an LLM for free-form recommendation generation, and the critic has not been validated as a comprehensive clinical hallucination-detection system.
+
+### 1.6 Reproducibility and Research-Artifact Verification
+
+DiaVigil includes a dedicated research-audit workflow for inspecting saved analytical artifacts and verifying selected consistency relationships.
+
+The recorded audit confirmed:
+
+- All 15 expected research artifacts were present.
+- Six selected serialized artifacts were successfully loaded and inspected.
+- All 18 implemented cross-artifact consistency checks passed.
+- Saved baseline and revised-model holdout probabilities were reproduced from their respective saved model artifacts.
+- A manifest recorded software-environment information, file sizes, and SHA-256 hashes for 15 research files.
+
+**Research contribution:** An artifact-centered verification procedure supporting internal consistency assessment, saved-prediction reproducibility, and research traceability.
+
+The audit does not independently establish complete end-to-end reproduction from raw data in a clean environment.
+
+## 2. Future Research Directions
+
+The current implementation provides a foundation for several further research investigations.
+
+### 2.1 Independent Reproduction and External Validation
+
+Future work should establish a clean-environment execution procedure that reproduces the analytical workflow from documented source data.
+
+This would include dependency management, deterministic execution settings where feasible, automated verification tests, and regeneration of research artifacts.
+
+Subsequent research could evaluate the modeling approach using suitable independent hospital datasets or more recent patient populations.
+
+The objective would be to investigate reproducibility, transportability, calibration stability, and performance under dataset shift.
+
+### 2.2 Robust Calibration and Decision-Threshold Optimization
+
+Further research could compare additional probability-calibration methods and evaluate calibration across clinically relevant subgroups.
+
+Potential investigations include:
+
+- Comparing isotonic calibration with alternative calibration procedures.
+- Evaluating threshold stability across validation partitions.
+- Conducting sensitivity analyses under different false-positive and false-negative cost ratios.
+- Investigating uncertainty-aware or capacity-sensitive decision thresholds.
+
+These analyses could help determine how strongly the selected decision policy depends on modeling and cost assumptions.
+
+### 2.3 Subgroup Robustness and Distribution Shift
+
+Future studies could examine whether subgroup performance differences remain stable across alternative cohorts, time periods, and healthcare institutions.
+
+Research directions include evaluating subgroup calibration, uncertainty intervals, missing demographic information, and changes in patient characteristics.
+
+These investigations would support a more comprehensive assessment of model reliability and potential disparities, without assuming that any single fairness metric fully characterizes equitable clinical performance.
+
+### 2.4 Clinically Informed Resource-Allocation Models
+
+The current allocation simulation could be extended using empirically estimated intervention effectiveness, observed nursing-workload data, and more realistic operational constraints.
+
+Potential extensions include:
+
+- Comparing greedy allocation with alternative optimization methods.
+- Incorporating scheduling, staffing availability, and intervention eligibility.
+- Modeling heterogeneous intervention effects when supported by suitable evidence.
+- Evaluating uncertainty in nursing-time requirements and intervention costs.
+- Comparing allocation strategies under alternative objectives and capacity constraints.
+
+These extensions would require additional data and validation before their outputs could support real-world operational decisions.
+
+### 2.5 Explainable and Auditable Agentic Decision Support
+
+The deterministic agent workflow provides a starting point for investigating more advanced decision-support architectures.
+
+Future research could explore retrieval-augmented generation, evidence-linked recommendation synthesis, and more comprehensive verification mechanisms.
+
+Possible extensions include:
+
+- Incorporating clinically reviewed evidence sources.
+- Evaluating LLM-based recommendation generation against the existing deterministic baseline.
+- Expanding grounding checks beyond predefined feature-name matching.
+- Testing unsupported-claim detection across larger, systematically constructed evaluation sets.
+- Introducing uncertainty-aware abstention and human-review pathways.
+- Measuring recommendation completeness, consistency, and audit reliability.
+
+Such systems would require clinical expert assessment and appropriate safety evaluation before any patient-care application.
+
+### 2.6 Prospective Evaluation and Human–AI Interaction
+
+A longer-term research direction is to investigate how clinicians interpret and interact with model-generated risk estimates, explanations, and structured recommendations.
+
+Potential studies could examine:
+
+- Interpretability and usability of risk explanations.
+- Clinician agreement and disagreement with generated recommendations.
+- Human oversight of automated decision-support outputs.
+- Effects of uncertainty presentation on decision-making.
+- Workflow integration and potential automation bias.
+
+Prospective evaluation would be necessary to determine whether any proposed system improves clinical decisions or patient outcomes.
+
+## 3. Long-Term Research Vision
+
+DiaVigil's longer-term research direction is to investigate an integrated, evidence-grounded clinical decision-support architecture connecting:
+
+**Patient Data → Calibrated Risk Prediction → Explainable Risk Assessment → Resource-Constrained Decision Analysis → Structured Recommendation Generation → Grounding Verification → Human Review**
+
+The current project implements experimental components of this architecture using historical encounter data, calibrated machine learning, simulation, and deterministic recommendation auditing.
+
+Future research could investigate whether these components can be extended into more adaptive, clinically informed, and independently validated systems.
+
+The intended direction is to support transparent and accountable human decision-making, not to replace clinical judgment.
+
+## 4. Research Significance
+
+DiaVigil contributes an integrated computational research prototype that connects predictive modeling with several downstream decision-support questions.
+
+Its principal significance lies in demonstrating how risk prediction, probability calibration, cost-sensitive thresholds, subgroup evaluation, uncertainty analysis, resource-allocation simulation, and auditable recommendation generation can be examined within a related analytical workflow.
+
+The project also documents methodological limitations and distinguishes verified computational results from hypothetical intervention effects and unvalidated clinical applications.
+
+**Research conclusion:** DiaVigil provides an experimental foundation for investigating explainable, auditable, and resource-aware machine learning decision-support systems. Further independent reproduction, external validation, clinical assessment, and prospective research are required before its methods or outputs could be considered for operational patient-care use.
 
 ---
 
@@ -1336,27 +1788,106 @@ DiaVigil demonstrates a research workflow that connects readmission risk predict
 
 ---
 
-## Citation & Attribution
+## References and Citation
 
-If you use the DiaVigil codebase, adapt its methodology, or refer to its reported findings, please cite the project repository and the relevant original data sources.
+DiaVigil builds upon publicly available clinical encounter data and established research in hospital readmission prediction. The project extends these foundations through calibrated machine learning, subgroup performance auditing, uncertainty analysis, experimental resource-allocation simulation, and structured AI-agent recommendation auditing.
 
-### DiaVigil Project
+Researchers who use the DiaVigil codebase, adapt its methodology, or reference its findings are encouraged to cite the project repository and acknowledge the original dataset and related research.
+
+### 1. Cite Project DiaVigil
+
+**Project:** *Project DiaVigil: Calibrated Machine Learning, Algorithmic Fairness Auditing, and Grounded Multi-Agent Decision Support*
+
+**Author:** N. M. Emran Hussain  
+**Year:** 2026  
+**Repository:** https://github.com/nmemranhussain/DiaVigil
+
+**BibTeX citation:**
 
 ```bibtex
 @misc{hussain2026diavigil,
-  author       = {Hussain, N M Emran},
-  title        = {Project DiaVigil: Calibrated Machine Learning,
+  author       = {Hussain, N. M. Emran},
+  title        = {{Project DiaVigil: Calibrated Machine Learning,
                   Algorithmic Fairness Auditing, and Grounded
-                  Multi-Agent Decision Support},
+                  Multi-Agent Decision Support}},
   year         = {2026},
   publisher    = {GitHub},
-  howpublished = {\url{https://github.com/nmemranhussain/DiaVigil}}
+  howpublished = {\url{https://github.com/nmemranhussain/DiaVigil}},
+  url          = {https://github.com/nmemranhussain/DiaVigil},
+  note         = {Research software repository}
 }
 ```
 
-### Underlying Dataset and Research
+This citation identifies DiaVigil as a research software project rather than a peer-reviewed publication.
 
-- **Dataset:** UCI Machine Learning Repository, *Diabetes 130-US Hospitals for Years 1999–2008*. Cite the dataset record when using or discussing the underlying data.
-- **Related publication:** Strack, B., DeShazo, J. P., Gennings, C., et al. (2014). *Impact of HbA1c Measurement on Hospital Readmission Rates: Analysis of 70,000 Clinical Database Patient Records*. *BioMed Research International*. https://doi.org/10.1155/2014/781670
+### 2. Underlying Clinical Dataset
 
-Please distinguish the original dataset and published research from DiaVigil's own implementation, experiments, and findings. The project is a research prototype, and its results require independent validation before clinical conclusions can be drawn.
+**Dataset:** *Diabetes 130-US Hospitals for Years 1999–2008*
+
+**Source:** UCI Machine Learning Repository
+
+**Dataset DOI:** https://doi.org/10.24432/C5230J
+
+The dataset contains historical hospital encounter records involving patients with diabetes from 130 U.S. hospitals and integrated delivery networks during 1999–2008.
+
+DiaVigil uses this dataset for retrospective readmission-risk modeling, clinical feature engineering, subgroup analysis, and experimental decision-support evaluation.
+
+Researchers using the underlying data should cite the official UCI dataset record in accordance with the repository's citation guidance.
+
+### 3. Related Foundational Research
+
+Strack, B., DeShazo, J. P., Gennings, C., Olmo, J. L., Ventura, S., Cios, K. J., & Clore, J. N. (2014).
+
+*Impact of HbA1c Measurement on Hospital Readmission Rates: Analysis of 70,000 Clinical Database Patient Records.*
+
+**BioMed Research International**, 2014, Article 781670.
+
+https://doi.org/10.1155/2014/781670
+
+This publication provides foundational research context for the underlying hospital encounter dataset and the investigation of diabetes-related hospital readmissions.
+
+### 4. Attribution and Research Independence
+
+DiaVigil is an independently developed research prototype using the publicly available dataset described above.
+
+The project's feature-engineering implementation, CatBoost-based modeling workflows, probability calibration, decision-threshold analysis, subgroup audits, resource-allocation simulations, and AI-agent recommendation auditing are components of the DiaVigil research implementation.
+
+The original dataset and associated publication should not be interpreted as validating DiaVigil's specific modeling procedures, experimental results, simulated interventions, or generated recommendations.
+
+### 5. Research and Clinical-Use Disclaimer
+
+DiaVigil is intended for retrospective machine learning research, methodological evaluation, and experimental decision-support analysis.
+
+Its findings do not establish clinical effectiveness, causal intervention benefits, universal algorithmic fairness, or readiness for real-world healthcare deployment.
+
+Independent external validation, clinical expert review, and prospective evaluation would be necessary before considering operational or patient-care applications.
+
+## License and Responsible Use
+
+### License
+
+Project DiaVigil is an independently developed research prototype intended for academic study, methodological evaluation, and reproducible machine learning experimentation.
+
+The licensing terms for the project's original source code and documentation are specified in the repository's `LICENSE` file, where applicable.
+
+The underlying Diabetes 130-US Hospitals dataset is maintained by the UCI Machine Learning Repository and remains subject to its original licensing and attribution requirements. The project's software license does not supersede the terms governing third-party data or dependencies.
+
+### Responsible Use
+
+DiaVigil investigates hospital readmission-risk prediction, probability calibration, subgroup performance, resource-allocation simulation, and structured AI-agent recommendation auditing.
+
+The project is intended for research and educational purposes.
+
+- **Not a medical device:** DiaVigil has not been validated or authorized for clinical diagnosis, treatment selection, or operational patient-care decisions.
+- **No demonstrated clinical effectiveness:** Predicted risks and simulated readmissions potentially averted do not establish actual improvements in patient outcomes.
+- **Human oversight:** Generated care recommendations are experimental and must not replace qualified clinical judgment.
+- **Fairness limitations:** Subgroup evaluations do not establish fairness across all populations or healthcare settings.
+- **Data responsibility:** Users must comply with applicable dataset licensing, privacy, and institutional requirements.
+
+### Research Status
+
+DiaVigil is a computational research prototype evaluated using historical hospital encounter data.
+
+Its current results support methodological investigation but do not establish external generalizability, clinical safety, or deployment readiness.
+
+Independent validation and appropriate clinical assessment would be required before considering real-world healthcare applications.
