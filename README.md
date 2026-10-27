@@ -687,134 +687,127 @@ flowchart TD
 ```
 ---
 
-## Experimental Results
+## Experimental Results and Model Evaluation
 
-### Holdout Model Comparison
+DiaVigil evaluates hospital readmission-risk prediction using a reserved holdout cohort and compares the original CatBoost model with a revised modeling procedure designed to separate model training, probability calibration, and decision-threshold selection.
 
-The original baseline and the Step 23 model were evaluated on the same untouched holdout cohort of 19,875 encounters, using the selected decision threshold of approximately 0.1620.
+The evaluation examines predictive discrimination, classification outcomes, calibration, subgroup errors, and statistical uncertainty. The results reflect retrospective performance on the historical Diabetes 130-US Hospitals dataset rather than demonstrated clinical effectiveness.
 
-| Metric | Original baseline | Step 23 model |
+### 1. Experimental Setup
+
+The analytical cohort contains 100,114 eligible hospital encounters after applying the documented exclusion criteria.
+
+| Dataset partition | Encounters | Purpose |
+|---|---:|---|
+| Development cohort | 80,239 | Model development, calibration, and threshold selection |
+| Reserved holdout cohort | 19,875 | Independent model evaluation |
+| **Total** | **100,114** | **Eligible analytical cohort** |
+
+The development and holdout cohorts are patient-disjoint. Both models are evaluated on the same holdout cohort, which contains 2,240 positive readmission outcomes.
+
+The revised modeling procedure additionally separates the development cohort into training, calibration, and threshold-selection partitions.
+
+### 2. Original vs. Revised Model Performance
+
+The following results were obtained from the reserved holdout cohort.
+
+| Evaluation metric | Original model | Revised model |
 |---|---:|---:|
-| PR-AUC | 0.203595 | 0.201322 |
-| ROC-AUC | 0.664123 | 0.657848 |
-| Brier score | 0.096154 | 0.096093 |
-| Precision | 23.81% | 22.42% |
+| PR-AUC | 0.2036 | 0.2013 |
+| ROC-AUC | 0.6641 | 0.6578 |
 | Recall | 29.15% | 31.96% |
-| False-positive rate | 11.83% | 14.05% |
-| False-negative rate | 70.85% | 68.04% |
-| False positives | 2,089 | 2,478 |
-| False negatives | 1,587 | 1,524 |
-| True positives | 653 | 716 |
-| True negatives | 15,546 | 15,157 |
+| False-positive predictions | 2,089 | 2,478 |
 
-The Step 23 model identified 63 additional positive outcomes and reduced false negatives by 63 compared with the baseline. Recall increased by 2.81 percentage points, while precision declined by approximately 1.40 percentage points. The model also produced 389 additional false positives.
+The revised model increased recall by approximately 2.81 percentage points, identifying additional positive outcomes. However, this improvement was accompanied by 389 additional false-positive predictions.
 
-PR-AUC declined by 0.002273 and ROC-AUC declined by 0.006274. The Brier score improved slightly, from 0.096154 to 0.096093. These results show a trade-off between identifying more positive outcomes and maintaining discrimination and precision.
+The revised model also exhibited slightly lower PR-AUC and ROC-AUC values than the original model.
 
-### Paired Patient-Cluster Bootstrap
+These results illustrate a trade-off between identifying additional positive readmission outcomes and increasing false-positive classifications. They do not establish that the revised model is universally preferable.
 
-A paired bootstrap with 1,000 replicates resampled 14,022 unique holdout patient clusters to estimate uncertainty in the differences between the two models.
+### 3. Revised Model Confusion Matrix
 
-| Metric | Difference (Step 23 − baseline) | 95% bootstrap confidence interval |
+At the selected operating threshold of approximately 0.1620, the revised model produced the following confusion matrix on the 19,875-encounter holdout cohort.
+
+| Actual outcome | Predicted negative | Predicted positive |
 |---|---:|---:|
-| PR-AUC | −0.002273 | [−0.008068, 0.003624] |
-| ROC-AUC | −0.006274 | [−0.010908, −0.001361] |
-| Brier score | −0.000061 | [−0.000411, 0.000276] |
-| Recall | +0.028125 | [+0.015426, +0.041615] |
-| False-negative rate | −0.028125 | [−0.041615, −0.015426] |
-| Cost per 1,000 encounters | +3.723270 | [−4.495490, 11.750153] |
+| No readmission within 30 days | 15,157 | 2,478 |
+| Readmission within 30 days | 1,524 | 716 |
 
-The bootstrap confidence intervals for ROC-AUC and recall exclude zero, indicating differences in opposite directions for these metrics in the evaluated cohort. The intervals for PR-AUC, Brier score, and cost per 1,000 encounters include zero.
+The revised model correctly identified 716 of the 2,240 recorded positive outcomes, corresponding to a recall of approximately 31.96%.
 
-The results do not establish that the Step 23 model is uniformly better than the baseline. Model selection depends on the intended use, the consequences of missed cases and false alarms, and the uncertainty associated with each metric.
+Its positive-class precision was approximately 22.42%, meaning that many encounters flagged as positive did not have a recorded readmission within 30 days.
 
-### Interpretation
+The confusion matrix demonstrates why recall, precision, false-positive counts, and false-negative counts should be considered together when evaluating the model.
 
-The Step 23 model is more sensitive to positive outcomes at the selected threshold, but this comes with more false positives, lower precision, and a lower ROC-AUC. Its slightly lower Brier score and improved recall do not independently establish clinical usefulness.
+### 4. Probability Calibration and Decision-Threshold Selection
 
-The classification-cost comparison also requires caution. Under the configured costs of 1 for a false positive and 5 for a false negative, the observed holdout cost was 10,098 for the Step 23 model and 10,024 for the baseline. The bootstrap confidence interval for the cost difference includes zero, so these results do not establish a statistically distinguishable cost advantage for either model.
+Both modeling procedures apply isotonic probability calibration.
 
-All findings describe the evaluated historical dataset. Independent external validation and clinical assessment would be needed before drawing conclusions about performance in other healthcare settings.
----
+The revised model uses a dedicated calibration partition and a separate threshold-selection partition, avoiding reuse of the same development encounters for both operations.
 
-## Calibration and Subgroup Fairness Analysis
+The decision threshold is selected by minimizing the configured classification-cost function:
 
-### Probability Calibration
+**Classification cost = (1 × false positives) + (5 × false negatives)**
 
-Probability calibration examines whether predicted readmission risks agree with observed outcome frequencies. DiaVigil evaluates calibration on the untouched holdout cohort of 19,875 encounters using 10 equal-frequency bins. For each bin, the mean predicted risk is compared with the observed outcome rate.
+The revised procedure selected an operating threshold of approximately 0.1620.
 
-The Step 24 holdout audit reported an expected calibration error (ECE) of **0.00656**, equivalent to a weighted average absolute difference of approximately 0.656 percentage points across the bins.
+The independent holdout evaluation reported a Brier score of approximately 0.0961.
 
-The Brier score for the Step 23 model was **0.096093** in the holdout evaluation. ECE and the Brier score measure different aspects of probabilistic prediction error and should be interpreted alongside discrimination and classification performance.
+The classification-cost weights represent experimental assumptions rather than clinically established intervention costs. The selected threshold is not a clinically validated decision boundary.
 
-These holdout results are distinct from the internal-validation output in Notebook 03, which reported a calibrated ECE of 0.0000 on the validation data used to fit the calibrator. The internal result should not be presented as the independent holdout result.
+### 5. Statistical Uncertainty and Subgroup Evaluation
 
-Calibration describes agreement between predicted probabilities and observed outcomes. It does not establish that the model identifies patients who would benefit most from intervention or that using its predictions improves clinical outcomes.
+DiaVigil includes paired patient-cluster bootstrap comparisons with 1,000 replicates to examine uncertainty in selected differences between the original and revised models.
 
-### False-Negative Rate by Age Group
+The analysis indicated lower ROC-AUC and higher recall for the revised model.
 
-The subgroup audit examines false-negative rates (FNRs) across age groups. FNR is the proportion of actual positive outcomes that the model fails to identify:
+Subgroup evaluation examines false-negative rates across available age, gender, and race categories.
 
-`FNR = False Negatives / (False Negatives + True Positives)`
+These analyses are intended to identify differences in model behavior and characterize uncertainty. They do not establish fairness across all patient populations or guarantee equivalent performance in independent healthcare settings.
 
-The primary age-group comparison requires at least 50 positive outcomes in each group. The Step 24 holdout audit reported:
+### 6. Resource-Allocation Simulation
 
-| Age group | Positive outcomes | False negatives | FNR |
-|---|---:|---:|---:|
-| 30–40 | 89 | 51 | 57.30% |
-| 40–50 | 191 | 133 | 69.63% |
-| 50–60 | 341 | 220 | 64.52% |
-| 60–70 | 486 | 343 | 70.58% |
-| 70–80 | 603 | 407 | 67.50% |
-| 80–90 | 413 | 286 | 69.25% |
-| 90–100 | 58 | 48 | 82.76% |
+DiaVigil includes a hypothetical resource-allocation simulation examining how available nursing hours and assumed intervention effectiveness may influence patient outreach and estimated readmissions averted.
 
-Among groups meeting the minimum-count requirement, the observed FNR ranged from 57.30% for ages 30–40 to 82.76% for ages 90–100, a difference of **25.46 percentage points**.
+The simulation considers staffing constraints, estimated patient risk, and intervention-effectiveness assumptions.
 
-The audit also reported the following groups with fewer than 50 positive outcomes: ages 0–10 (1 positive outcome), 10–20 (11), and 20–30 (47). Their FNRs were 100.00%, 90.91%, and 53.19%, respectively. These groups were excluded from the primary gap calculation because their estimates are based on relatively few positive outcomes.
+Its outputs are conditional model-based estimates, not observed reductions in hospital readmissions or verified financial savings.
 
-The observed age-group differences warrant further investigation, particularly for the oldest group, which has 58 positive outcomes. The results are descriptive and do not establish the causes of the differences or demonstrate fairness under every relevant criterion.
+### 7. AI-Agent Recommendation and Audit Demonstration
 
-### False-Negative Rate by Gender
+The experimental AI-agent workflow combines encounter-level information, model-estimated readmission risk, and feature-attribution outputs to generate structured care-recommendation briefs.
 
-The audit compared observed FNRs across the two reported gender categories.
+A deterministic audit component evaluates generated briefs against predefined structural and grounding criteria.
 
-| Group | Positive outcomes | False negatives | FNR |
-|---|---:|---:|---:|
-| Female | 1,188 | 802 | 67.51% |
-| Male | 1,052 | 722 | 68.63% |
+The demonstration includes an accepted example and a deliberately unsupported example designed to test rejection behavior.
 
-The observed FNR was approximately **1.12 percentage points higher for the male group**. Both groups meet the minimum-50-positive-outcomes requirement.
+Passing the implemented audit checks does not establish that recommendations are clinically appropriate, comprehensive, or safe.
 
-This is a descriptive difference within the evaluated cohort. It does not establish equivalent model performance across all populations or prove that the model satisfies broader fairness criteria.
+### 8. Reproducibility Verification
 
-### False-Negative Rate by Race
+The reproducibility-audit notebook recorded the following verification results:
 
-The primary race comparison includes groups with at least 50 positive outcomes.
+| Verification component | Recorded result |
+|---|---|
+| Research artifact inventory | 15 of 15 expected artifacts present |
+| Serialized artifact inspection | 6 selected artifacts successfully loaded |
+| Cross-artifact consistency | 18 of 18 implemented checks passed |
+| Saved-prediction verification | Baseline and revised probability arrays reproduced |
+| Artifact manifest | Software metadata, file sizes, and SHA-256 hashes recorded for 15 files |
 
-| Group | Positive outcomes | False negatives | FNR |
-|---|---:|---:|---:|
-| African American | 417 | 285 | 68.35% |
-| Caucasian | 1,731 | 1,177 | 68.00% |
+Saved-prediction verification was performed on the same 19,875 holdout encounters.
 
-The observed difference between these groups was approximately **0.35 percentage points**, with a higher FNR for the African American group.
+These results support artifact traceability, internal consistency, and reproduction of saved predictions within the recorded environment. They do not demonstrate complete independent reproduction of the workflow from raw data in a clean environment.
 
-Other categories did not meet the minimum-count requirement: Asian (13 positive outcomes), Hispanic (33), Other (22), and unreported or unknown race (24). Their results are excluded from the primary gap calculation but remain relevant to further investigation. Estimates based on small numbers of positive outcomes require particular caution.
+### 9. Interpretation and Research Limitations
 
-The small observed difference between the two included groups does not establish fairness across race categories, explain the causes of performance differences, or demonstrate that the model satisfies other fairness criteria.
+The principal experimental finding is that the revised model achieves higher recall at the cost of additional false-positive predictions and slightly lower discrimination metrics.
 
-### Limitations and Interpretation
+The revised development procedure also provides clearer separation between model fitting, calibration, and threshold selection.
 
-The calibration and subgroup analyses have several limitations:
+However, the analysis is limited to a historical dataset from 1999–2008. Independent external validation, prospective clinical evaluation, and assessment of operational consequences have not been performed.
 
-- **Dataset dependence:** The results describe the evaluated holdout cohort and may differ in other healthcare settings.
-- **Small subgroup counts:** Estimates based on relatively few positive outcomes may be unstable. The minimum-count rule reduces reliance on small groups in the primary comparisons but does not eliminate uncertainty.
-- **Metric selection:** Similar FNRs do not establish fairness across other error measures, demographic groups, or clinical outcomes.
-- **Calibration versus clinical usefulness:** Agreement between predicted probabilities and observed outcome frequencies does not demonstrate that predictions improve care.
-- **No causal conclusions:** Differences in observed error rates do not, by themselves, explain why the differences occur.
-- **No independent external validation:** These results do not establish generalizability to other hospitals, contemporary patient populations, or prospective clinical workflows.
-
-DiaVigil uses these analyses to document model behavior and identify subgroup differences for further investigation. Independent validation, uncertainty analysis, assessment of additional fairness measures, and clinical review would be required before drawing conclusions about clinical use.
+**Research conclusion:** DiaVigil demonstrates an experimental framework for evaluating hospital readmission-risk models and related decision-support workflows. The results provide evidence about predictive performance and methodological trade-offs, but do not establish clinical effectiveness, recommendation safety, or deployment readiness.
 
 ---
 
