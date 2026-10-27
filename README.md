@@ -1862,6 +1862,8 @@ Its findings do not establish clinical effectiveness, causal intervention benefi
 
 Independent external validation, clinical expert review, and prospective evaluation would be necessary before considering operational or patient-care applications.
 
+---
+
 ## License and Responsible Use
 
 ### License
