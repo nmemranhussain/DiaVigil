@@ -850,9 +850,11 @@ The simulation uses the reserved holdout cohort and saved prediction outputs fro
 
 The simulation defines required nursing hours using:
 
+
 $$
-H_i = \operatorname{clip}\left(1.5 + 0.25L_i + 0.5P_i,\ 1.5,\ 8.0\right)
+H_i = \min(8.0,\ \max(1.5,\ 1.5 + 0.25L_i + 0.5P_i))
 $$
+
 
 where:
 
