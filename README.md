@@ -507,44 +507,43 @@ These variables are derived from the available administrative and clinical field
 
 ### 3. Model Training
 
-DiaVigil uses CatBoost as its primary classification algorithm to estimate the probability of a qualifying readmission outcome.
+DiaVigil uses CatBoost as its primary classification algorithm to estimate the probability of hospital readmission within 30 days.
 
-The current model configuration uses:
+Both the original and revised modeling procedures use the following configuration:
 
-- Boosting iterations: 400
-- Learning rate: 0.05
-- Tree depth: 6
-- Class weighting: Balanced
-- Random seed: 42
+- **Boosting iterations:** 400
+- **Learning rate:** 0.05
+- **Tree depth:** 6
+- **Class weighting:** Balanced
+- **Random seed:** 42
 
-Model fitting is performed on the training portion of the development cohort within the patient-grouped validation workflow. The project also retains an earlier baseline model to support comparisons with the revised modeling approach.
+The original model is developed in Notebook 03 using patient-grouped internal validation.
 
-The model configuration and associated preprocessing pipeline are saved as research artifacts for subsequent evaluation. Performance is assessed using multiple metrics because no single metric fully characterizes the trade-offs involved in identifying potentially high-risk encounters.
+The revised modeling procedure, documented in Notebook 00, Steps 23A–23C, separates the development cohort into three patient-disjoint partitions: 48,295 encounters for training, 15,849 for probability calibration, and 16,095 for decision-threshold selection.
+
+The revised model is fitted exclusively on the training partition. The calibration and threshold-selection partitions are reserved for their respective procedures, and the independent holdout cohort remains excluded from all three development stages.
 
 ### 4. Probability Calibration
 
-Probability calibration assesses whether predicted readmission probabilities agree with observed outcome frequencies. DiaVigil uses isotonic regression to calibrate the CatBoost model's predicted probabilities.
+DiaVigil applies isotonic regression to calibrate CatBoost probability estimates.
 
-Calibration is evaluated using the Brier score and expected calibration error (ECE). ECE summarizes the weighted average absolute difference between mean predicted risks and observed outcome frequencies across probability bins.
+The original implementation performs calibration using an internal validation fold. The revised implementation fits the calibration procedure on a dedicated patient-disjoint calibration partition using the previously trained model.
 
-During the internal validation run, Notebook 03 reported an uncalibrated ECE of 0.3289 and a calibrated ECE of 0.0000, rounded to four decimal places. However, the calibrator was fitted and evaluated on the same validation fold. These figures therefore describe the internal development-fold result and do not establish independent calibration performance on unseen encounters.
+The revised procedure separates model fitting, probability calibration, and decision-threshold selection to reduce data reuse between these operations.
 
-The saved calibration artifact is subsequently used in the holdout evaluation workflow. Calibration performance should be interpreted using the results calculated on the untouched holdout cohort, alongside the Brier score and other predictive metrics.
-
-Good calibration does not, by itself, establish that a model ranks patients correctly, identifies those most likely to benefit from intervention, or improves clinical outcomes.
+Calibration performance is examined using probability-based evaluation metrics, including the Brier score. Calibration estimates from internal development partitions are distinguished from results obtained on the reserved holdout cohort.
 
 ### 5. Decision-Threshold Selection
 
-DiaVigil selects an operating threshold by minimizing an explicitly configured classification-cost function. The current implementation assigns different penalties to false-positive and false-negative predictions:
+DiaVigil selects an operating threshold by minimizing a configured classification-cost function.
 
-- False-positive cost (\(C_{FP}\)): 1
-- False-negative cost (\(C_{FN}\)): 5
+The implementation assigns a false-positive cost of 1 and a false-negative cost of 5. The revised procedure searches 100 candidate thresholds between 0.02 and 0.40 using its dedicated threshold-selection partition.
 
-Under this assumed cost structure, a missed positive outcome receives five times the penalty assigned to a false-positive prediction. The internal validation workflow reported an optimal decision threshold of approximately **0.1620**.
+The revised model selected an operating threshold of approximately 0.1620, with an estimated threshold-selection cost of 7,922 under the specified assumptions.
 
-The threshold determines which encounters are classified as positive. Lowering the threshold generally increases the number of encounters flagged as positive, potentially increasing recall while also increasing false-positive predictions. Raising it generally reduces the number flagged, potentially missing more positive outcomes.
+The threshold is subsequently applied to the independent holdout cohort without additional optimization.
 
-The reported threshold is an optimization result under the configured assumptions, not a clinically validated decision boundary. Because threshold optimization uses the same internal validation fold as calibration in the current implementation, its development-fold cost estimate may be optimistic. Independent evaluation is required to assess performance at the selected threshold.
+These costs are hypothetical modeling assumptions rather than empirically established clinical or financial costs. The selected threshold is not a clinically validated intervention boundary.
 
 ### 6. Holdout Evaluation
 
